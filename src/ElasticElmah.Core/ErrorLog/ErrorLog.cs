@@ -19,7 +19,7 @@ namespace Elmah
         /// identifier, or null if it does not exist.
         /// </summary>
 
-        public abstract ErrorLogEntry GetError(string id);
+        public abstract Error GetError(string id);
 
         /// <summary>
         /// Retrieves a page of application errors from the log in 
@@ -31,7 +31,7 @@ namespace Elmah
         {
             public int pageIndex; public int pageSize;
             public int Total;
-            public IList<ErrorLogEntry> Entries;
+            public IList<Error> Entries;
         }
 
         public abstract Errors GetErrors(int pageIndex, int pageSize);

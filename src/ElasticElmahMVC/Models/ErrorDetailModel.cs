@@ -25,11 +25,11 @@ namespace Elmah
     public class ErrorDetailModel
     {
         Environment environment;
-        public ErrorDetailModel(ErrorLogEntry errorLogEntry, Environment environment)
+        public ErrorDetailModel(Error errorLogEntry, Environment environment)
         {
             this.environment = environment;
             this._errorEntry = errorLogEntry;
-            this.PageTitle = string.Format("Error: {0} [{1}]", _errorEntry.Error.Type, _errorEntry.Id);
+            this.PageTitle = string.Format("Error: {0} [{1}]", _errorEntry.Type, _errorEntry.Id);
         }
         public HtmlString Render(HtmlHelper helper)
         {
@@ -43,7 +43,7 @@ namespace Elmah
                 return new HtmlString(reader.ReadToEnd());
             }
         }
-        private ErrorLogEntry _errorEntry;
+        private Error _errorEntry;
         
         protected void RenderContents(HtmlTextWriter writer, HtmlHelper helper)
         {
@@ -59,15 +59,15 @@ namespace Elmah
         // contain a stack trace. If it doesn't then pre-formatting 
         // might not be the right thing to do here.
         //
-        public string Detail { get { return _errorEntry.Error.Detail; } }
+        public string Detail { get { return _errorEntry.Detail; } }
         // Write out the error log time. This will be in the local
         // time zone of the server. Would be a good idea to indicate
         // it here for the user.
         //
-        public DateTime Time { get { return _errorEntry.Error.Time; } }
+        public DateTime Time { get { return _errorEntry.Time; } }
         private void RenderError(HtmlTextWriter writer)
         {
-            Error error = _errorEntry.Error;
+            Error error = _errorEntry;
 
             //
             // If this error has context, then write it out.
@@ -335,9 +335,9 @@ namespace Elmah
             HttpContext.Current.Server.HtmlEncode(text, writer);
         }
 
-        public string Title { get { return _errorEntry.Error.Message; } }
-        public string Type { get { return _errorEntry.Error.Type; } }
-        public string Message { get { return _errorEntry.Error.Message; } }
+        public string Title { get { return _errorEntry.Message; } }
+        public string Type { get { return _errorEntry.Type; } }
+        public string Message { get { return _errorEntry.Message; } }
 
     }
 }

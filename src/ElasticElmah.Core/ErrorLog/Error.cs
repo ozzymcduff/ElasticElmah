@@ -13,14 +13,14 @@ namespace Elmah
     [Serializable]
     public sealed class Error 
     {
+        public string Id { get; private set; }
         public PropertiesDictionary Properties { get { return _data.Data.Properties; } }
         private readonly LogEntry _data;
-        
-        public Error() { }
-
-        public Error(log4net.Core.LoggingEventData l)
+       
+        public Error(log4net.Core.LoggingEventData l, string id)
         {
             this._data = new LogEntry { Data = l };
+            this.Id = id;
         }
 
 

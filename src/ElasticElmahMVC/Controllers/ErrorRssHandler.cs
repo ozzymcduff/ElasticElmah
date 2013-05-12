@@ -21,11 +21,11 @@ namespace Elmah
     {
         public const int pageSize = 15;
 
-        IList<ErrorLogEntry> errorEntryList;
+        IList<Error> errorEntryList;
         
         private Environment environment;
 
-        public ErrorRssHandler(Environment environment, IList<ErrorLogEntry> errorEntryList)
+        public ErrorRssHandler(Environment environment, IList<Error> errorEntryList)
         {
             this.errorEntryList = errorEntryList;
             this.environment = environment;
@@ -68,8 +68,8 @@ namespace Elmah
 
             for (int index = 0; index < errorEntryList.Count; index++)
             {
-                ErrorLogEntry errorEntry = (ErrorLogEntry) errorEntryList[index];
-                Error error = errorEntry.Error;
+                Error errorEntry = errorEntryList[index];
+                Error error = errorEntry;
 
                 Item item = new Item();
 

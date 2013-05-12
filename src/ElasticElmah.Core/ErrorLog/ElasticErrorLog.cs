@@ -22,7 +22,6 @@ namespace Elmah
             appender = new ElasticSearchAppender() { ConnectionString = _connectionString };
         }
 
-        private static readonly object _lock = new object();
         private ElasticSearchAppender appender;
 
         /// <summary>
@@ -53,22 +52,18 @@ namespace Elmah
             };
         }
 
-        private ErrorLogEntry Map(Tuple<string, log4net.Core.LoggingEventData> e)
+        private Error Map(Tuple<string, log4net.Core.LoggingEventData> e)
         {
-            return new ErrorLogEntry(this, e.Item1, Map(e.Item2));
+            return new Error(e.Item2,e.Item1) ;
         }
 
-        private Error Map(log4net.Core.LoggingEventData l)
-        {
-            return new Error(l);
-        }
 
         /// <summary>
         /// Returns the specified error from the database, or null 
         /// if it does not exist.
         /// </summary>
 
-        public override ErrorLogEntry GetError(string id)
+        public override Error GetError(string id)
         {
             return Map(appender.Get(id));
         }

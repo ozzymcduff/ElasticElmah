@@ -28,8 +28,8 @@ namespace Elmah
         public const int maxPageLimit = 30;
 
         Environment environment;
-        private IList<ErrorLogEntry> entries;
-        public ErrorDigestRssHandler(Environment environment, IList<ErrorLogEntry> entries)
+        private IList<Error> entries;
+        public ErrorDigestRssHandler(Environment environment, IList<Error> entries)
         {
             this.entries = entries;
             this.environment = environment;
@@ -84,9 +84,9 @@ namespace Elmah
             StringBuilder sb = new StringBuilder();
             HtmlTextWriter writer = new HtmlTextWriter(new StringWriter(sb));
 
-            foreach (ErrorLogEntry entry in entries)
+            foreach (Error entry in entries)
             {
-                Error error = entry.Error;
+                Error error = entry;
                 DateTime time = error.Time.ToUniversalTime();
                 DateTime day = new DateTime(time.Year, time.Month, time.Day);
 
@@ -144,9 +144,9 @@ namespace Elmah
             writer.RenderBeginTag(HtmlTextWriterTag.Ul);
         }
 
-        private void RenderError(HttpServerUtilityBase Server, HtmlTextWriter writer, ErrorLogEntry entry, Uri baseUrl)
+        private void RenderError(HttpServerUtilityBase Server, HtmlTextWriter writer, Error entry, Uri baseUrl)
         {
-            Error error = entry.Error;
+            Error error = entry;
             writer.RenderBeginTag(HtmlTextWriterTag.Li);
 
             string errorType = ErrorDisplay.HumaneExceptionErrorType(error);

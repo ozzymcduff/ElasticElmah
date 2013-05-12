@@ -52,7 +52,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ErrorLog\Error.cs" />
-    <Compile Include="ErrorLog\ErrorLogEntry.cs" />
     <Compile Include="Infrastructure\Build.cs" />
     <Compile Include="ElasticConnectionBuilder.cs" />
     <Compile Include="ElasticSearchAppender.cs" />

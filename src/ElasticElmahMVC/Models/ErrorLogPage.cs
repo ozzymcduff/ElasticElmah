@@ -297,8 +297,8 @@ namespace Elmah
 
             for (int errorIndex = 0; errorIndex < errors.Entries.Count; errorIndex++)
             {
-                ErrorLogEntry errorEntry = errors.Entries[errorIndex];
-                Error error = errorEntry.Error;
+                Error errorEntry = errors.Entries[errorIndex];
+                Error error = errorEntry;
 
                 TableRow bodyRow = new TableRow();
                 bodyRow.CssClass = errorIndex % 2 == 0 ? "even-row" : "odd-row";
