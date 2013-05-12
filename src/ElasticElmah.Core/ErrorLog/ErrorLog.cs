@@ -6,11 +6,6 @@ using System.Collections.Generic;
 namespace Elmah
 {
 
-    /// <summary>
-    /// Represents an error log capable of storing and retrieving errors
-    /// generated in an ASP.NET Web application.
-    /// </summary>
-
     public abstract class ErrorLog
     {
 
