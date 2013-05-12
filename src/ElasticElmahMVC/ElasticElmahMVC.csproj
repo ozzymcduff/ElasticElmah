@@ -120,16 +120,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Code\Filters\RequireLocalFilter.cs" />
+    <Compile Include="Filters\HandleWithLog4netFilter.cs" />
+    <Compile Include="Filters\RequireLocalFilter.cs" />
     <Compile Include="Code\Helper.cs" />
     <Compile Include="Code\HtmlLinkType.cs" />
-    <Compile Include="Code\Model\AboutModel.cs" />
+    <Compile Include="Models\AboutModel.cs" />
     <Compile Include="Code\Environment.cs" />
-    <Compile Include="Code\Model\ErrorDetailModel.cs" />
+    <Compile Include="Models\ErrorDetailModel.cs" />
     <Compile Include="Controllers\DetailController.cs" />
     <Compile Include="Controllers\ErrorDigestRssHandler.cs" />
     <Compile Include="Code\ErrorDisplay.cs" />
-    <Compile Include="Code\Model\ErrorLogPage.cs" />
+    <Compile Include="Models\ErrorLogPage.cs" />
     <Compile Include="Controllers\ErrorRssHandler.cs" />
     <Compile Include="Code\PoweredBy.cs" />
     <Compile Include="Code\SpeedBar.cs" />
@@ -158,7 +159,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />

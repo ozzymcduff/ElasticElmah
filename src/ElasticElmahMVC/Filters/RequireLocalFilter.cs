@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 
-namespace ElasticElmahMVC.Code.Filters
+namespace ElasticElmahMVC.Filters
 {
     public class RequireLocalFilter : IAuthorizationFilter
     {
