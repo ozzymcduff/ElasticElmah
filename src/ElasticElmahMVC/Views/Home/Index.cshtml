@@ -1,0 +1,14 @@
+﻿@model Elmah.ErrorLogPage
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section Head{
+    <link rel="alternate" type="application/rss+xml" title="RSS" href="@Model.RssLink()" />
+    @if (Model.FirstPage()){
+    <meta http-equiv="refresh" content="60">
+    }
+
+}
+<h2>Index</h2>
+@Html.Raw(Model.Render())
