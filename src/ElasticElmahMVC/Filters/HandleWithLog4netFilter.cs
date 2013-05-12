@@ -27,6 +27,7 @@ namespace ElasticElmahMVC.Filters
 
         public void OnActionExecuting(ActionExecutingContext filterContext)
         {
+            
         }
     }
 }

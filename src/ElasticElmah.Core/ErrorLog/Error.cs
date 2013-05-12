@@ -30,7 +30,7 @@ namespace Elmah
 
         public string HostName
         {
-            get { return this._data.HostName; }
+            get { return this._data.Data.Domain; }
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace Elmah
 
         public string User
         {
-            get { return Mask.NullString(this._data.Identity); }
+            get { return Mask.NullString(this._data.Data.UserName); }
         }
 
         /// <summary>
