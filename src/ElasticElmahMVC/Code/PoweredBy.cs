@@ -3,8 +3,9 @@ using System.Reflection;
 using System.Text;
 using System.Web;
 using System.Web.Caching;
+using ElasticElmah.Core.Infrastructure;
 
-namespace Elmah
+namespace ElasticElmahMVC.Code
 {
     #region Imports
 

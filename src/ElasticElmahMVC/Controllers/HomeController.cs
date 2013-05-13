@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Web.Mvc;
+using ElasticElmah.Core;
+using ElasticElmah.Core.ErrorLog;
 using ElasticElmahMVC.Code;
-using Elmah;
-using Environment = Elmah.Environment;
+using ElasticElmahMVC.Models;
+using Environment = ElasticElmahMVC.Code.Environment;
 
-namespace ElmahMVC.Controllers
+namespace ElasticElmahMVC.Controllers
 {
     public class HomeController : Controller
     {

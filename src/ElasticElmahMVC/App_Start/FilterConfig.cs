@@ -1,7 +1,7 @@
 ﻿using System.Web.Mvc;
 using ElasticElmahMVC.Filters;
 
-namespace ElmahMVC
+namespace ElasticElmahMVC.App_Start
 {
     public class FilterConfig
     {

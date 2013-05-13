@@ -23,7 +23,7 @@
 
 #endregion
 
-namespace Elmah
+namespace ElasticElmahMVC.Code
 {
     /// <summary>
     /// User agents, search engines, etc. may interpret and use these link 

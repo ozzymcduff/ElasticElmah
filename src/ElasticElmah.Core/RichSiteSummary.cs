@@ -1,6 +1,6 @@
 using System.Xml.Serialization;
 
-namespace Elmah.ContentSyndication
+namespace ElasticElmah.Core
 {
     #region Imports
 

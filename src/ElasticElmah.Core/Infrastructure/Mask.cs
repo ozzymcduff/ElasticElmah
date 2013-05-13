@@ -1,4 +1,4 @@
-namespace Elmah
+namespace ElasticElmah.Core.Infrastructure
 {
     #region Imports
 

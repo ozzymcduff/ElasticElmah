@@ -1,8 +1,9 @@
 using System;
+using ElasticElmah.Core.Infrastructure;
 using log4net.Core;
 using log4net.Util;
 
-namespace Elmah
+namespace ElasticElmah.Core.ErrorLog
 {
     /// <summary>
     /// Represents a logical application error (as opposed to the actual 

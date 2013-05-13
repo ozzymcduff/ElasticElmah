@@ -1,9 +1,12 @@
 using System.Collections.Generic;
 using System.Web;
 using System.Web.Mvc;
-using Elmah.ContentSyndication;
+using ElasticElmah.Core;
+using ElasticElmah.Core.ErrorLog;
+using ElasticElmah.Core.Infrastructure;
+using ElasticElmahMVC.Code;
 
-namespace Elmah
+namespace ElasticElmahMVC.Controllers
 {
     #region Imports
 

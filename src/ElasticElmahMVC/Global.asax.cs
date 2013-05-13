@@ -2,7 +2,7 @@
 using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Routing;
-using ElmahMVC;
+using ElasticElmahMVC.App_Start;
 using log4net.Config;
 
 namespace ElasticElmahMVC

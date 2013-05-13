@@ -2,8 +2,9 @@ using System;
 using System.IO;
 using System.Web;
 using System.Web.UI;
+using ElasticElmah.Core.Infrastructure;
 
-namespace Elmah
+namespace ElasticElmahMVC.Code
 {
     #region Imports
 

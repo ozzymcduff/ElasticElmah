@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Elmah
+namespace ElasticElmah.Core
 {
     #region Imports
 

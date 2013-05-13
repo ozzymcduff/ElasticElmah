@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Elmah
+namespace ElasticElmah.Core.ErrorLog
 {
     public abstract class ErrorLog
     {

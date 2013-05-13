@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using Elmah;
+using ElasticElmah.Core.Infrastructure;
 
 //using CLSCompliantAttribute = System.CLSCompliantAttribute;
 //using ComVisible = System.Runtime.InteropServices.ComVisibleAttribute;

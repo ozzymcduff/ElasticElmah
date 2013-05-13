@@ -1,11 +1,11 @@
 using System.IO;
 using System.Xml;
 
-namespace Elmah
+namespace ElasticElmah.Core.Infrastructure
 {
     #region Imports
 
-    using SystemXmlSerializer = System.Xml.Serialization.XmlSerializer;
+    
 
     #endregion
 
@@ -36,7 +36,7 @@ namespace Elmah
 
             try
             {
-                var serializer = new SystemXmlSerializer(obj.GetType());
+                var serializer = new System.Xml.Serialization.XmlSerializer(obj.GetType());
                 serializer.Serialize(writer, obj);
                 writer.Flush();
             }

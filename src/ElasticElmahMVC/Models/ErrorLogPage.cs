@@ -4,8 +4,11 @@ using System.IO;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using ElasticElmah.Core.ErrorLog;
+using ElasticElmahMVC.Code;
+using Environment = ElasticElmahMVC.Code.Environment;
 
-namespace Elmah
+namespace ElasticElmahMVC.Models
 {
     #region Imports
 

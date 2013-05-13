@@ -23,7 +23,7 @@
 
 #endregion
 
-namespace Elmah
+namespace ElasticElmah.Core.Infrastructure
 {
     public sealed class Build
     {

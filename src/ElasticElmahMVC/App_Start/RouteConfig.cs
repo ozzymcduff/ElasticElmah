@@ -1,7 +1,7 @@
 ﻿using System.Web.Mvc;
 using System.Web.Routing;
 
-namespace ElmahMVC
+namespace ElasticElmahMVC.App_Start
 {
     public class RouteConfig
     {

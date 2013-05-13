@@ -2,12 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ElasticElmah.Appender;
-using Elmah;
 using log4net.Core;
 
 namespace ElasticElmah.Core.ErrorLog
 {
-    public class ElasticErrorLog : Elmah.ErrorLog
+    public class ElasticErrorLog : ErrorLog
     {
         private readonly string _connectionString;
 

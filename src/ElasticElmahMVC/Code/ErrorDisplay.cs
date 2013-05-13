@@ -1,7 +1,8 @@
 using System;
 using System.Globalization;
+using ElasticElmah.Core.ErrorLog;
 
-namespace Elmah
+namespace ElasticElmahMVC.Code
 {
     #region Imports
 

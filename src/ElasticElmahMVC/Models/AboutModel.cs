@@ -1,7 +1,8 @@
 using System;
 using System.Reflection;
+using Environment = ElasticElmahMVC.Code.Environment;
 
-namespace Elmah
+namespace ElasticElmahMVC.Models
 {
     #region Imports
 

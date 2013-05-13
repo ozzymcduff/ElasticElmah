@@ -1,6 +1,7 @@
 ﻿using System.Web.Mvc;
+using ElasticElmah.Core.ErrorLog;
 using ElasticElmahMVC.Code;
-using Elmah;
+using ElasticElmahMVC.Models;
 
 namespace ElasticElmahMVC.Controllers
 {

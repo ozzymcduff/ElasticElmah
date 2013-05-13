@@ -6,9 +6,13 @@ using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.UI;
-using Elmah.ContentSyndication;
+using ElasticElmah.Core;
+using ElasticElmah.Core.ErrorLog;
+using ElasticElmah.Core.Infrastructure;
+using ElasticElmahMVC.Code;
+using Environment = ElasticElmahMVC.Code.Environment;
 
-namespace Elmah
+namespace ElasticElmahMVC.Controllers
 {
     #region Imports
 

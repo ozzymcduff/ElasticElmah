@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 
-namespace Elmah
+namespace ElasticElmah.Core.Infrastructure
 {
     #region Imports
 

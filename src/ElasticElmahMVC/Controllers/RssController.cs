@@ -1,8 +1,8 @@
 ﻿using System.Web.Mvc;
+using ElasticElmah.Core.ErrorLog;
 using ElasticElmahMVC.Code;
-using Elmah;
 
-namespace ElmahMVC.Controllers
+namespace ElasticElmahMVC.Controllers
 {
     public class RssController : Controller
     {

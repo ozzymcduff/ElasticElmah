@@ -1,6 +1,6 @@
 ﻿using System.Web.Http;
 
-namespace ElmahMVC
+namespace ElasticElmahMVC.App_Start
 {
     public static class WebApiConfig
     {

@@ -1,6 +1,5 @@
 ﻿using System.Web;
 using ElasticElmah.Core.ErrorLog;
-using Elmah;
 
 namespace ElasticElmahMVC.Code
 {
