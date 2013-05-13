@@ -1,4 +1,5 @@
 #region License, Terms and Author(s)
+
 //
 // ELMAH - Error Logging Modules and Handlers for ASP.NET
 // Copyright (c) 2004-9 Atif Aziz. All rights reserved.
@@ -19,15 +20,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
 #endregion
-
-
 
 namespace Elmah
 {
     public sealed class Build
     {
-        private Build() { }
+        private Build()
+        {
+        }
 
 #if DEBUG
         public const bool IsDebug = true;
@@ -51,20 +53,15 @@ namespace Elmah
         /// the file containing the manifest. Under 1.0, this returns
         /// the hard-wired string "v1.0.3705".
         /// </summary>
-
         public static string ImageRuntimeVersion
         {
-            get
-            {
-                return typeof(Build).Assembly.ImageRuntimeVersion;
-            }
+            get { return typeof (Build).Assembly.ImageRuntimeVersion; }
         }
 
         /// <summary>
         /// This is the status or milestone of the build. Examples are
         /// M1, M2, ..., Mn, BETA1, BETA2, RC1, RC2, RTM.
         /// </summary>
-
         public const string Status = "RTM";
     }
 }

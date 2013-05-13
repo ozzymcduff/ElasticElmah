@@ -1,18 +1,23 @@
+using System;
+using System.Globalization;
 
 namespace Elmah
 {
     #region Imports
 
-    using System.Globalization;
+    
 
     #endregion
 
     /// <summary>
     /// Provides miscellaneous formatting methods for 
     /// </summary>
-
     public sealed class ErrorDisplay
     {
+        private ErrorDisplay()
+        {
+        }
+
         /// <summary>
         /// Formats the type of an error, typically supplied as the 
         /// <see cref="Error.Type"/> value, in a short and human-
@@ -33,7 +38,6 @@ namespace Elmah
         /// "System.Web.HttpException" will be transformed into simply
         /// "Html".
         /// </remarks>
-
         public static string HumaneExceptionErrorType(string type)
         {
             if (type == null || type.Length == 0)
@@ -64,15 +68,12 @@ namespace Elmah
         /// Formats the error type of an <see cref="Error"/> object in a 
         /// short and human-readable form.
         /// </summary>
-
         public static string HumaneExceptionErrorType(Error error)
         {
             if (error == null)
-                throw new System.ArgumentNullException("error");
+                throw new ArgumentNullException("error");
 
             return HumaneExceptionErrorType(error.Type);
         }
-
-        private ErrorDisplay() { }
     }
 }

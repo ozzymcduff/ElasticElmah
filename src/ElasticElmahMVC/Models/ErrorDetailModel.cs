@@ -1,19 +1,17 @@
-
+using System;
+using System.IO;
+using System.Text.RegularExpressions;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using log4net.Util;
 
 namespace Elmah
 {
     #region Imports
 
-    using ElasticElmahMVC.Code;
-    using log4net.Util;
-    using System;
-    using System.IO;
-    using System.Text.RegularExpressions;
-    using System.Web;
-    using System.Web.Mvc;
-    using System.Web.UI;
-    using System.Web.UI.WebControls;
-    using NameValueCollection = System.Collections.Specialized.NameValueCollection;
+    
 
     #endregion
 
@@ -21,16 +19,85 @@ namespace Elmah
     /// Renders an HTML page displaying details about an error from the 
     /// error log.
     /// </summary>
-
     public class ErrorDetailModel
     {
-        Environment environment;
+        private static readonly Regex _reStackTrace =
+            new Regex(
+                @"
+                ^
+                \s*
+                \w+ \s+ 
+                (?<type> .+ ) \.
+                (?<method> .+? ) 
+                (?<params> \( (?<params> .*? ) \) )
+                ( \s+ 
+                \w+ \s+ 
+                  (?<file> [a-z] \: .+? ) 
+                  \: \w+ \s+ 
+                  (?<line> [0-9]+ ) \p{P}? )?
+                \s*
+                $",
+                RegexOptions.IgnoreCase
+                | RegexOptions.Multiline
+                | RegexOptions.ExplicitCapture
+                | RegexOptions.CultureInvariant
+                | RegexOptions.IgnorePatternWhitespace
+                | RegexOptions.Compiled);
+
+        private readonly Error _errorEntry;
+
+        private readonly Environment environment;
+        private string PageTitle;
+
         public ErrorDetailModel(Error errorLogEntry, Environment environment)
         {
             this.environment = environment;
-            this._errorEntry = errorLogEntry;
-            this.PageTitle = string.Format("Error: {0} [{1}]", _errorEntry.Type, _errorEntry.Id);
+            _errorEntry = errorLogEntry;
+            PageTitle = string.Format("Error: {0} [{1}]", _errorEntry.Type, _errorEntry.Id);
         }
+
+
+        //
+        // Do we have details, like the stack trace? If so, then write 
+        // them out in a pre-formatted (pre) element. 
+        // NOTE: There is an assumption here that detail will always
+        // contain a stack trace. If it doesn't then pre-formatting 
+        // might not be the right thing to do here.
+        //
+        public string Detail
+        {
+            get { return _errorEntry.Detail; }
+        }
+
+        // Write out the error log time. This will be in the local
+        // time zone of the server. Would be a good idea to indicate
+        // it here for the user.
+        //
+        public DateTime Time
+        {
+            get { return _errorEntry.Time; }
+        }
+
+        public string BasePageName
+        {
+            get { return environment.BasePageName; }
+        }
+
+        public string Title
+        {
+            get { return _errorEntry.Message; }
+        }
+
+        public string Type
+        {
+            get { return _errorEntry.Type; }
+        }
+
+        public string Message
+        {
+            get { return _errorEntry.Message; }
+        }
+
         public HtmlString Render(HtmlHelper helper)
         {
             using (var stream = new MemoryStream())
@@ -43,28 +110,12 @@ namespace Elmah
                 return new HtmlString(reader.ReadToEnd());
             }
         }
-        private Error _errorEntry;
-        
+
         protected void RenderContents(HtmlTextWriter writer, HtmlHelper helper)
         {
             RenderError(writer);
-
         }
 
-
-        //
-        // Do we have details, like the stack trace? If so, then write 
-        // them out in a pre-formatted (pre) element. 
-        // NOTE: There is an assumption here that detail will always
-        // contain a stack trace. If it doesn't then pre-formatting 
-        // might not be the right thing to do here.
-        //
-        public string Detail { get { return _errorEntry.Detail; } }
-        // Write out the error log time. This will be in the local
-        // time zone of the server. Would be a good idea to indicate
-        // it here for the user.
-        //
-        public DateTime Time { get { return _errorEntry.Time; } }
         private void RenderError(HtmlTextWriter writer)
         {
             Error error = _errorEntry;
@@ -76,11 +127,11 @@ namespace Elmah
             //
 
             RenderCollection(writer, error.Properties,
-                "ServerVariables", "Server Variables");
+                             "ServerVariables", "Server Variables");
         }
 
         private void RenderCollection(HtmlTextWriter writer,
-            PropertiesDictionary collection, string id, string title)
+                                      PropertiesDictionary collection, string id, string title)
         {
             //
             // If the collection isn't there or it's empty, then bail out.
@@ -102,7 +153,7 @@ namespace Elmah
 
             writer.AddAttribute(HtmlTextWriterAttribute.Class, "table-caption");
             writer.RenderBeginTag(HtmlTextWriterTag.P);
-            this.HtmlEncode(title, writer);
+            HtmlEncode(title, writer);
             writer.RenderEndTag(); // </p>
             writer.WriteLine();
 
@@ -121,14 +172,14 @@ namespace Elmah
             // collection in 2 columns.
             //
 
-            Table table = new Table();
+            var table = new Table();
             table.CellSpacing = 0;
 
             //
             // Create the header row and columns.
             //
 
-            TableRow headRow = new TableRow();
+            var headRow = new TableRow();
 
             TableHeaderCell headCell;
 
@@ -159,8 +210,8 @@ namespace Elmah
             {
                 string key = keys[keyIndex];
 
-                TableRow bodyRow = new TableRow();
-                bodyRow.CssClass = keyIndex % 2 == 0 ? "even-row" : "odd-row";
+                var bodyRow = new TableRow();
+                bodyRow.CssClass = keyIndex%2 == 0 ? "even-row" : "odd-row";
 
                 TableCell cell;
 
@@ -199,28 +250,6 @@ namespace Elmah
             writer.RenderEndTag(); // </div>
             writer.WriteLine();
         }
-
-        private static readonly Regex _reStackTrace = new Regex(@"
-                ^
-                \s*
-                \w+ \s+ 
-                (?<type> .+ ) \.
-                (?<method> .+? ) 
-                (?<params> \( (?<params> .*? ) \) )
-                ( \s+ 
-                \w+ \s+ 
-                  (?<file> [a-z] \: .+? ) 
-                  \: \w+ \s+ 
-                  (?<line> [0-9]+ ) \p{P}? )?
-                \s*
-                $",
-            RegexOptions.IgnoreCase
-            | RegexOptions.Multiline
-            | RegexOptions.ExplicitCapture
-            | RegexOptions.CultureInvariant
-            | RegexOptions.IgnorePatternWhitespace
-            | RegexOptions.Compiled);
-        private string PageTitle;
 
         private void MarkupStackTrace(string text, TextWriter writer)
         {
@@ -297,19 +326,16 @@ namespace Elmah
             int end = match.Index + match.Length;
             HtmlEncode(text.Substring(anchor, end - anchor), writer);
         }
-        public string BasePageName
-        {
-            get { return environment.BasePageName; }
-        }
 
         private int StackFrameSpan(string text, int anchor, string klass, Group group, TextWriter writer)
         {
             return group.Success
-                 ? StackFrameSpan(text, anchor, klass, group.Value, group.Index, group.Length, writer)
-                 : anchor;
+                       ? StackFrameSpan(text, anchor, klass, group.Value, group.Index, group.Length, writer)
+                       : anchor;
         }
 
-        private int StackFrameSpan(string text, int anchor, string klass, string value, int index, int length, TextWriter writer)
+        private int StackFrameSpan(string text, int anchor, string klass, string value, int index, int length,
+                                   TextWriter writer)
         {
             HtmlEncode(text.Substring(anchor, index - anchor), writer);
             Span(writer, klass, value);
@@ -334,10 +360,5 @@ namespace Elmah
         {
             HttpContext.Current.Server.HtmlEncode(text, writer);
         }
-
-        public string Title { get { return _errorEntry.Message; } }
-        public string Type { get { return _errorEntry.Type; } }
-        public string Message { get { return _errorEntry.Message; } }
-
     }
 }

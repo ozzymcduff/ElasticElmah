@@ -1,4 +1,5 @@
-﻿@model Elmah.ErrorDetailModel
+﻿@using Elmah
+@model Elmah.ErrorDetailModel
 
 @{
     ViewBag.Title = "Index";
@@ -6,10 +7,10 @@
 }
 
 <h1 id="PageTitle">@Model.Title</h1>
-@Html.Raw(Elmah.SpeedBar.Render(
-                Elmah.SpeedBar.Home.Format(Model.BasePageName),
-                Elmah.SpeedBar.Help,
-                Elmah.SpeedBar.About.Format(Model.BasePageName)))
+@Html.Raw(SpeedBar.Render(
+    SpeedBar.Home.Format(Model.BasePageName),
+    SpeedBar.Help,
+    SpeedBar.About.Format(Model.BasePageName)))
 <p id="ErrorTitle">
     <span id="ErrorType">
         @Model.Type
@@ -17,10 +18,11 @@
     <span id="ErrorTypeMessageSeparator">: </span>
     <span id="ErrorMessage">@Model.Message</span>
 </p>
-@if(!string.IsNullOrEmpty(Model.Detail)){
-<pre id="ErrorDetail">@Model.Detail</pre>
+@if (!string.IsNullOrEmpty(Model.Detail))
+{
+    <pre id="ErrorDetail">@Model.Detail</pre>
 }
 <p id="ErrorLogTime">@string.Format("Logged on {0} at {1}",
-                Model.Time.ToLongDateString(),
-                Model.Time.ToLongTimeString())</p>
+                         Model.Time.ToLongDateString(),
+                         Model.Time.ToLongTimeString())</p>
 @Html.Raw(Model.Render(Html))

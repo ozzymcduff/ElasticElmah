@@ -1,39 +1,39 @@
+using System;
+using System.Globalization;
+using System.IO;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
 
 namespace Elmah
 {
     #region Imports
 
-    using System;
-    using System.Web;
-    using System.Web.UI;
-    using System.Web.UI.WebControls;
-
-    using CultureInfo = System.Globalization.CultureInfo;
-    using ArrayList = System.Collections.ArrayList;
-    using System.IO;
-    using ElasticElmahMVC.Code;
+    
 
     #endregion
 
     /// <summary>
     /// Renders an HTML page displaying a page of errors from the error log.
     /// </summary>
-
     public class ErrorLogPage
     {
-        Environment env;
+        private readonly Environment env;
+
+        private readonly ErrorLog.Errors errors;
+        private string PageTitle;
+
         public ErrorLogPage(Environment env, ErrorLog.Errors errors)
         {
             this.env = env;
             this.errors = errors;
         }
 
-        private string PageTitle;
-        private ErrorLog.Errors errors;
         public string BasePageName
         {
             get { return env.BasePageName; }
         }
+
         public ErrorLogPage OnLoad()
         {
             //
@@ -51,13 +51,14 @@ namespace Elmah
             //
 
             string hostName = Environment.TryGetMachineName(new HttpContextWrapper(HttpContext.Current));
-            this.PageTitle = string.Format(
+            PageTitle = string.Format(
                 hostName.Length > 0
-                ? "Error log for {0} on {2} (Page #{1})"
-                : "Error log for {0} (Page #{1})",
+                    ? "Error log for {0} on {2} (Page #{1})"
+                    : "Error log for {0} (Page #{1})",
                 env.ApplicationName, (errors.pageIndex + 1).ToString("N0"), hostName);
             return this;
         }
+
         public string RssLink()
         {
             return BasePageName + "/rss";
@@ -143,7 +144,7 @@ namespace Elmah
             writer.RenderBeginTag(HtmlTextWriterTag.P);
 
             int nextPageIndex = errors.pageIndex + 1;
-            bool moreErrors = nextPageIndex * errors.pageSize < errors.Total;
+            bool moreErrors = nextPageIndex*errors.pageSize < errors.Total;
 
             if (moreErrors)
                 RenderLinkToPage(writer, HtmlLinkType.Next, "Next errors", nextPageIndex);
@@ -174,7 +175,7 @@ namespace Elmah
 
             writer.Write("Start with ");
 
-            int[] stockSizes = new int[] { 10, 15, 20, 25, 30, 50, 100 };
+            var stockSizes = new[] {10, 15, 20, 25, 30, 50, 100};
 
             for (int stockSizeIndex = 0; stockSizeIndex < stockSizes.Length; stockSizeIndex++)
             {
@@ -191,9 +192,9 @@ namespace Elmah
 
         private void RenderStats(HtmlTextWriter writer)
         {
-            int firstErrorNumber = errors.pageIndex * errors.pageSize + 1;
+            int firstErrorNumber = errors.pageIndex*errors.pageSize + 1;
             int lastErrorNumber = firstErrorNumber + errors.Entries.Count - 1;
-            int totalPages = (int)Math.Ceiling((double)errors.Total / errors.pageSize);
+            var totalPages = (int) Math.Ceiling((double) errors.Total/errors.pageSize);
 
             writer.Write("Errors {0} to {1} of total {2} (page {3} of {4}). ",
                          firstErrorNumber.ToString("N0"),
@@ -215,7 +216,7 @@ namespace Elmah
             string simpleName = env.ApplicationName;
 
             if (string.Compare(simpleName, HttpContext.Current.Request.ServerVariables["APPL_MD_PATH"],
-                true, CultureInfo.InvariantCulture) == 0)
+                               true, CultureInfo.InvariantCulture) == 0)
             {
                 int lastSlashIndex = simpleName.LastIndexOf('/');
 
@@ -228,7 +229,8 @@ namespace Elmah
             writer.Write("Error Log for ");
 
             writer.AddAttribute(HtmlTextWriterAttribute.Id, "ApplicationName");
-            writer.AddAttribute(HtmlTextWriterAttribute.Title, HttpContext.Current.Server.HtmlEncode(env.ApplicationName));
+            writer.AddAttribute(HtmlTextWriterAttribute.Title,
+                                HttpContext.Current.Server.HtmlEncode(env.ApplicationName));
             writer.RenderBeginTag(HtmlTextWriterTag.Span);
             HttpContext.Current.Server.HtmlEncode(simpleName, writer);
             if (env.HostName.Length > 0)
@@ -266,12 +268,11 @@ namespace Elmah
 
         private void RenderErrors(HtmlTextWriter writer)
         {
-
             //
             // Create a table to display error information in each row.
             //
 
-            Table table = new Table();
+            var table = new Table();
             table.ID = "ErrorLog";
             table.CellSpacing = 0;
 
@@ -279,7 +280,7 @@ namespace Elmah
             // Create the table row for headings.
             //
 
-            TableRow headRow = new TableRow();
+            var headRow = new TableRow();
 
             headRow.Cells.Add(FormatCell(new TableHeaderCell(), "Host", "host-col"));
             //  headRow.Cells.Add(FormatCell(new TableHeaderCell(), "Code", "code-col"));
@@ -300,8 +301,8 @@ namespace Elmah
                 Error errorEntry = errors.Entries[errorIndex];
                 Error error = errorEntry;
 
-                TableRow bodyRow = new TableRow();
-                bodyRow.CssClass = errorIndex % 2 == 0 ? "even-row" : "odd-row";
+                var bodyRow = new TableRow();
+                bodyRow.CssClass = errorIndex%2 == 0 ? "even-row" : "odd-row";
 
                 //
                 // Format host and status code cells.
@@ -309,7 +310,8 @@ namespace Elmah
 
                 bodyRow.Cells.Add(FormatCell(new TableCell(), error.HostName, "host-col"));
                 //bodyRow.Cells.Add(FormatCell(new TableCell(), error.StatusCode.ToString(), "code-col", Mask.NullString(HttpWorkerRequest.GetStatusDescription(error.StatusCode))));
-                bodyRow.Cells.Add(FormatCell(new TableCell(), ErrorDisplay.HumaneExceptionErrorType(error), "type-col", error.Type));
+                bodyRow.Cells.Add(FormatCell(new TableCell(), ErrorDisplay.HumaneExceptionErrorType(error), "type-col",
+                                             error.Type));
 
                 //
                 // Format the message cell, which contains the message 
@@ -317,13 +319,13 @@ namespace Elmah
                 // all error details can be viewed.
                 //
 
-                TableCell messageCell = new TableCell();
+                var messageCell = new TableCell();
                 messageCell.CssClass = "error-col";
 
-                Label messageLabel = new Label();
+                var messageLabel = new Label();
                 messageLabel.Text = HttpContext.Current.Server.HtmlEncode(error.Message);
 
-                HyperLink detailsLink = new HyperLink();
+                var detailsLink = new HyperLink();
                 detailsLink.NavigateUrl = BasePageName + "/detail?id=" + HttpUtility.UrlEncode(errorEntry.Id);
                 detailsLink.Text = "Details&hellip;";
 
@@ -339,9 +341,9 @@ namespace Elmah
 
                 bodyRow.Cells.Add(FormatCell(new TableCell(), error.User, "user-col"));
                 bodyRow.Cells.Add(FormatCell(new TableCell(), error.Time.ToShortDateString(), "date-col",
-                    error.Time.ToLongDateString()));
+                                             error.Time.ToLongDateString()));
                 bodyRow.Cells.Add(FormatCell(new TableCell(), error.Time.ToShortTimeString(), "time-col",
-                    error.Time.ToLongTimeString()));
+                                             error.Time.ToLongTimeString()));
 
                 //
                 // Finally, add the row to the table.
@@ -377,7 +379,7 @@ namespace Elmah
                 }
                 else
                 {
-                    Label label = new Label();
+                    var label = new Label();
                     label.ToolTip = toolTip;
                     label.Text = encodedContents;
                     cell.Controls.Add(label);
@@ -398,9 +400,9 @@ namespace Elmah
             if (!(pageSize >= 0)) throw new Exception("pageSize >= 0");
 
             string href = string.Format("{0}?page={1}&size={2}",
-                BasePageName,
-                (pageIndex + 1).ToString(CultureInfo.InvariantCulture),
-                pageSize.ToString(CultureInfo.InvariantCulture));
+                                        BasePageName,
+                                        (pageIndex + 1).ToString(CultureInfo.InvariantCulture),
+                                        pageSize.ToString(CultureInfo.InvariantCulture));
 
             writer.AddAttribute(HtmlTextWriterAttribute.Href, href);
 

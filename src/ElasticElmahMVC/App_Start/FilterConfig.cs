@@ -1,6 +1,5 @@
-﻿using ElasticElmahMVC.Filters;
-using System.Web;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
+using ElasticElmahMVC.Filters;
 
 namespace ElmahMVC
 {

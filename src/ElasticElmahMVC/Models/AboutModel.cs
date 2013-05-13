@@ -1,13 +1,11 @@
+using System;
+using System.Reflection;
 
 namespace Elmah
 {
     #region Imports
 
-    using System;
-    using System.Globalization;
-    using System.Reflection;
-    using System.Web;
-    using System.Web.UI;
+    
 
     #endregion
 
@@ -16,30 +14,33 @@ namespace Elmah
     /// build configuration, source files as well as a method to check
     /// for updates.
     /// </summary>
-
-    public class AboutModel 
+    public class AboutModel
     {
-        public string PageTitle { get; set; }
-        private Environment environment;
+        private readonly Environment environment;
+
         public AboutModel(Environment environment)
         {
             this.environment = environment;
             PageTitle = "About ElasticELMAH";
         }
 
+        public string PageTitle { get; set; }
+
         public string BasePageName
         {
             get { return environment.BasePageName; }
         }
 
-        public Version GetVersion() 
+        public Version GetVersion()
         {
             return GetType().Assembly.GetName().Version;
         }
 
         public Version GetFileVersion()
         {
-            AssemblyFileVersionAttribute version = (AssemblyFileVersionAttribute) Attribute.GetCustomAttribute(GetType().Assembly, typeof(AssemblyFileVersionAttribute));
+            var version =
+                (AssemblyFileVersionAttribute)
+                Attribute.GetCustomAttribute(GetType().Assembly, typeof (AssemblyFileVersionAttribute));
             return version != null ? new Version(version.Version) : new Version();
         }
     }

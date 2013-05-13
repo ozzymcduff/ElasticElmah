@@ -1,16 +1,14 @@
-﻿using log4net;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Web;
+﻿using System.Reflection;
 using System.Web.Mvc;
+using log4net;
 
 namespace ElasticElmahMVC.Filters
 {
-    public class HandleWithLog4netFilter:IActionFilter
+    public class HandleWithLog4netFilter : IActionFilter
     {
         protected static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
+        #region IActionFilter Members
 
         public void OnActionExecuted(ActionExecutedContext filterContext)
         {
@@ -27,7 +25,8 @@ namespace ElasticElmahMVC.Filters
 
         public void OnActionExecuting(ActionExecutingContext filterContext)
         {
-            
         }
+
+        #endregion
     }
 }

@@ -1,14 +1,20 @@
-﻿using Elmah;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Web;
+using ElasticElmah.Core.ErrorLog;
+using Elmah;
 
 namespace ElasticElmahMVC.Code
 {
     public class Helper
     {
         private static readonly object _contextKey = new object();
+
+
+        private HttpContextBase _context;
+
+        public Helper(HttpContextBase context)
+        {
+            _context = context;
+        }
 
         public static ErrorLog GetDefault(HttpContextBase context)
         {
@@ -21,7 +27,7 @@ namespace ElasticElmahMVC.Code
 
             if (context != null)
             {
-                log = (ErrorLog)context.Items[_contextKey];
+                log = (ErrorLog) context.Items[_contextKey];
 
                 if (log != null)
                     return log;
@@ -61,14 +67,5 @@ namespace ElasticElmahMVC.Code
 
             return log;
         }
-
-
-        private HttpContextBase _context;
-        public Helper(HttpContextBase context)
-        {
-            _context = context;
-        }
-        
-
     }
 }

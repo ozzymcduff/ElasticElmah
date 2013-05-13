@@ -1,11 +1,8 @@
-﻿using ElasticElmahMVC.Code;
-using Elmah;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System;
 using System.Web.Mvc;
+using ElasticElmahMVC.Code;
+using Elmah;
+using Environment = Elmah.Environment;
 
 namespace ElmahMVC.Controllers
 {
@@ -19,24 +16,24 @@ namespace ElmahMVC.Controllers
             const int _defaultPageSize = 15;
             const int _maximumPageSize = 100;
 
-            var _pageSize = Math.Min(_maximumPageSize, Math.Max(0, size ?? 0));
+            int _pageSize = Math.Min(_maximumPageSize, Math.Max(0, size ?? 0));
 
             if (_pageSize == 0)
             {
                 _pageSize = _defaultPageSize;
             }
 
-            var _pageIndex = Math.Max(1, page ?? 0) - 1;
-            var errorlog = Helper.GetDefault(HttpContext);
-            this.ViewBag.ErrorLog = errorlog;
-            var errors = errorlog.GetErrors(_pageIndex, _pageSize);
-            return View(new ErrorLogPage(new Elmah.Environment(HttpContext), errors).OnLoad());
+            int _pageIndex = Math.Max(1, page ?? 0) - 1;
+            ErrorLog errorlog = Helper.GetDefault(HttpContext);
+            ViewBag.ErrorLog = errorlog;
+            ErrorLog.Errors errors = errorlog.GetErrors(_pageIndex, _pageSize);
+            return View(new ErrorLogPage(new Environment(HttpContext), errors).OnLoad());
         }
 
         public ActionResult About()
         {
-            this.ViewBag.ErrorLog = Helper.GetDefault(HttpContext);
-            return View(new AboutModel(new Elmah.Environment(HttpContext)));
+            ViewBag.ErrorLog = Helper.GetDefault(HttpContext);
+            return View(new AboutModel(new Environment(HttpContext)));
         }
 
         public ActionResult Test()
@@ -46,7 +43,5 @@ namespace ElmahMVC.Controllers
 
         //case "test":
         //    ;
-
-
     }
 }

@@ -1,32 +1,62 @@
+using System;
+using System.Security;
+using System.Web;
 
 namespace Elmah
 {
     #region Imports
 
-    using System.Security;
-    using System.Web;
+    
 
     #endregion
 
     public class Environment
     {
-        private HttpContextBase context;
+        private readonly HttpContextBase context;
+        private string _appName;
+
+        private string _hostname;
 
         public Environment(HttpContextBase context)
         {
             this.context = context;
         }
 
-        private string _hostname;
+        private Environment()
+        {
+        }
+
         public string HostName
         {
             get
             {
                 if (_hostname == null)
                 {
-                    _hostname=TryGetMachineName(context);
+                    _hostname = TryGetMachineName(context);
                 }
                 return _hostname;
+            }
+        }
+
+        public string BasePageName
+        {
+            get { return ToBase(context.Request.Url); }
+        }
+
+        public Uri BasePageUrl
+        {
+            get { return new Uri(ToBase(context.Request.Url)); }
+        }
+
+        public string ApplicationName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_appName))
+                {
+                    _appName = InferApplicationName(context);
+                }
+                return Mask.NullString(_appName);
             }
         }
 
@@ -39,7 +69,6 @@ namespace Elmah
         /// If <paramref name="unknownName"/> is a null reference then this
         /// method will still return an empty string.
         /// </remarks>
-
         public static string TryGetMachineName(HttpContextBase context, string unknownName)
         {
             //
@@ -80,28 +109,9 @@ namespace Elmah
             return Mask.NullString(unknownName);
         }
 
-        private Environment() { }
-
-        public string BasePageName { get { return ToBase(context.Request.Url); } }
-
-        private static string ToBase(System.Uri uri)
+        private static string ToBase(Uri uri)
         {
             return uri.Scheme + "://" + uri.Host + (uri.Port != 80 || uri.Port != 443 ? ":" + uri.Port : string.Empty);
-        }
-
-        public System.Uri BasePageUrl { get { return new System.Uri(ToBase(context.Request.Url)); } }
-        private string _appName;
-
-        public string ApplicationName
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_appName))
-                {
-                    _appName = InferApplicationName(context);
-                }
-                return Mask.NullString(_appName);
-            }
         }
 
         private string InferApplicationName(HttpContextBase context)
@@ -140,8 +150,6 @@ namespace Elmah
             }
 
             return Mask.EmptyString(appName, "/");
-
         }
-
     }
 }

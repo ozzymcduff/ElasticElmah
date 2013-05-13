@@ -1,9 +1,10 @@
+using System.Xml.Serialization;
 
-namespace Elmah.ContentSyndication 
+namespace Elmah.ContentSyndication
 {
     #region Imports
 
-    using System.Xml.Serialization;
+    
 
     #endregion
 
@@ -13,75 +14,62 @@ namespace Elmah.ContentSyndication
     // file.
     //
 
-    [ XmlRoot("rss", Namespace = "", IsNullable = false) ]
-    public class RichSiteSummary 
+    [XmlRoot("rss", Namespace = "", IsNullable = false)]
+    public class RichSiteSummary
     {
         public Channel channel;
-        [ XmlAttribute ]
-        public string version;
-    }
-    
-    public class Channel 
-    {
-        public string title;
-        [ XmlElement(DataType = "anyURI") ]
-        public string link;
-        public string description;
-        [ XmlElement(DataType = "language") ]
-        public string language;
-        public string rating;
-        public Image image;
-        public TextInput textInput;
-        public string copyright;
-        [ XmlElement(DataType = "anyURI") ]
-        public string docs;
-        public string managingEditor;
-        public string webMaster;
-        public string pubDate;
-        public string lastBuildDate;
-        [ XmlArrayItem("hour", IsNullable = false) ]
-        public int[] skipHours;
-        [ XmlArrayItem("day", IsNullable = false) ]
-        public Day[] skipDays;
-        [ XmlElement("item") ]
-        public Item[] item;
-    }
-    
-    public class Image 
-    {
-        public string title;
-        [ XmlElement(DataType = "anyURI") ]
-        public string url;
-        [ XmlElement(DataType = "anyURI") ]
-        public string link;
-        public int width;
-        [ XmlIgnore() ]
-        public bool widthSpecified;
-        public int height;
-        [ XmlIgnore() ]
-        public bool heightSpecified;
-        public string description;
-    }
-    
-    public class Item 
-    {
-        public string title;
-        public string description;
-        public string pubDate;
-        [ XmlElement(DataType = "anyURI") ]
-        public string link;
-    }
-    
-    public class TextInput 
-    {
-        public string title;
-        public string description;
-        public string name;
-        [ XmlElement(DataType = "anyURI") ]
-        public string link;
+        [XmlAttribute] public string version;
     }
 
-    public enum Day 
+    public class Channel
+    {
+        public string copyright;
+        public string description;
+        [XmlElement(DataType = "anyURI")] public string docs;
+        public Image image;
+        [XmlElement("item")] public Item[] item;
+        [XmlElement(DataType = "language")] public string language;
+        public string lastBuildDate;
+        [XmlElement(DataType = "anyURI")] public string link;
+        public string managingEditor;
+        public string pubDate;
+        public string rating;
+        [XmlArrayItem("day", IsNullable = false)] public Day[] skipDays;
+        [XmlArrayItem("hour", IsNullable = false)] public int[] skipHours;
+        public TextInput textInput;
+        public string title;
+        public string webMaster;
+    }
+
+    public class Image
+    {
+        public string description;
+        public int height;
+        [XmlIgnore] public bool heightSpecified;
+        [XmlElement(DataType = "anyURI")] public string link;
+        public string title;
+        [XmlElement(DataType = "anyURI")] public string url;
+        public int width;
+        [XmlIgnore] public bool widthSpecified;
+    }
+
+    public class Item
+    {
+        public string description;
+        [XmlElement(DataType = "anyURI")] public string link;
+        public string pubDate;
+        public string title;
+    }
+
+    public class TextInput
+    {
+        public string description;
+        [XmlElement(DataType = "anyURI")] public string link;
+        public string name;
+        public string title;
+    }
+
+    public enum Day
     {
         Monday,
         Tuesday,

@@ -5,10 +5,11 @@
 }
 @section Head{
     <link rel="alternate" type="application/rss+xml" title="RSS" href="@Model.RssLink()" />
-    @if (Model.FirstPage()){
-    <meta http-equiv="refresh" content="60">
-    }
+    @if (Model.FirstPage())
+    {
+        <meta http-equiv="refresh" content="60">
+        }
 
-}
-<h2>Index</h2>
-@Html.Raw(Model.Render())
+        }
+        <h2>Index</h2>
+        @Html.Raw(Model.Render())

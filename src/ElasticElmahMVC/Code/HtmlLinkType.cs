@@ -1,4 +1,5 @@
 #region License, Terms and Author(s)
+
 //
 // ELMAH - Error Logging Modules and Handlers for ASP.NET
 // Copyright (c) 2004-9 Atif Aziz. All rights reserved.
@@ -19,9 +20,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
 #endregion
-
-
 
 namespace Elmah
 {
@@ -34,7 +34,6 @@ namespace Elmah
     /// See <a href="http://www.w3.org/TR/html401/types.html#type-links">6.12 Link types</a>
     /// for more information.
     /// </remarks>
-    
     public sealed class HtmlLinkType
     {
         // Designates  substitute  versions  for the document in which the
@@ -121,6 +120,8 @@ namespace Elmah
 
         public const string Bookmark = "bookmark";
 
-        private HtmlLinkType() {}
+        private HtmlLinkType()
+        {
+        }
     }
 }

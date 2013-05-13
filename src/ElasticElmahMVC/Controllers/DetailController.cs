@@ -1,10 +1,6 @@
-﻿using ElasticElmahMVC.Code;
+﻿using System.Web.Mvc;
+using ElasticElmahMVC.Code;
 using Elmah;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
 
 namespace ElasticElmahMVC.Controllers
 {
@@ -15,10 +11,9 @@ namespace ElasticElmahMVC.Controllers
 
         public ActionResult Index(string id)
         {
-            var errorlog=Helper.GetDefault(HttpContext);
-            this.ViewBag.ErrorLog = errorlog;
-            return View(new ErrorDetailModel(errorlog.GetError(id),new Elmah.Environment(HttpContext)));
+            ErrorLog errorlog = Helper.GetDefault(HttpContext);
+            ViewBag.ErrorLog = errorlog;
+            return View(new ErrorDetailModel(errorlog.GetError(id), new Environment(HttpContext)));
         }
-
     }
 }

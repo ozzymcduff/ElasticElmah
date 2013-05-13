@@ -1,18 +1,18 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.UI;
+using Elmah.ContentSyndication;
 
 namespace Elmah
 {
     #region Imports
 
-    using System;
-    using System.IO;
-    using System.Text;
-    using System.Web;
-    using System.Web.UI;
-    using ContentSyndication;
-
-    using ArrayList = System.Collections.ArrayList;
-    using System.Collections.Generic;
-    using System.Web.Mvc;
+    
 
     #endregion
 
@@ -21,14 +21,14 @@ namespace Elmah
     /// recorded errors in the error log. The feed spans at most 15
     /// days on which errors occurred.
     /// </summary>
-
     internal sealed class ErrorDigestRssHandler : ActionResult
     {
         public const int pageSize = 30;
         public const int maxPageLimit = 30;
 
-        Environment environment;
-        private IList<Error> entries;
+        private readonly IList<Error> entries;
+        private readonly Environment environment;
+
         public ErrorDigestRssHandler(Environment environment, IList<Error> entries)
         {
             this.entries = entries;
@@ -37,25 +37,25 @@ namespace Elmah
 
         private void Render(ControllerContext context)
         {
-            var Response = context.HttpContext.Response;
-            var Request = context.HttpContext.Request;
+            HttpResponseBase Response = context.HttpContext.Response;
+            HttpRequestBase Request = context.HttpContext.Request;
             Response.ContentType = "application/xml";
 
             //
             // We'll be emitting RSS vesion 0.91.
             //
 
-            RichSiteSummary rss = new RichSiteSummary();
+            var rss = new RichSiteSummary();
             rss.version = "0.91";
 
             //
             // Set up the RSS channel.
             //
 
-            Channel channel = new Channel();
+            var channel = new Channel();
             channel.title = "Daily digest of errors in "
-                          + environment.ApplicationName
-                          + (environment.HostName.Length > 0 ? " on " + environment.HostName : null);
+                            + environment.ApplicationName
+                            + (environment.HostName.Length > 0 ? " on " + environment.HostName : null);
             channel.description = "Daily digest of application errors";
             channel.language = "en";
 
@@ -67,7 +67,7 @@ namespace Elmah
             // Build the channel items.
             //
 
-            ArrayList itemList = new ArrayList(pageSize);
+            var itemList = new ArrayList(pageSize);
 
             //
             // Start with the first page of errors.
@@ -81,14 +81,14 @@ namespace Elmah
             DateTime runningDay = DateTime.MaxValue;
             int runningErrorCount = 0;
             Item item = null;
-            StringBuilder sb = new StringBuilder();
-            HtmlTextWriter writer = new HtmlTextWriter(new StringWriter(sb));
+            var sb = new StringBuilder();
+            var writer = new HtmlTextWriter(new StringWriter(sb));
 
             foreach (Error entry in entries)
             {
                 Error error = entry;
                 DateTime time = error.Time.ToUniversalTime();
-                DateTime day = new DateTime(time.Year, time.Month, time.Day);
+                var day = new DateTime(time.Year, time.Month, time.Day);
 
                 //
                 // If we're dealing with a new day then break out to a 
@@ -113,7 +113,7 @@ namespace Elmah
                     item = new Item();
                     item.pubDate = time.ToString("r");
                     item.title = string.Format("Digest for {0} ({1})",
-                        runningDay.ToString("yyyy-MM-dd"), runningDay.ToLongDateString());
+                                               runningDay.ToString("yyyy-MM-dd"), runningDay.ToLongDateString());
 
                     sb.Length = 0;
                     RenderStart(writer);
@@ -130,7 +130,7 @@ namespace Elmah
                 itemList.Add(item);
             }
 
-            channel.item = (Item[])itemList.ToArray(typeof(Item));
+            channel.item = (Item[]) itemList.ToArray(typeof (Item));
 
             //
             // Stream out the RSS XML.
@@ -164,7 +164,7 @@ namespace Elmah
                 Server.HtmlEncode(errorType, writer);
 
                 if (abbreviated)
-                    writer.RenderEndTag(/* span */);
+                    writer.RenderEndTag( /* span */);
 
                 writer.Write(": ");
             }
@@ -172,14 +172,14 @@ namespace Elmah
             writer.AddAttribute(HtmlTextWriterAttribute.Href, baseUrl + "/detail?id=" + HttpUtility.UrlEncode(entry.Id));
             writer.RenderBeginTag(HtmlTextWriterTag.A);
             Server.HtmlEncode(error.Message, writer);
-            writer.RenderEndTag(/* a */);
+            writer.RenderEndTag( /* a */);
 
             writer.RenderEndTag( /* li */);
         }
 
         private static void RenderEnd(HtmlTextWriter writer)
         {
-            writer.RenderEndTag(/* li */);
+            writer.RenderEndTag( /* li */);
             writer.Flush();
         }
 
