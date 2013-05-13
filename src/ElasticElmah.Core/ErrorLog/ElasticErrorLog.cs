@@ -38,21 +38,15 @@ namespace ElasticElmah.Core.ErrorLog
 
         public override Errors GetErrors(int pageIndex, int pageSize)
         {
-            Tuple<IEnumerable<Tuple<string, LoggingEventData>>, int> res = appender.GetPaged(pageIndex, pageSize);
+            var res = appender.GetPaged(pageIndex, pageSize);
             return new Errors
                        {
-                           Total = res.Item2,
-                           Entries = res.Item1.Select(e => Map(e)).ToList(),
+                           Total = res.Total,
+                           Entries = res.Documents.Select(e => new ElasticElmah.Core.ErrorLog.Error(e.Data, e.Id)).ToList(),
                            pageIndex = pageIndex,
                            pageSize = pageSize
                        };
         }
-
-        private Error Map(Tuple<string, LoggingEventData> e)
-        {
-            return new Error(e.Item2, e.Item1);
-        }
-
 
         /// <summary>
         /// Returns the specified error from the database, or null 
@@ -60,7 +54,7 @@ namespace ElasticElmah.Core.ErrorLog
         /// </summary>
         public override Error GetError(string id)
         {
-            return Map(appender.Get(id));
+            return new ElasticElmah.Core.ErrorLog.Error(appender.Get(id).Data, id);
         }
     }
 }

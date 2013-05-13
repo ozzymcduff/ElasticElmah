@@ -34,14 +34,6 @@ namespace ElasticElmah.Appender
         
         private readonly string _index;
 
-
-        public IEnumerable<LoggingEventData> All()
-        {
-            var results = _client.Search<LogEvent>(s => s.Fields("_source"));
-            var docs = results.DocumentsWithMetaData.Select(d => Map.To(d.Source));
-            return docs;
-        }
-
         public void CreateIndex()
         {
             CreateIndex(_client);
@@ -71,7 +63,32 @@ namespace ElasticElmah.Appender
             _client.Flush();
         }
 
-        public Tuple<IEnumerable<Tuple<string, LoggingEventData>>, int> GetPaged(int pageIndex, int pageSize)
+        public class Errors
+        {
+            public readonly IEnumerable<Error> Documents;
+            public readonly int Total;
+
+            public Errors(IEnumerable<Error> docs, int count)
+            {
+                // TODO: Complete member initialization
+                this.Documents = docs;
+                this.Total = count;
+            }
+
+        }
+        public class Error
+        {
+            public readonly string Id;
+            public readonly LoggingEventData Data;
+
+            public Error(string id, LoggingEventData data)
+            {
+                this.Id = id;
+                this.Data = data;
+            }
+        }
+
+        public Errors GetPaged(int pageIndex, int pageSize)
         {
             var results = _client.Search<LogEvent>(s => s
                 .Fields("_source")
@@ -79,16 +96,16 @@ namespace ElasticElmah.Appender
                 .Size(pageSize)
                 .SortDescending(f=>f.TimeStamp)
                 );
-            var docs = results.DocumentsWithMetaData.Select(d => new Tuple<string, LoggingEventData>(d.Id, Map.To(d.Source)));
-            return new Tuple<IEnumerable<Tuple<string, LoggingEventData>>, int>(docs, results.Total);
+            var docs = results.DocumentsWithMetaData.Select(d => new Error(d.Id, Map.To(d.Source)));
+            return new Errors(docs, results.Total);
         }
 
-        public Tuple<string, LoggingEventData> Get(string id)
+        public Error Get(string id)
         {
             var results = _client.Get<LogEvent>(_index, "LoggingEvent", id);
             if (results == null)
                 return null;
-            return new Tuple<string, LoggingEventData>(id, Map.To(results));
+            return new Error(id, Map.To(results));
         }
 
         private static Tuple<ConnectionSettings, IDictionary<string, string>> BuildElsticSearchConnection(string connectionString)

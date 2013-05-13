@@ -44,9 +44,9 @@ namespace ElasticElmah.Appender.Tests
                         Message = "Message"
                     }));
             _appender.Flush();
-            var result = _appender.All();
-            Assert.AreEqual(1, result.Count());
-            Assert.That(result.Single().Message, Is.EqualTo("Message"));
+            var result = _appender.GetPaged(0,10);
+            Assert.AreEqual(1, result.Total);
+            Assert.That(result.Documents.Single().Data.Message, Is.EqualTo("Message"));
         }
 
         [Test]
@@ -63,9 +63,9 @@ namespace ElasticElmah.Appender.Tests
                         })
                     }));
             _appender.Flush();
-            var result = _appender.All();
-            Assert.AreEqual(1, result.Count());
-            Assert.AreEqual("msg", result.First().Properties["prop"]);
+            var result = _appender.GetPaged(0,10);
+            Assert.AreEqual(1, result.Total);
+            Assert.AreEqual("msg", result.Documents.First().Data.Properties["prop"]);
         }
 
         [Test]
@@ -92,8 +92,8 @@ namespace ElasticElmah.Appender.Tests
             }
             _appender.Flush();
             var result = _appender.GetPaged(0,2);
-            Assert.AreEqual(5, result.Item2);
-            Assert.That(result.Item1.Select(l=>l.Item2.TimeStamp).ToArray(),
+            Assert.AreEqual(5, result.Total);
+            Assert.That(result.Documents.Select(l=>l.Data.TimeStamp).ToArray(),
                 Is.EquivalentTo(new []{ 
                     new DateTime(2001,1,5),
                     new DateTime(2001,1,4)
