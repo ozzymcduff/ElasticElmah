@@ -9,6 +9,8 @@ using ElasticElmah.Core.ErrorLog;
 using ElasticElmah.Core.Infrastructure;
 using log4net.Util;
 using Environment = ElasticElmahMVC.Code.Environment;
+using log4net.Core;
+using System.Collections.Generic;
 
 namespace ElasticElmahMVC.Models
 {
@@ -51,7 +53,7 @@ namespace ElasticElmahMVC.Models
 
         private readonly Environment environment;
         private string PageTitle;
-
+        public Dictionary<string, object> Properties { get { return _errorEntry.Properties; } }
         public ErrorDetailModel(Error errorLogEntry, Environment environment)
         {
             this.environment = environment;
@@ -69,7 +71,7 @@ namespace ElasticElmahMVC.Models
         //
         public string Detail
         {
-            get { return _errorEntry.Detail; }
+            get { return MarkupStackTrace(_errorEntry.Detail); }
         }
 
         // Write out the error log time. This will be in the local
@@ -101,161 +103,9 @@ namespace ElasticElmahMVC.Models
             get { return _errorEntry.Message; }
         }
 
-        public HtmlString Render(HtmlHelper helper)
+        private string MarkupStackTrace(string text)
         {
-            using (var stream = new MemoryStream())
-            {
-                var writer = new HtmlTextWriter(new StreamWriter(stream));
-                RenderContents(writer, helper);
-                writer.Flush();
-                stream.Position = 0;
-                var reader = new StreamReader(stream);
-                return new HtmlString(reader.ReadToEnd());
-            }
-        }
-
-        protected void RenderContents(HtmlTextWriter writer, HtmlHelper helper)
-        {
-            RenderError(writer);
-        }
-
-        private void RenderError(HtmlTextWriter writer)
-        {
-            Error error = _errorEntry;
-
-            //
-            // If this error has context, then write it out.
-            // ServerVariables are good enough for most purposes, so
-            // we only write those out at this time.
-            //
-
-            RenderCollection(writer, error.Properties,
-                             "ServerVariables", "Server Variables");
-        }
-
-        private void RenderCollection(HtmlTextWriter writer,
-                                      PropertiesDictionary collection, string id, string title)
-        {
-            //
-            // If the collection isn't there or it's empty, then bail out.
-            //
-
-            if (collection == null || collection.Count == 0)
-                return;
-
-            //
-            // Surround the entire section with a <div> element.
-            //
-
-            writer.AddAttribute(HtmlTextWriterAttribute.Id, id);
-            writer.RenderBeginTag(HtmlTextWriterTag.Div);
-
-            //
-            // Write out the table caption.
-            //
-
-            writer.AddAttribute(HtmlTextWriterAttribute.Class, "table-caption");
-            writer.RenderBeginTag(HtmlTextWriterTag.P);
-            HtmlEncode(title, writer);
-            writer.RenderEndTag(); // </p>
-            writer.WriteLine();
-
-            //
-            // Some values can be large and add scroll bars to the page
-            // as well as ruin some formatting. So we encapsulate the
-            // table into a scrollable view that is controlled via the 
-            // style sheet.
-            //
-
-            writer.AddAttribute(HtmlTextWriterAttribute.Class, "scroll-view");
-            writer.RenderBeginTag(HtmlTextWriterTag.Div);
-
-            //
-            // Create a table to display the name/value pairs of the
-            // collection in 2 columns.
-            //
-
-            var table = new Table();
-            table.CellSpacing = 0;
-
-            //
-            // Create the header row and columns.
-            //
-
-            var headRow = new TableRow();
-
-            TableHeaderCell headCell;
-
-            headCell = new TableHeaderCell();
-            headCell.Wrap = false;
-            headCell.Text = "Name";
-            headCell.CssClass = "name-col";
-
-            headRow.Cells.Add(headCell);
-
-            headCell = new TableHeaderCell();
-            headCell.Wrap = false;
-            headCell.Text = "Value";
-            headCell.CssClass = "value-col";
-
-            headRow.Cells.Add(headCell);
-
-            table.Rows.Add(headRow);
-
-            //
-            // Create a row for each entry in the collection.
-            //
-
-            string[] keys = collection.GetKeys();
-            InvariantStringArray.Sort(keys);
-
-            for (int keyIndex = 0; keyIndex < keys.Length; keyIndex++)
-            {
-                string key = keys[keyIndex];
-
-                var bodyRow = new TableRow();
-                bodyRow.CssClass = keyIndex%2 == 0 ? "even-row" : "odd-row";
-
-                TableCell cell;
-
-                //
-                // Create the key column.
-                //
-
-                cell = new TableCell();
-                cell.Text = HtmlEncode(key);
-                cell.CssClass = "key-col";
-
-                bodyRow.Cells.Add(cell);
-
-                //
-                // Create the value column.
-                //
-
-                cell = new TableCell();
-                cell.Text = HtmlEncode(collection[key].ToString());
-                cell.CssClass = "value-col";
-
-                bodyRow.Cells.Add(cell);
-
-                table.Rows.Add(bodyRow);
-            }
-
-            //
-            // Write out the table and close container tags.
-            //
-
-            table.RenderControl(writer);
-
-            writer.RenderEndTag(); // </div>
-            writer.WriteLine();
-
-            writer.RenderEndTag(); // </div>
-            writer.WriteLine();
-        }
-
-        private void MarkupStackTrace(string text, TextWriter writer)
-        {
+            var writer = new StringWriter();
             int anchor = 0;
 
             foreach (Match match in _reStackTrace.Matches(text))
@@ -266,6 +116,7 @@ namespace ElasticElmahMVC.Models
             }
 
             HtmlEncode(text.Substring(anchor), writer);
+            return writer.ToString();
         }
 
         private void MarkupStackFrame(string text, Match match, TextWriter writer)

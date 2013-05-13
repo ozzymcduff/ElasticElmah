@@ -1,7 +1,9 @@
 using System;
+using System.Linq;
 using ElasticElmah.Core.Infrastructure;
 using log4net.Core;
 using log4net.Util;
+using System.Collections.Generic;
 
 namespace ElasticElmah.Core.ErrorLog
 {
@@ -13,7 +15,7 @@ namespace ElasticElmah.Core.ErrorLog
     public sealed class Error
     {
         private readonly LoggingEventData _data;
-
+        public LoggingEventData Data { get { return _data; } }
         public Error(LoggingEventData l, string id)
         {
             _data = l;
@@ -22,9 +24,19 @@ namespace ElasticElmah.Core.ErrorLog
 
         public string Id { get; private set; }
 
-        public PropertiesDictionary Properties
+        public Dictionary<string, object> Properties
         {
-            get { return _data.Properties; }
+            get { return Map(_data.Properties); }
+        }
+
+        private Dictionary<string, object> Map(PropertiesDictionary propertiesDictionary)
+        {
+            var dic = new Dictionary<string, object>();
+            foreach (var key in propertiesDictionary.GetKeys())
+            {
+                dic.Add(key, propertiesDictionary[key]);
+            }
+            return dic;
         }
 
 
@@ -57,7 +69,9 @@ namespace ElasticElmah.Core.ErrorLog
         /// </summary>
         public string Message
         {
-            get { return Mask.NullString(_data.Message); }
+            get { return Mask.NullString(_data.Message)
+                .Split(new[]{'\r','\n'},StringSplitOptions.RemoveEmptyEntries)
+                .First(); }
         }
 
         /// <summary>
@@ -66,7 +80,12 @@ namespace ElasticElmah.Core.ErrorLog
         /// </summary>
         public string Detail
         {
-            get { return Mask.NullString(_data.ExceptionString); }
+            get 
+            {
+                return string.IsNullOrEmpty(_data.ExceptionString)
+                    ?_data.Message
+                    :_data.ExceptionString; 
+            }
         }
 
         /// <summary>
