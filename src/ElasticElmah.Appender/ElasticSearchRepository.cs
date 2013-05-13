@@ -18,12 +18,12 @@ namespace ElasticElmah.Appender
 
         private ElasticClient _client;
         private Tuple<ConnectionSettings, IDictionary<string, string>> _settings;
-        private static readonly object lockObj = new object();
+        private static readonly object _lockObj = new object();
         protected virtual ElasticClient Client
         {
             get
             {
-                lock (lockObj)
+                lock (_lockObj)
                 {
                     if (_client != null)
                     {
