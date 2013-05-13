@@ -18,7 +18,7 @@ namespace ElasticElmah.Appender.Storage
         public DateTime TimeStamp { get; set; }
         public LogEventLocation LocationInfo { get; set; }
         public string UserName { get; set; }
-        public Dictionary<string, string> Properties { get; set; }
+        public Dictionary<string, object> Properties { get; set; }
         public string ExceptionString { get; set; }
         public string Domain { get; set; }
         public string Identity { get; set; }

@@ -44,10 +44,12 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ElasticSearchAppender.cs" />
     <Compile Include="ElasticSearchRepository.cs" />
+    <Compile Include="ElasticSearchWebAppender.cs" />
     <Compile Include="Storage\LogEventLocation.cs" />
     <Compile Include="Storage\LogEvent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

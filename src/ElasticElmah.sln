@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2010
+# Visual Studio Express 2012 for Web
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElasticElmah.Core", "ElasticElmah.Core\ElasticElmah.Core.csproj", "{78D25C0C-BE6B-4771-B0D1-11B7277329E4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElasticElmahMVC", "ElasticElmahMVC\ElasticElmahMVC.csproj", "{04CD023A-1822-43DA-82A7-D87863E613ED}"
@@ -15,8 +15,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{262662
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 		.nuget\packages.config = .nuget\packages.config
 	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElasticElmah.Appender.Web", "ElasticElmah.Appender.Web\ElasticElmah.Appender.Web.csproj", "{ABA60B9A-A09D-4E55-95DF-94309E6B36E6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElasticElmah.Tail", "ElasticElmah.Tail\ElasticElmah.Tail.csproj", "{64D64941-C9B6-4ABC-AEB7-4EBBFA0B68D7}"
 EndProject
@@ -80,18 +78,6 @@ Global
 		{4F8C1DA9-B511-44E8-AAB8-47218A7ADFEB}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{4F8C1DA9-B511-44E8-AAB8-47218A7ADFEB}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{4F8C1DA9-B511-44E8-AAB8-47218A7ADFEB}.Release|x86.ActiveCfg = Release|Any CPU
-		{ABA60B9A-A09D-4E55-95DF-94309E6B36E6}.Debug|.NET.ActiveCfg = Debug|Any CPU
-		{ABA60B9A-A09D-4E55-95DF-94309E6B36E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ABA60B9A-A09D-4E55-95DF-94309E6B36E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ABA60B9A-A09D-4E55-95DF-94309E6B36E6}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{ABA60B9A-A09D-4E55-95DF-94309E6B36E6}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{ABA60B9A-A09D-4E55-95DF-94309E6B36E6}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{ABA60B9A-A09D-4E55-95DF-94309E6B36E6}.Release|.NET.ActiveCfg = Release|Any CPU
-		{ABA60B9A-A09D-4E55-95DF-94309E6B36E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ABA60B9A-A09D-4E55-95DF-94309E6B36E6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{ABA60B9A-A09D-4E55-95DF-94309E6B36E6}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{ABA60B9A-A09D-4E55-95DF-94309E6B36E6}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{ABA60B9A-A09D-4E55-95DF-94309E6B36E6}.Release|x86.ActiveCfg = Release|Any CPU
 		{64D64941-C9B6-4ABC-AEB7-4EBBFA0B68D7}.Debug|.NET.ActiveCfg = Debug|x86
 		{64D64941-C9B6-4ABC-AEB7-4EBBFA0B68D7}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{64D64941-C9B6-4ABC-AEB7-4EBBFA0B68D7}.Debug|Mixed Platforms.ActiveCfg = Debug|x86

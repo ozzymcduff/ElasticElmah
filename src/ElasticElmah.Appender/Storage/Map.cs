@@ -38,7 +38,7 @@ namespace ElasticElmah.Appender.Storage
             var d = new LogEvent
                         {
                             LoggerName = l.LoggerName,
-                            Level = l.Level.Name,
+                            Level = l.Level!=null ? l.Level.Name : string.Empty,
                             Message = l.RenderedMessage,
                             ThreadName = l.ThreadName,
                             TimeStamp = l.TimeStamp,
@@ -60,22 +60,22 @@ namespace ElasticElmah.Appender.Storage
             }
 
             if (l.Properties != null)
-                d.Properties = To(l.Properties);
+                d.Properties = To(l.GetProperties());
 
             return d;
         }
 
-        private static Dictionary<string, string> To(PropertiesDictionary p)
+        private static Dictionary<string, object> To(PropertiesDictionary p)
         {
-            var d = new Dictionary<string, string>();
+            var d = new Dictionary<string, object>();
             foreach (var key in p.GetKeys())
             {
-                d.Add(key, p[key].ToString());
+                d.Add(key, p[key]);
             }
             return d;
         }
 
-        private static PropertiesDictionary To(Dictionary<string, string> dictionary)
+        private static PropertiesDictionary To(Dictionary<string, object> dictionary)
         {
             var dic = new PropertiesDictionary();
             foreach (var item in dictionary)
