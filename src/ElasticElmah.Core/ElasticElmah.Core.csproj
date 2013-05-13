@@ -50,9 +50,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ErrorLog\Error.cs" />
+    <Compile Include="ErrorLog\ErrorLog.cs" />
     <Compile Include="Infrastructure\Build.cs" />
     <Compile Include="ErrorLog\ElasticErrorLog.cs" />
-    <Compile Include="ErrorLog\ErrorLog.cs" />
     <Compile Include="Infrastructure\InvariantStringArray.cs" />
     <Compile Include="Infrastructure\Mask.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -46,7 +46,7 @@ namespace ElasticElmah.Appender
         {
             CreateIndex(_client);
         }
-        private void CreateIndex(ElasticClient c)
+        private void CreateIndex(IElasticClient c)
         {
             var indexSettings = new IndexSettings();
             indexSettings.NumberOfReplicas = 0;
