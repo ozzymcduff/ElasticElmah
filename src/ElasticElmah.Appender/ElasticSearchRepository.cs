@@ -73,7 +73,12 @@ namespace ElasticElmah.Appender
 
         public Tuple<IEnumerable<Tuple<string, LoggingEventData>>, int> GetPaged(int pageIndex, int pageSize)
         {
-            var results = _client.Search<LogEvent>(s => s.Fields("_source").Skip(pageIndex).Size(pageSize));
+            var results = _client.Search<LogEvent>(s => s
+                .Fields("_source")
+                .Skip(pageIndex)
+                .Size(pageSize)
+                .SortDescending(f=>f.TimeStamp)
+                );
             var docs = results.DocumentsWithMetaData.Select(d => new Tuple<string, LoggingEventData>(d.Id, Map.To(d.Source)));
             return new Tuple<IEnumerable<Tuple<string, LoggingEventData>>, int>(docs, results.Total);
         }

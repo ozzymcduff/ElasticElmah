@@ -55,9 +55,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\ElasticElmah.Appender\ElasticSearchAppender.cs">
-      <Link>ElasticSearchAppender.cs</Link>
-    </Compile>
     <Compile Include="..\ElasticElmah.Appender\ElasticSearchRepository.cs">
       <Link>ElasticSearchRepository.cs</Link>
     </Compile>

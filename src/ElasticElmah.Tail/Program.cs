@@ -7,6 +7,7 @@ using System.Threading;
 using NDesk.Options;
 using log4net.Core;
 using log4net.Layout;
+using ElasticElmah.Appender;
 
 namespace ElasticElmah.Tail
 {
@@ -14,16 +15,12 @@ namespace ElasticElmah.Tail
     {
         static void Main(string[] args)
         {
-            var files = new List<string>();
-            int monitor = 0;
+            var index = new List<string>();
             int? lines = null;
-            var watch = false;
             LayoutSkeleton layout = null;
             var help = false;
             var p = new OptionSet() {
-                { "f|file=",   v => { files.Add(v); } },
-                { "m|monitor=", v => { monitor=ParseInterval(v);}},
-                { "w|watch", v => { watch = true;}},
+                { "i|index=",   v => { index.Add(v); } },
                 { "l|lines=", v => { lines=Int32.Parse(v);}},
                 { "h|?|help", v => { help = true;}},
                 { "y|layout=",v=> { layout=new PatternLayout(v);}}
@@ -33,20 +30,20 @@ namespace ElasticElmah.Tail
                 .Where(a => Uri.IsWellFormedUriString(a, UriKind.RelativeOrAbsolute))
                 .Where(a => File.Exists(a));
             // does not seem to work. add tests
-            files.AddRange(detectedFiles);
+            index.AddRange(detectedFiles);
 
             p.Parse(args);
             if (layout == null)
             {
                 layout = new SimpleLayout();
             }
-            Action<TextWriter, LogEntry> showentry = (writer, l) => layout.Format(writer, new LoggingEvent(l.Data));
+            Action<TextWriter, LoggingEventData> showentry = (writer, l) => layout.Format(writer, new LoggingEvent(l));
 
             if (help)
             {
                 Console.WriteLine(@"Usage:
--f|file={a filename}
-    The file to watch, monitor or 
+-i|index={an index}
+    The elastic index to read
 
 -l|lines={tail x lines}	
     Display the last x lines. Defaults to 10 lines. 
@@ -56,15 +53,9 @@ namespace ElasticElmah.Tail
 -h|?|help
     Display help
 
--w|watch
-    Use file system watcher to watch file
-
--m|monitor=seconds
-    Use polling to check for changes of the file.
-
 For instance to :
-LogTail.exe -f=logfile.xml
-LogTail.exe -file=logfile.xml
+LogTail.exe -i=log
+LogTail.exe -index=log
 
 If you are in powershell (or cygwin) you can do the following:
 cat yourlogfile.xml | LogTail.exe
@@ -72,41 +63,10 @@ cat yourlogfile.xml | LogTail.exe
                 return;
             }
 
-            if (watch)
-            {
-                Do(new Watcher(new FileWithPosition(files.Single())).Tap(w =>
-                {
-                    w.LogEntry += (entry) => showentry(Console.Out, entry);
-                }));
-                return;
-            }
-            if (monitor > 0)
-            {
-                Do(new Poller(new FileWithPosition(files.Single()), monitor).Tap(w =>
-                {
-                    w.LogEntry += (entry) => showentry(Console.Out, entry);
-                }));
-                return;
-            }
 
-            if (files.Any())
+            if (index.Any())
             {
-                TailFiles(lines ?? 10, files, (entry) => showentry(Console.Out, entry));
-                return;
-            }
-            else
-            {
-                Console.WriteLine("No files, listening to standard input.");
-                using (Stream stdin = Console.OpenStandardInput())
-                using (Stream stdout = Console.OpenStandardOutput())
-                using (StreamWriter writer = new StreamWriter(stdout))
-                {
-                    var items = new LogEntryParser().Parse(stdin).ToArray();
-                    foreach (var logEntry in items.Skip(items.Count() - (lines ?? 10)))
-                    {
-                        showentry(writer, logEntry);
-                    }
-                }
+                Tail(lines ?? 10, index, (entry) => showentry(Console.Out, entry));
                 return;
             }
         }
@@ -116,29 +76,16 @@ cat yourlogfile.xml | LogTail.exe
             return Int32.Parse(v) * 1000;
         }
 
-        private static void Do(ILogFileWatcher w)
+        private static void Tail(int lines, List<string> indexes, Action<LoggingEventData> showentry)
         {
-            bool keepAlive = true;
-            Thread workerThread = new Thread(w.Init);
-            Console.CancelKeyPress += (o, e) => { w.Dispose(); keepAlive = false; };
-            workerThread.Start();
-            while (keepAlive) ;
-
-            workerThread.Join();
-        }
-
-        private static void TailFiles(int lines, List<string> files, Action<LogEntry> showentry)
-        {
-            foreach (var fileName in files)
+            foreach (var index in indexes)
             {
-                using (var file = FileUtil.OpenReadOnly(fileName))
+                var repo = new ElasticSearchRepository("Server=localhost;Index="+index+";Port=9200");
+                var entries = repo.GetPaged(0, lines);
+                var items = entries.Item1.Select(e=>e.Item2);
+                foreach (var logEntry in items)
                 {
-                    var items = new LogEntryParser().Parse(file)
-                        .ToArray();
-                    foreach (var logEntry in items.Skip(items.Count() - lines))
-                    {
-                        showentry(logEntry);
-                    }
+                    showentry(logEntry);
                 }
             }
         }
