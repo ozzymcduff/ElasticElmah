@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>ElasticElmah.Appender</id>
+    <title>ElasticElmah.Appender</title>
+    <version>1.0.0</version>
+    <authors>Oskar Gewalli</authors>
+    <owners>Oskar Gewalli</owners>
+    <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+    <projectUrl>https://github.com/wallymathieu/ElasticElmah</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>ElasticElmah appender is a small library to append and read log4net data to and from elastic search.</description>
+    <copyright>Copyright 2013</copyright>
+    <references>
+      <reference file="ElasticElmah.Appender.dll" />
+    </references>
+    <dependencies>
+      <dependency id="log4net" version="2.0.0" />
+      <dependency id="NEST" version="0.10.1.0" />
+    </dependencies>
+  </metadata>
+</package>
