@@ -19,6 +19,7 @@ namespace ElasticElmah.Appender
                         return _repo;
                     }
                     _repo = new ElasticSearchRepository(ConnectionString);
+                    _repo.CreateIndexIfNotExists();
                     return _repo;
                 }
             }

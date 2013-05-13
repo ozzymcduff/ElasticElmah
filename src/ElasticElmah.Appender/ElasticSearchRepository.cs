@@ -1,60 +1,50 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Text;
+using ElasticElmah.Appender.Storage;
 using Nest;
-using log4net;
 using log4net.Core;
 
 namespace ElasticElmah.Appender
 {
-    public partial class ElasticSearchRepository
+    public class ElasticSearchRepository
     {
         public ElasticSearchRepository(string connectionString)
         {
-            ConnectionString = connectionString;
+            var settings = BuildElsticSearchConnection(connectionString);
+            _client = new ElasticClient(settings.Item1);
+            _index = settings.Item2["Index"];
         }
 
-        private ElasticClient _client;
-        private Tuple<ConnectionSettings, IDictionary<string, string>> _settings;
-        private static readonly object _lockObj = new object();
-        protected virtual ElasticClient Client
+        public ElasticSearchRepository(ElasticClient client, string index)
         {
-            get
+            _client = client;
+            _index = index;
+        }
+
+        public void CreateIndexIfNotExists()
+        {
+            if (!_client.IndexExists(_index).Exists)
             {
-                lock (_lockObj)
-                {
-                    if (_client != null)
-                    {
-                        return _client;
-                    }
-                    _settings = BuildElsticSearchConnection(ConnectionString);
-                    _client = new ElasticClient(_settings.Item1);
-                    if (!_client.IndexExists(Index).Exists)
-                    {
-                        CreateIndex(_client);
-                    }
-                    return _client;
-                }
+                CreateIndex(_client);
             }
         }
-        private string Index { get { return _settings.Item2["Index"]; } }
 
+        private readonly ElasticClient _client;
         
-        private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-        private string ConnectionString;
+        private readonly string _index;
+
 
         public IEnumerable<LoggingEventData> All()
         {
-            var results = Client.Search<LogEvent>(s => s.Fields("_source"));
-            var docs = results.DocumentsWithMetaData.Select(d => Map(d.Source));
+            var results = _client.Search<LogEvent>(s => s.Fields("_source"));
+            var docs = results.DocumentsWithMetaData.Select(d => Map.To(d.Source));
             return docs;
         }
 
         public void CreateIndex()
         {
-            CreateIndex(Client);
+            CreateIndex(_client);
         }
         private void CreateIndex(ElasticClient c)
         {
@@ -68,32 +58,32 @@ namespace ElasticElmah.Appender
                 SourceFieldMapping = new SourceFieldMapping().SetDisabled(false),
                 Properties = new Dictionary<string, IElasticType> { { "timeStamp", new DateMapping() } }
             });
-            c.CreateIndex(Index, indexSettings);
+            c.CreateIndex(_index, indexSettings);
 
         }
         public void DeleteIndex()
         {
-            Client.DeleteIndex(Index);
+            _client.DeleteIndex(_index);
         }
 
         public void Flush()
         {
-            Client.Flush();
+            _client.Flush();
         }
 
         public Tuple<IEnumerable<Tuple<string, LoggingEventData>>, int> GetPaged(int pageIndex, int pageSize)
         {
-            var results = Client.Search<LogEvent>(s => s.Fields("_source").Skip(pageIndex).Size(pageSize));
-            var docs = results.DocumentsWithMetaData.Select(d => new Tuple<string, LoggingEventData>(d.Id, Map(d.Source)));
+            var results = _client.Search<LogEvent>(s => s.Fields("_source").Skip(pageIndex).Size(pageSize));
+            var docs = results.DocumentsWithMetaData.Select(d => new Tuple<string, LoggingEventData>(d.Id, Map.To(d.Source)));
             return new Tuple<IEnumerable<Tuple<string, LoggingEventData>>, int>(docs, results.Total);
         }
 
         public Tuple<string, LoggingEventData> Get(string id)
         {
-            var results = Client.Get<LogEvent>(Index, "LoggingEvent", id);
+            var results = _client.Get<LogEvent>(_index, "LoggingEvent", id);
             if (results == null)
                 return null;
-            return new Tuple<string, LoggingEventData>(id, Map(results));
+            return new Tuple<string, LoggingEventData>(id, Map.To(results));
         }
 
         private static Tuple<ConnectionSettings, IDictionary<string, string>> BuildElsticSearchConnection(string connectionString)
@@ -111,12 +101,12 @@ namespace ElasticElmah.Appender
 
         public string Add(LoggingEvent loggingEvent)
         {
-            var c = Client;
+            var c = _client;
             if (c != null)
             {
                 if (c.IsValid)
                 {
-                    var response = c.Index(Map(loggingEvent), Index);
+                    var response = c.Index(Map.To(loggingEvent), _index);
                     return response.Id;
                 }
             }

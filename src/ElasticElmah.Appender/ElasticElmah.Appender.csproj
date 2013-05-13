@@ -47,9 +47,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ElasticSearchAppender.cs" />
-    <Compile Include="ElasticSearchRepositoryTypes.cs" />
     <Compile Include="ElasticSearchRepository.cs" />
+    <Compile Include="Storage\LogEventLocation.cs" />
+    <Compile Include="Storage\LogEvent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Storage\Map.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
