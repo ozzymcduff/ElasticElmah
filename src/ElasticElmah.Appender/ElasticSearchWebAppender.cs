@@ -39,9 +39,10 @@ namespace ElasticElmah.Appender
         /// <param name="loggingEvent"></param>
         protected override void Append(LoggingEvent loggingEvent)
         {
-            HydrateProperties(loggingEvent, HttpContext.Current != null
-                ? new HttpContextWrapper(HttpContext.Current)
-                : null);
+            if (HttpContext.Current != null)
+            {
+                AddHttpContextProperties(loggingEvent, new HttpContextWrapper(HttpContext.Current));
+            }
             Repo.Add(loggingEvent);
         }
 
@@ -59,10 +60,10 @@ namespace ElasticElmah.Appender
             }
         }
 
-        public void HydrateProperties(LoggingEvent e, HttpContextBase context)
+        public static void AddHttpContextProperties(LoggingEvent loggingEvent, HttpContextBase context)
         {
             var errors = new List<ErrorCodeAndHtmlMessage>();
-            if (context.AllErrors != null)
+            if (context != null && context.AllErrors != null)
             {
                 for (int i = 0; i < context.AllErrors.Length; i++)
                 {
@@ -76,7 +77,7 @@ namespace ElasticElmah.Appender
                     }
                 }
                 if (errors.Any())
-                    e.Properties["httpErrors"] = errors;
+                    loggingEvent.Properties["httpErrors"] = errors;
             }
             if (context != null)
             {
@@ -93,34 +94,34 @@ namespace ElasticElmah.Appender
                     var authPassword = _serverVariables[authPasswordKey];
                     if (authPassword != null) // yes, mask empty too!
                         _serverVariables[authPasswordKey] = "*****";
-                    e.Properties["serverVariables"] = _serverVariables;
+                    loggingEvent.Properties["serverVariables"] = _serverVariables;
                 }
-                e.Properties["queryString"] = CopyCollection(request.QueryString);
-                e.Properties["form"] = CopyCollection(request.Form);
-                e.Properties["cookies"] = CopyCollection(request.Cookies);
+                loggingEvent.Properties["queryString"] = CopyCollection(request.QueryString);
+                loggingEvent.Properties["form"] = CopyCollection(request.Form);
+                loggingEvent.Properties["cookies"] = CopyCollection(request.Cookies);
             }
         }
 
-        private Dictionary<string, object> MapToJson(Dictionary<string, object> dictionary)
+        private static Dictionary<string, object> MapToJson(Dictionary<string, object> dictionary)
         {
             return dictionary.ToDictionary(kv => JsonNameConvention(kv.Key), kv => kv.Value,
                 StringComparer.InvariantCultureIgnoreCase);
         }
 
-        private string JsonNameConvention(string key)
+        private static string JsonNameConvention(string key)
         {
             return string.Join("", (key ?? string.Empty).ToLower().Split('_')
                 .Select(k => FirstLetterToUpper(k)).ToArray());
         }
 
-        private string FirstLetterToUpper(string val)
+        private static string FirstLetterToUpper(string val)
         {
             if (val.Length > 0)
                 return val.First().ToString().ToUpper() + (val.Length > 1 ? val.Substring(1) : string.Empty);
             return string.Empty;
         }
 
-        private Dictionary<string, object> CopyCollection(HttpCookieCollection httpCookieCollection)
+        private static Dictionary<string, object> CopyCollection(HttpCookieCollection httpCookieCollection)
         {
             var dic = new Dictionary<string, object>();
             foreach (var key in httpCookieCollection.AllKeys)
@@ -130,7 +131,7 @@ namespace ElasticElmah.Appender
             return dic;
         }
 
-        private Dictionary<string, object> CopyCollection(System.Collections.Specialized.NameValueCollection nameValueCollection)
+        private static Dictionary<string, object> CopyCollection(System.Collections.Specialized.NameValueCollection nameValueCollection)
         {
             var dic = new Dictionary<string, object>();
             foreach (var key in nameValueCollection.AllKeys)

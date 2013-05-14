@@ -20,7 +20,7 @@
 </p>
 @if (!string.IsNullOrEmpty(Model.Detail))
 {
-    <pre id="ErrorDetail">@Model.Detail</pre>
+    <pre id="ErrorDetail">@Html.Raw(Model.Detail)</pre>
 }
 <p id="ErrorLogTime">@string.Format("Logged on {0} at {1}",
                          Model.Time.ToLongDateString(),
