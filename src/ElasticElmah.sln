@@ -18,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{262662
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElasticElmah.Tail", "ElasticElmah.Tail\ElasticElmah.Tail.csproj", "{64D64941-C9B6-4ABC-AEB7-4EBBFA0B68D7}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ElasticElmah.Append", "ElasticElmah.Append\ElasticElmah.Append.fsproj", "{2ADFF38B-455A-4264-AD6A-3B5F85880406}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|.NET = Debug|.NET
@@ -90,6 +92,18 @@ Global
 		{64D64941-C9B6-4ABC-AEB7-4EBBFA0B68D7}.Release|Mixed Platforms.Build.0 = Release|x86
 		{64D64941-C9B6-4ABC-AEB7-4EBBFA0B68D7}.Release|x86.ActiveCfg = Release|x86
 		{64D64941-C9B6-4ABC-AEB7-4EBBFA0B68D7}.Release|x86.Build.0 = Release|x86
+		{2ADFF38B-455A-4264-AD6A-3B5F85880406}.Debug|.NET.ActiveCfg = Debug|Any CPU
+		{2ADFF38B-455A-4264-AD6A-3B5F85880406}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2ADFF38B-455A-4264-AD6A-3B5F85880406}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2ADFF38B-455A-4264-AD6A-3B5F85880406}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{2ADFF38B-455A-4264-AD6A-3B5F85880406}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{2ADFF38B-455A-4264-AD6A-3B5F85880406}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2ADFF38B-455A-4264-AD6A-3B5F85880406}.Release|.NET.ActiveCfg = Release|Any CPU
+		{2ADFF38B-455A-4264-AD6A-3B5F85880406}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2ADFF38B-455A-4264-AD6A-3B5F85880406}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2ADFF38B-455A-4264-AD6A-3B5F85880406}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{2ADFF38B-455A-4264-AD6A-3B5F85880406}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{2ADFF38B-455A-4264-AD6A-3B5F85880406}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
