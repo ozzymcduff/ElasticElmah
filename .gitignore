@@ -110,3 +110,5 @@ UpgradeLog*.XML
 
 nuget/**/lib/
 nuget/**/*.nupkg
+nuget/**/tools/
+
