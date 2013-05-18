@@ -72,7 +72,7 @@ namespace ElasticElmah.Appender.Tests
             var list = new List<IAsyncResult>();
             foreach (var timestamp in times)
             {
-               list.Add( _appender.Add(new LoggingEvent(GetType(), _log.Logger.Repository,
+               list.Add(_appender.Add(new LoggingEvent(GetType(), _log.Logger.Repository,
                     new LoggingEventData
                     {
                         TimeStamp = timestamp,
@@ -84,11 +84,12 @@ namespace ElasticElmah.Appender.Tests
                         })
                     }), (resp) => { }));
             }
-            _appender.Flush();
             foreach (var item in list)
             {
                 item.AsyncWaitHandle.WaitOne();
             }
+            _appender.Flush();
+
             ExpectOrderedResultASync();
             ExpectOrderedResultSync();
         }
@@ -101,8 +102,7 @@ namespace ElasticElmah.Appender.Tests
         }
         private void ExpectOrderedResultSync()
         {
-            var result = _appender.GetPaged(0, 2)();
-            ExpectedOrderedResult(result);
+            ExpectedOrderedResult(_appender.GetPaged(0, 2)());
         }
 
         private static void ExpectedOrderedResult(ElasticSearchRepository.Errors result)
