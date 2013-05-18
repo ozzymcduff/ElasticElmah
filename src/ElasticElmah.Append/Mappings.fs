@@ -1,11 +1,15 @@
-﻿namespace ElasticElmah.Appender.Storage
+﻿namespace ElasticElmah.Append
 open log4net;
 open log4net.Core;
 open log4net.Util;
 open System.Reflection;
-   module Map=
+
+   module Mappings=
         //type PropertyDictionary=log4net.Util.PropertyDictionary;
         let _log =LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType)
+        let tap<'typeparam>(o:'typeparam,a) : 'typeparam=
+            a(o)
+            o
 
         let mapPropTo (p : log4net.Util.PropertiesDictionary) =
             Map.ofSeq(p.GetKeys() |> Array.map (fun key ->(key, p.Item(key))) )
@@ -20,7 +24,7 @@ open System.Reflection;
         let inline isNull< ^a when ^a : not struct> (x:^a) =
             obj.ReferenceEquals (x, Unchecked.defaultof<_>)
 
-        let rec mapTo l: LoggingEventData = 
+        let mapTo (l) = 
             let mutable d = new LoggingEventData()
             d.LoggerName <- l.loggerName
             d.Level <- _log.Logger.Repository.LevelMap.[l.level]
@@ -39,10 +43,10 @@ open System.Reflection;
                 d.LocationInfo <- new LocationInfo(i.className, i.methodName, i.fileName, i.lineNumber)
             d
 
-        type LoggingEvent = ElasticElmah.Appender.Storage.LoggingEvent
+        //type LoggingEvent = ElasticElmah.Append.LoggingEvent
         let empty = System.String.Empty
 
-        let mapToLog (l : log4net.Core.LoggingEvent): LoggingEvent =
+        let mapToLog (l : log4net.Core.LoggingEvent): ElasticElmah.Append.LoggingEvent =
             let i = l.LocationInformation
             {
                 loggerName = l.LoggerName;

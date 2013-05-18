@@ -23,8 +23,9 @@ namespace ElasticElmah.Appender.Tests
         [SetUp]
         public void Init()
         {
+            var fiddler = true;
             _index = Guid.NewGuid();
-            _appender = new ElasticSearchRepository("Server=localhost;Index=" + _index + ";Port=9200");
+            _appender = new ElasticSearchRepository("Server=" + (fiddler ? Environment.MachineName : "localhost") + ";Index=" + _index + ";Port=9200", new Web.Request());
             _appender.CreateIndex();
         }
 
@@ -44,7 +45,7 @@ namespace ElasticElmah.Appender.Tests
                         Message = "Message"
                     }));
             _appender.Flush();
-            var result = _appender.GetPaged(0,10);
+            var result = _appender.GetPaged(0, 10)();
             Assert.AreEqual(1, result.Total);
             Assert.That(result.Documents.Single().Data.Message, Is.EqualTo("Message"));
         }
@@ -63,7 +64,7 @@ namespace ElasticElmah.Appender.Tests
                         })
                     }));
             _appender.Flush();
-            var result = _appender.GetPaged(0,10);
+            var result = _appender.GetPaged(0, 10)();
             Assert.AreEqual(1, result.Total);
             Assert.AreEqual("msg", result.Documents.First().Data.Properties["prop"]);
         }
@@ -88,13 +89,13 @@ namespace ElasticElmah.Appender.Tests
                         {
                             d["prop"] = "msg";
                         })
-                    }));
+                    }), (c, s) => { });
             }
             _appender.Flush();
-            var result = _appender.GetPaged(0,2);
+            var result = _appender.GetPaged(0, 2)();
             Assert.AreEqual(5, result.Total);
-            Assert.That(result.Documents.Select(l=>l.Data.TimeStamp).ToArray(),
-                Is.EquivalentTo(new []{ 
+            Assert.That(result.Documents.Select(l => l.Data.TimeStamp).ToArray(),
+                Is.EquivalentTo(new[]{ 
                     new DateTime(2001,1,5),
                     new DateTime(2001,1,4)
                 }));

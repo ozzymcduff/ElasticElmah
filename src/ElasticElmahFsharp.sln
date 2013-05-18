@@ -1,0 +1,33 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 2012 for Web
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{262662BC-3BE0-464F-8AA1-A32D22499BE3}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ElasticElmah.Append", "ElasticElmah.Append\ElasticElmah.Append.fsproj", "{2ADFF38B-455A-4264-AD6A-3B5F85880406}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ElasticElmah.Append.Tests", "ElasticElmah.Append.Tests\ElasticElmah.Append.Tests.fsproj", "{9AFF066D-1D03-4305-98DB-FCAC3BB5B45E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2ADFF38B-455A-4264-AD6A-3B5F85880406}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2ADFF38B-455A-4264-AD6A-3B5F85880406}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2ADFF38B-455A-4264-AD6A-3B5F85880406}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2ADFF38B-455A-4264-AD6A-3B5F85880406}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9AFF066D-1D03-4305-98DB-FCAC3BB5B45E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9AFF066D-1D03-4305-98DB-FCAC3BB5B45E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9AFF066D-1D03-4305-98DB-FCAC3BB5B45E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9AFF066D-1D03-4305-98DB-FCAC3BB5B45E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

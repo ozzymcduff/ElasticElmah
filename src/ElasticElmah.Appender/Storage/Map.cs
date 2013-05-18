@@ -3,6 +3,7 @@ using System.Reflection;
 using log4net;
 using log4net.Core;
 using log4net.Util;
+using System;
 
 namespace ElasticElmah.Appender.Storage
 {
@@ -12,23 +13,23 @@ namespace ElasticElmah.Appender.Storage
         {
             var d = new LoggingEventData
                         {
-                            LoggerName = l.LoggerName,
-                            Level = _log.Logger.Repository.LevelMap[l.Level],
-                            Message = l.Message,
-                            ThreadName = l.ThreadName,
-                            TimeStamp = l.TimeStamp,
-                            UserName = l.UserName,
-                            ExceptionString = l.ExceptionString,
-                            Domain = l.Domain,
-                            Identity = l.Identity,
+                            LoggerName = l.loggerName,
+                            Level = _log.Logger.Repository.LevelMap[l.level??"ERROR"],
+                            Message = l.message,
+                            ThreadName = l.threadName,
+                            TimeStamp = string.IsNullOrEmpty(l.timeStamp)? DateTime.Now: DateTime.Parse(l.timeStamp),
+                            UserName = l.userName,
+                            ExceptionString = l.exceptionString,
+                            Domain = l.domain,
+                            Identity = l.identity,
                         };
-            if (l.Properties != null)
-                d.Properties = To(l.Properties);
+            if (l.properties != null)
+                d.Properties = To(l.properties);
 
-            if (l.LocationInfo != null)
+            if (l.locationInfo != null)
             {
-                var i = l.LocationInfo;
-                d.LocationInfo = new LocationInfo(i.ClassName, i.MethodName, i.FileName, i.LineNumber);
+                var i = l.locationInfo;
+                d.LocationInfo = new LocationInfo(i.className, i.methodName, i.fileName, i.lineNumber);
             }
             return d;
         }
@@ -37,30 +38,30 @@ namespace ElasticElmah.Appender.Storage
         {
             var d = new LogEvent
                         {
-                            LoggerName = l.LoggerName,
-                            Level = l.Level!=null ? l.Level.Name : string.Empty,
-                            Message = l.RenderedMessage,
-                            ThreadName = l.ThreadName,
-                            TimeStamp = l.TimeStamp,
-                            UserName = l.UserName,
-                            ExceptionString = l.GetExceptionString(),
-                            Domain = l.Domain,
-                            Identity = l.Identity
+                            loggerName = l.LoggerName,
+                            level = l.Level!=null ? l.Level.Name : string.Empty,
+                            message = l.RenderedMessage,
+                            threadName = l.ThreadName,
+                            timeStamp = l.TimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fffffffzzz"),//timeStamp: 2013-05-14T20:41:01.2255267+02:00
+                            userName = l.UserName,
+                            exceptionString = l.GetExceptionString(),
+                            domain = l.Domain,
+                            identity = l.Identity
                         };
             if (l.LocationInformation != null)
             {
                 var i = l.LocationInformation;
-                d.LocationInfo = new LogEventLocation
+                d.locationInfo = new LogEventLocation
                                      {
-                                         ClassName = i.ClassName,
-                                         FileName = i.FileName,
-                                         LineNumber = i.LineNumber,
-                                         MethodName = i.MethodName
+                                         className = i.ClassName,
+                                         fileName = i.FileName,
+                                         lineNumber = i.LineNumber,
+                                         methodName = i.MethodName
                                      };
             }
 
             if (l.Properties != null)
-                d.Properties = To(l.GetProperties());
+                d.properties = To(l.GetProperties());
 
             return d;
         }

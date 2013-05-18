@@ -1,4 +1,6 @@
-﻿namespace ElasticElmah.Appender.Storage
+﻿namespace ElasticElmah.Append
+module Repository=
 
-module Repository
+    type Class1() = 
+        member this.X = "F#"
 

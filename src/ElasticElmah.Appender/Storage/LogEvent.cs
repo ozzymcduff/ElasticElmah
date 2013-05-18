@@ -1,26 +1,24 @@
 using System;
 using System.Collections.Generic;
-using Nest;
 
 namespace ElasticElmah.Appender.Storage
 {
-    [ElasticType(Name = "LoggingEvent")]
     public class LogEvent
     {
         public LogEvent()
         {
-            LocationInfo = new LogEventLocation();
+            locationInfo = new LogEventLocation();
         }
-        public string LoggerName { get; set; }
-        public string Level { get; set; }
-        public string Message { get; set; }
-        public string ThreadName { get; set; }
-        public DateTime TimeStamp { get; set; }
-        public LogEventLocation LocationInfo { get; set; }
-        public string UserName { get; set; }
-        public Dictionary<string, object> Properties { get; set; }
-        public string ExceptionString { get; set; }
-        public string Domain { get; set; }
-        public string Identity { get; set; }
+        public string loggerName { get; set; }
+        public string level { get; set; }
+        public string message { get; set; }
+        public string threadName { get; set; }
+        public string timeStamp { get; set; }
+        public LogEventLocation locationInfo { get; set; }
+        public string userName { get; set; }
+        public Dictionary<string, object> properties { get; set; }
+        public string exceptionString { get; set; }
+        public string domain { get; set; }
+        public string identity { get; set; }
     }
 }

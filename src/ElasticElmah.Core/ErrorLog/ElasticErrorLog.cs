@@ -38,7 +38,7 @@ namespace ElasticElmah.Core.ErrorLog
 
         public override Errors GetErrors(int pageIndex, int pageSize)
         {
-            var res = appender.GetPaged(pageIndex, pageSize);
+            var res = appender.GetPaged(pageIndex, pageSize)();
             return new Errors
                        {
                            Total = res.Total,

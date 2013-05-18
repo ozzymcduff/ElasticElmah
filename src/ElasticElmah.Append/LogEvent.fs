@@ -1,4 +1,4 @@
-namespace ElasticElmah.Appender.Storage
+namespace ElasticElmah.Append
 open System
 type LogEventLocation=
     { className :string;
