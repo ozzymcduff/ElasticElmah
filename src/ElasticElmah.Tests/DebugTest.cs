@@ -21,7 +21,8 @@ namespace ElasticElmah.Tests
         {
             var fiddler = true;
             _index = Guid.NewGuid();
-            _appender = new ElasticSearchRepository("Server="+(fiddler?Environment.MachineName:"localhost")+";Index=" + _index + ";Port=9200", new ElasticElmah.Appender.Web.JsonRequest());
+            _appender = new ElasticSearchRepository("Server="+(fiddler?Environment.MachineName:"localhost")+";Index=" + _index + ";Port=9200", 
+                new ElasticElmah.Appender.Web.JsonRequestAsync());
             _appender.CreateIndex();
         }
 
@@ -32,20 +33,21 @@ namespace ElasticElmah.Tests
         }
 
         [TestMethod]
-        public void TestMethod1()
+        public void ReadAppend()
         {
-            _appender.AddWithoutReturn(new LoggingEvent(GetType(), _log.Logger.Repository,
+            var res = _appender.Add(new LoggingEvent(GetType(), _log.Logger.Repository,
                 new LoggingEventData
                 {
                     Level = Level.Alert,
                     Message = "Message"
-                }));
+                }), errors => { });
+            res.AsyncWaitHandle.WaitOne();
             _appender.Flush();
             _appender.GetPaged(0, 10, result => {
                 Assert.AreEqual(1, result.Total);
 
                 Assert.That(result.Documents.Single().Data.Message, Is.EqualTo("Message"));
-            });
+            }).AsyncWaitHandle.WaitOne();
         }
         [TestMethod]
         public void TestThread()

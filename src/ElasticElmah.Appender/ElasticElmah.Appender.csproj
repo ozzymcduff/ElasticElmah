@@ -52,7 +52,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Storage\Map.cs" />
     <Compile Include="Web\IJSonRequest.cs" />
-    <Compile Include="Web\JsonRequest.cs" />
     <Compile Include="Web\JsonRequestAsync.cs" />
     <Compile Include="Web\RequestException.cs" />
   </ItemGroup>
