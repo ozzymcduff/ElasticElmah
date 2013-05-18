@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Security;
-using System.Security.Principal;
-using System.Threading;
 using System.Web;
 using System.Linq;
 using log4net.Appender;
 using log4net.Core;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 
 namespace ElasticElmah.Appender
 {
@@ -43,7 +39,7 @@ namespace ElasticElmah.Appender
             {
                 AddHttpContextProperties(loggingEvent, new HttpContextWrapper(HttpContext.Current));
             }
-            Repo.Add(loggingEvent);
+            Repo.AddWithoutReturn(loggingEvent);
         }
 
         public class ErrorCodeAndHtmlMessage
@@ -148,7 +144,7 @@ namespace ElasticElmah.Appender
             {
                 return e.GetHtmlErrorMessage();
             }
-            catch (SecurityException se)
+            catch (SecurityException)
             {
                 // In partial trust environments, HttpException.GetHtmlErrorMessage() 
                 // has been known to throw:

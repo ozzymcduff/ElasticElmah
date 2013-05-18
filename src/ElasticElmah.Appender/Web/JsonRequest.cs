@@ -7,8 +7,46 @@ using System.Text;
 
 namespace ElasticElmah.Appender.Web
 {
-    public class Request : IRequest
+    public class JsonRequest : IJSonRequest
     {
+        class FakeAsyncResult : IAsyncResult
+        {
+            class FakeWaitHandle : System.Threading.WaitHandle
+            {
+                private FakeAsyncResult fakeAsyncResult;
+
+                public FakeWaitHandle(FakeAsyncResult fakeAsyncResult)
+                {
+                    this.fakeAsyncResult = fakeAsyncResult;
+                }
+                public override bool WaitOne()
+                {
+                    fakeAsyncResult.IsCompleted = true;
+                    return true;
+                }
+            }
+            public object AsyncState
+            {
+                get { return null; }
+            }
+
+            public System.Threading.WaitHandle AsyncWaitHandle
+            {
+                get { return new FakeWaitHandle(this); }
+            }
+
+            public bool CompletedSynchronously
+            {
+                get { return false; }
+            }
+
+            public bool IsCompleted
+            {
+                get;
+                set;
+            }
+        }
+
         public Tuple<HttpStatusCode, string> Sync(Uri uri, string method, string data)
         {
             var request = WebRequest.Create(uri).Tap(r =>
@@ -32,14 +70,7 @@ namespace ElasticElmah.Appender.Web
                 using (var reader = new StreamReader(rstream, Encoding.UTF8))
                 {
                     var c = reader.ReadToEnd();
-                    //if (response.StatusCode != HttpStatusCode.OK)
-                    //{
-                    //    throw new RequestException(response.StatusCode, c);
-                    //}
-                    //else
-                    //{
                     return new Tuple<HttpStatusCode,string>(response.StatusCode,c);
-                    //}
                 }
             }
             catch (WebException ex)
@@ -60,19 +91,20 @@ namespace ElasticElmah.Appender.Web
             }
         }
 
-        public void Async(Uri uri, string method, string data,
-    Action<HttpStatusCode,string> onsuccess)
+        public IAsyncResult Async(Uri uri, string method, string data, Action<HttpStatusCode,string> onsuccess)
         {
             var result = Sync(uri, method, data);
             onsuccess(result.Item1, result.Item2);
+            return new FakeAsyncResult();
         }
         public Func<Tuple<HttpStatusCode,string>> Async(Uri uri, string method, string data)
         {
             var result = Sync(uri, method, data);
-            return () =>
+            Func<Tuple<HttpStatusCode, string>> resp = () =>
             {
                 return result;
             };
+            return resp;
         }
     }
 }

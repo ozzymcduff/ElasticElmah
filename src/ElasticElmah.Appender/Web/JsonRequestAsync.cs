@@ -7,7 +7,7 @@ using System.Text;
 
 namespace ElasticElmah.Appender.Web
 {
-    public class RequestAsync : IRequest
+    public class JsonRequestAsync : IJSonRequest
     {
         public Func<Tuple<HttpStatusCode, string>> Async(Uri uri, string method, string bytes)
         {
@@ -24,14 +24,14 @@ namespace ElasticElmah.Appender.Web
             };
         }
 
-        public void Async(Uri uri, string method, string bytes, Action<HttpStatusCode,string> onsuccess)
+        public IAsyncResult Async(Uri uri, string method, string bytes, Action<HttpStatusCode, string> onsuccess)
         {
             var request = (HttpWebRequest)WebRequest.Create(uri).Tap(r =>
             {
                 Request(r, method, bytes);
             });
 
-            request.BeginGetResponse(iar =>
+            return request.BeginGetResponse(iar =>
             {
                 var resp = Response(request, iar);
                 onsuccess(resp.Item1,resp.Item2);
@@ -48,14 +48,7 @@ namespace ElasticElmah.Appender.Web
                 using (var reader = new StreamReader(rstream, Encoding.UTF8))
                 {
                     var c = reader.ReadToEnd();
-                    //if (response.StatusCode != HttpStatusCode.OK&& response.st)
-                    //{
-                    //    throw new RequestException(response.StatusCode, c);
-                    //}
-                    //else
-                    //{
                     return new Tuple<HttpStatusCode, string>(response.StatusCode,c);
-                    //}
                 }
             }
             finally { if (response != null) response.Close(); }

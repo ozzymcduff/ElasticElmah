@@ -9,50 +9,16 @@ using System.Globalization;
 
 namespace ElasticElmah.Appender.Tests
 {
-    [TestFixture]
-    public class AppenderTests
+
+    public abstract class AppenderTests
     {
-        private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-        private Guid _index;
-        private ElasticSearchRepository _appender;
-        [Test, Ignore]
-        public void Log()
-        {
-            _log.Debug("test");
-        }
-        [SetUp]
-        public void Init()
-        {
-            var fiddler = true;
-            _index = Guid.NewGuid();
-            _appender = new ElasticSearchRepository("Server=" + (fiddler ? Environment.MachineName : "localhost") + ";Index=" + _index + ";Port=9200", new Web.Request());
-            _appender.CreateIndex();
-        }
-
-        [TearDown]
-        public void Cleanup()
-        {
-            _appender.DeleteIndex();
-        }
-
-        [Test]
-        public void Can_log()
-        {
-            _appender.Add(new LoggingEvent(GetType(), _log.Logger.Repository,
-                new LoggingEventData
-                    {
-                        Level = Level.Alert,
-                        Message = "Message"
-                    }));
-            _appender.Flush();
-            var result = _appender.GetPaged(0, 10)();
-            Assert.AreEqual(1, result.Total);
-            Assert.That(result.Documents.Single().Data.Message, Is.EqualTo("Message"));
-        }
+        protected static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        protected ElasticSearchRepository _appender;
 
         [Test]
         public void Can_log_properties()
         {
+            string id = null;
             _appender.Add(new LoggingEvent(GetType(), _log.Logger.Repository,
                 new LoggingEventData
                     {
@@ -62,11 +28,37 @@ namespace ElasticElmah.Appender.Tests
                         {
                             d["prop"] = "msg";
                         })
-                    }));
+                    }),resp=>{
+                        id = resp._id;
+                    });
             _appender.Flush();
-            var result = _appender.GetPaged(0, 10)();
+
+            Can_read_property_when_paging();
+
+            Can_read_property_when_get(id);
+        }
+
+        private void Can_read_property_when_get(string id)
+        {
+            _appender.Get(id, err => {
+                Assert.AreEqual("msg", err.Data.Properties["prop"]);
+                Assert.That(err.Data.Message, Is.EqualTo("Message"));
+            }).AsyncWaitHandle.WaitOne();
+        }
+
+        private void Can_read_property_when_paging()
+        {
+            ExpectedPagingResult(_appender.GetPaged(0, 10)());
+            _appender.GetPaged(0, 10, (errors) => {
+                ExpectedPagingResult(errors);
+            }).AsyncWaitHandle.WaitOne();
+        }
+
+        private static void ExpectedPagingResult(ElasticSearchRepository.Errors result)
+        {
             Assert.AreEqual(1, result.Total);
             Assert.AreEqual("msg", result.Documents.First().Data.Properties["prop"]);
+            Assert.That(result.Documents.Single().Data.Message, Is.EqualTo("Message"));
         }
 
         [Test]
@@ -77,9 +69,10 @@ namespace ElasticElmah.Appender.Tests
             {
                 times.Add(new DateTime(2001, 1, 1).AddDays(i));
             }
+            var list = new List<IAsyncResult>();
             foreach (var timestamp in times)
             {
-                _appender.Add(new LoggingEvent(GetType(), _log.Logger.Repository,
+               list.Add( _appender.Add(new LoggingEvent(GetType(), _log.Logger.Repository,
                     new LoggingEventData
                     {
                         TimeStamp = timestamp,
@@ -89,10 +82,31 @@ namespace ElasticElmah.Appender.Tests
                         {
                             d["prop"] = "msg";
                         })
-                    }), (c, s) => { });
+                    }), (resp) => { }));
             }
             _appender.Flush();
+            foreach (var item in list)
+            {
+                item.AsyncWaitHandle.WaitOne();
+            }
+            ExpectOrderedResultASync();
+            ExpectOrderedResultSync();
+        }
+
+        private void ExpectOrderedResultASync()
+        {
+            _appender.GetPaged(0, 2, errors => {
+                ExpectedOrderedResult(errors);
+            }).AsyncWaitHandle.WaitOne();
+        }
+        private void ExpectOrderedResultSync()
+        {
             var result = _appender.GetPaged(0, 2)();
+            ExpectedOrderedResult(result);
+        }
+
+        private static void ExpectedOrderedResult(ElasticSearchRepository.Errors result)
+        {
             Assert.AreEqual(5, result.Total);
             Assert.That(result.Documents.Select(l => l.Data.TimeStamp).ToArray(),
                 Is.EquivalentTo(new[]{ 

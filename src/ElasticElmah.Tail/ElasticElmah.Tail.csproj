@@ -56,8 +56,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\ElasticElmah.Appender\DefaultJsonSerializer.cs">
+      <Link>DefaultJsonSerializer.cs</Link>
+    </Compile>
     <Compile Include="..\ElasticElmah.Appender\ElasticSearchRepository.cs">
       <Link>ElasticSearchRepository.cs</Link>
+    </Compile>
+    <Compile Include="..\ElasticElmah.Appender\IJsonSerializer.cs">
+      <Link>IJsonSerializer.cs</Link>
     </Compile>
     <Compile Include="..\ElasticElmah.Appender\Storage\LogEvent.cs">
       <Link>Storage\LogEvent.cs</Link>
@@ -67,6 +73,18 @@
     </Compile>
     <Compile Include="..\ElasticElmah.Appender\Storage\Map.cs">
       <Link>Storage\Map.cs</Link>
+    </Compile>
+    <Compile Include="..\ElasticElmah.Appender\Web\IJSonRequest.cs">
+      <Link>Web\IJSonRequest.cs</Link>
+    </Compile>
+    <Compile Include="..\ElasticElmah.Appender\Web\JsonRequest.cs">
+      <Link>Web\JsonRequest.cs</Link>
+    </Compile>
+    <Compile Include="..\ElasticElmah.Appender\Web\JsonRequestAsync.cs">
+      <Link>Web\JsonRequestAsync.cs</Link>
+    </Compile>
+    <Compile Include="..\ElasticElmah.Appender\Web\RequestException.cs">
+      <Link>Web\RequestException.cs</Link>
     </Compile>
     <Compile Include="Options.cs" />
     <Compile Include="Program.cs" />

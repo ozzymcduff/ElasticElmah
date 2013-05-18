@@ -10,13 +10,14 @@ namespace ElasticElmah.Appender
 {
     public class ElasticSearchRepository
     {
-        private readonly IRequest request;
-
-        public ElasticSearchRepository(string connectionString, IRequest request = null)
+        private readonly IJSonRequest request;
+        private readonly IJsonSerializer serializer;
+        public ElasticSearchRepository(string connectionString, IJSonRequest request = null, IJsonSerializer serializer = null)
         {
             settings = BuildElsticSearchConnection(connectionString);
             _index = settings["Index"];
-            this.request = request ?? new Web.RequestAsync();
+            this.request = request ?? new Web.JsonRequestAsync();
+            this.serializer = serializer ?? new DefaultJsonSerializer();
         }
 
         public void CreateIndexIfNotExists()
@@ -30,17 +31,17 @@ namespace ElasticElmah.Appender
         private bool IndexExists()
         {
             var resp = request.Async(UrlToIndex(settings, ""), "HEAD", null)();
-            return resp.Item1==HttpStatusCode.OK;
+            return resp.Item1 == HttpStatusCode.OK;
         }
 
         private readonly string _index;
         private IDictionary<string, string> settings;
 
-        public void CreateIndex()
+        public IAsyncResult CreateIndex()
         {
-            CreateIndex(s => { });
+            return CreateIndex(s => { });
         }
-        
+
         private RequestInfo CreateIndexRequest()
         {
             return new RequestInfo(UrlToIndex(settings, ""), "POST",
@@ -70,19 +71,19 @@ namespace ElasticElmah.Appender
   }
 }");
         }
-        public void CreateIndex(Action<string> onsuccess)
+        public IAsyncResult CreateIndex(Action<string> onsuccess)
         {
             var req = CreateIndexRequest();
-            request.Async(req.Url, req.Method, req.Body,
-              (code,s) =>
+            return request.Async(req.Url, req.Method, req.Body,
+              (code, s) =>
               {
                   onsuccess(s);
               });
         }
 
-        public void DeleteIndex()
+        public IAsyncResult DeleteIndex()
         {
-            request.Async(UrlToIndex(settings,""), "DELETE", null, (c, s) => { });
+            return request.Async(UrlToIndex(settings, ""), "DELETE", null, (c, s) => { });
         }
 
         public void Flush()
@@ -128,12 +129,8 @@ namespace ElasticElmah.Appender
                 public string _type { get; set; }
                 public string _index { get; set; }
                 public int? _version { get; set; }
-                public Source _source { get; set; }
+                public LogEvent _source { get; set; }
                 public double? _score { get; set; }
-            }
-            public class Source
-            {
-                public LogEvent LoggingEvent { get; set; }
             }
             public int? took { get; set; }
             public bool timed_out { get; set; }
@@ -156,19 +153,33 @@ namespace ElasticElmah.Appender
         {
             return new RequestInfo(UrlToIndex(settings, "LoggingEvent/_search"), "POST",
                   @"{
-""fields"":[""_parent"",""_source""],
-""query"":{""bool"":{""must"":[],""must_not"":[],""should"":[{""match_all"":{}}]}},
-""from"":" + pageIndex + @",""size"":" + pageSize + @",
-""sort"":[{""timeStamp"":{""order"":""desc""}}],
-""facets"":{},""version"":true}");
+    ""fields"" : [""_parent"",""_source""],
+    ""query""  : {
+        ""bool"": {
+            ""must"": [],
+            ""must_not"": [],
+            ""should"": [{""match_all"":{}}]
         }
-        public void GetPaged(int pageIndex, int pageSize, Action<Errors> onsuccess)
+    },
+    ""from"": " + pageIndex + @",
+    ""size"": " + pageSize + @",
+    ""sort"":[
+        {""timeStamp"": {
+                ""order"":""desc""
+            }
+        }
+    ],
+    ""facets"":{},
+    ""version"":true
+}");
+        }
+        public IAsyncResult GetPaged(int pageIndex, int pageSize, Action<Errors> onsuccess)
         {
             var req = GetPagedRequest(pageIndex, pageSize);
-            request.Async(req.Url, req.Method, req.Body,
-              (c,s)=>
+            return request.Async(req.Url, req.Method, req.Body,
+              (c, s) =>
               {
-                  onsuccess(GetPagedResult(c,s));
+                  onsuccess(GetPagedResult(c, s));
               });
         }
         public Func<Errors> GetPaged(int pageIndex, int pageSize)
@@ -178,15 +189,13 @@ namespace ElasticElmah.Appender
             return () =>
                 {
                     var res = resp();
-                    return GetPagedResult(res.Item1,res.Item2);
+                    return GetPagedResult(res.Item1, res.Item2);
                 };
         }
-        private static Errors GetPagedResult(HttpStatusCode c,string s)
+        private Errors GetPagedResult(HttpStatusCode c, string s)
         {
-            var res = Newtonsoft.Json.JsonConvert.DeserializeObject<SearchResponse>(s);
-            //var res = new System.Web.Script.Serialization.JavaScriptSerializer()
-            //  .Deserialize<SearchResponse>(s);
-            var parsed = new Errors(res.hits.hits.Select(h => new Error(h._id, Map.To(h._source.LoggingEvent))), res.hits.total);
+            var res = serializer.Deserialize<SearchResponse>(s);
+            var parsed = new Errors(res.hits.hits.Select(h => new Error(h._id, Map.To(h._source))), res.hits.total);
             return parsed;
         }
 
@@ -203,20 +212,19 @@ namespace ElasticElmah.Appender
         {
             return new RequestInfo(UrlToIndex(settings, "LoggingEvent/" + id), "GET", null);
         }
-        public void Get(string id, Action<Error> success)
+        public IAsyncResult Get(string id, Action<Error> success)
         {
             var req = GetRequest(id);
-            request.Async(req.Url, req.Method, req.Body,
-                 (code,s) =>
+            return request.Async(req.Url, req.Method, req.Body,
+                 (code, s) =>
                  {
                      success(GetGetResponse(s));
                  });
         }
 
-        private static Error GetGetResponse(string s)
+        private Error GetGetResponse(string s)
         {
-            var res = new System.Web.Script.Serialization.JavaScriptSerializer()
-              .Deserialize<GetResponse>(s);
+            var res = serializer.Deserialize<GetResponse>(s);
             var resp = new Error(res._id, Map.To(res._source));
             return resp;
         }
@@ -238,10 +246,10 @@ namespace ElasticElmah.Appender
             return lookup;
         }
 
-        private static Uri Url(IDictionary<string, string> lookup, string t=null)
+        private static Uri Url(IDictionary<string, string> lookup, string t = null)
         {
             var serverAndPort = ServerAndPort(lookup);
-            var url = new Uri(serverAndPort+(string.IsNullOrEmpty(t)?"":"/"+t));
+            var url = new Uri(serverAndPort + (string.IsNullOrEmpty(t) ? "" : "/" + t));
             return url;
         }
 
@@ -256,26 +264,37 @@ namespace ElasticElmah.Appender
             var url = new Uri(ServerAndPort(lookup) + "/" + lookup["Index"] + "/" + t);
             return url;
         }
-        public void Add(LoggingEvent loggingEvent)
+        public void AddWithoutReturn(LoggingEvent loggingEvent)
         {
-            Add(loggingEvent, (c,s) => { });
+            Add(loggingEvent, (resp) => { });
         }
-        public class Index
+        public class AddResponse
         {
-            public LogEvent LoggingEvent { get; private set; }
+            public bool ok { get; set; }
+            public string _index { get; set; }
+            public string _type { get; set; }
+            public string _id { get; set; }
+            public int _version { get; set; }
+        }
+        public Func<AddResponse> Add(LoggingEvent loggingEvent)
+        {
+            var data = serializer.Serialize(Map.To(loggingEvent));
 
-            public Index(LogEvent logEvent)
+            var resp = request.Async(UrlToIndex(settings, "LoggingEvent/"), "POST", data);
+
+            return () => {
+                return serializer.Deserialize<AddResponse>(resp().Item2);
+            };
+            
+        }
+        public IAsyncResult Add(LoggingEvent loggingEvent, Action<AddResponse> onsuccess)
+        {
+            var data = serializer.Serialize(Map.To(loggingEvent));
+
+            return request.Async(UrlToIndex(settings, "LoggingEvent/"), "POST", data, (code, val) =>
             {
-                this.LoggingEvent = logEvent;
-            }
-
-        }
-        public void Add(LoggingEvent loggingEvent, Action<HttpStatusCode,string> onsuccess)
-        {
-            var data = new System.Web.Script.Serialization.JavaScriptSerializer()
-                .Serialize(new Index(Map.To(loggingEvent)));
-
-            request.Async(UrlToIndex(settings, "LoggingEvent/"), "POST", data, onsuccess);
+                onsuccess(serializer.Deserialize<AddResponse>(val));
+            });
         }
     }
     public static class Extensions

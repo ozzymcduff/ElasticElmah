@@ -11,7 +11,7 @@ using System.Threading;
 namespace ElasticElmah.Tests
 {
     [TestClass]
-    public class UnitTest1
+    public class DebugTest
     {
         private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         private Guid _index;
@@ -21,7 +21,7 @@ namespace ElasticElmah.Tests
         {
             var fiddler = true;
             _index = Guid.NewGuid();
-            _appender = new ElasticSearchRepository("Server="+(fiddler?Environment.MachineName:"localhost")+";Index=" + _index + ";Port=9200", new ElasticElmah.Appender.Web.Request());
+            _appender = new ElasticSearchRepository("Server="+(fiddler?Environment.MachineName:"localhost")+";Index=" + _index + ";Port=9200", new ElasticElmah.Appender.Web.JsonRequest());
             _appender.CreateIndex();
         }
 
@@ -34,7 +34,7 @@ namespace ElasticElmah.Tests
         [TestMethod]
         public void TestMethod1()
         {
-            _appender.Add(new LoggingEvent(GetType(), _log.Logger.Repository,
+            _appender.AddWithoutReturn(new LoggingEvent(GetType(), _log.Logger.Repository,
                 new LoggingEventData
                 {
                     Level = Level.Alert,

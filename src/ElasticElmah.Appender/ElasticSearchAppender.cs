@@ -30,7 +30,7 @@ namespace ElasticElmah.Appender
         /// <param name="loggingEvent"></param>
         protected override void Append(LoggingEvent loggingEvent)
         {
-            Repo.Add(loggingEvent);
+            Repo.AddWithoutReturn(loggingEvent);
         }
     }
 }

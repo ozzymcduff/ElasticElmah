@@ -48,7 +48,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppenderTests.cs" />
+    <Compile Include="AppenderTestsWithAsync.cs" />
+    <Compile Include="AppenderTestsWithNewtonSoftJson.cs" />
+    <Compile Include="AppenderTestsWithSync.cs" />
+    <Compile Include="Json.cs" />
+    <Compile Include="JsonSerializerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WrappedNewtonsoft.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

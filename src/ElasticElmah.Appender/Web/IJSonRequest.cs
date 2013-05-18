@@ -6,9 +6,9 @@ using System.Text;
 
 namespace ElasticElmah.Appender.Web
 {
-    public interface IRequest
+    public interface IJSonRequest
     {
-        void Async(Uri uri, string method, string bytes, Action<HttpStatusCode, string> onsuccess);
+        IAsyncResult Async(Uri uri, string method, string bytes, Action<HttpStatusCode, string> onsuccess);
         Func<Tuple<HttpStatusCode, string>> Async(Uri uri, string method, string bytes);
     }
 }
