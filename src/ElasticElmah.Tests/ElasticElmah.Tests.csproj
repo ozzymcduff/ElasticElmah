@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="DebugTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StackTraceTransformerTests.cs" />
     <Compile Include="WrappedNewtonsoft.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -73,6 +74,10 @@
     <ProjectReference Include="..\ElasticElmah.Appender\ElasticElmah.Appender.csproj">
       <Project>{c9ea9975-0609-4330-a69f-b8c608a46e28}</Project>
       <Name>ElasticElmah.Appender</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ElasticElmah.Core\ElasticElmah.Core.csproj">
+      <Project>{78d25c0c-be6b-4771-b0d1-11b7277329e4}</Project>
+      <Name>ElasticElmah.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

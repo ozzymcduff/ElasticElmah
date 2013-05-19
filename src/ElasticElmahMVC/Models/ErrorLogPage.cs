@@ -53,7 +53,7 @@ namespace ElasticElmahMVC.Models
             // Set the title of the page.
             //
 
-            string hostName = Environment.TryGetMachineName(new HttpContextWrapper(HttpContext.Current));
+            string hostName = env.HostName;
             PageTitle = string.Format(
                 hostName.Length > 0
                     ? "Error log for {0} on {2} (Page #{1})"
@@ -218,7 +218,7 @@ namespace ElasticElmahMVC.Models
 
             string simpleName = env.ApplicationName;
 
-            if (string.Compare(simpleName, HttpContext.Current.Request.ServerVariables["APPL_MD_PATH"],
+            if (string.Compare(simpleName, env.ApplicationName,
                                true, CultureInfo.InvariantCulture) == 0)
             {
                 int lastSlashIndex = simpleName.LastIndexOf('/');

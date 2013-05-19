@@ -28,9 +28,10 @@ namespace ElasticElmahMVC.Controllers
 
             int _pageIndex = Math.Max(1, page ?? 0) - 1;
             var errorlog = Helper.GetDefault(HttpContext);
+            var env = new Environment(HttpContext);
             ViewBag.ErrorLog = errorlog;
             var errors = await errorlog.GetErrorsAsync(_pageIndex, _pageSize);
-            return View(new ErrorLogPage(new Environment(HttpContext), errors).OnLoad());
+            return View(new ErrorLogPage(env, errors).OnLoad());
         }
 
         public ActionResult About()

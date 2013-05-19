@@ -67,7 +67,7 @@ cat yourlogfile.xml | LogTail.exe
 
             if (index.Any())
             {
-                Tail(lines ?? 10, index, (entry) => showentry(Console.Out, entry));
+                Tail(lines ?? 10, index, (entry) => showentry(Console.Out, entry)).Wait();
                 return;
             }
         }
@@ -77,7 +77,7 @@ cat yourlogfile.xml | LogTail.exe
             return Int32.Parse(v) * 1000;
         }
 
-        private static async void Tail(int lines, List<string> indexes, Action<LoggingEventData> showentry)
+        private static async Task Tail(int lines, List<string> indexes, Action<LoggingEventData> showentry)
         {
             foreach (var index in indexes)
             {

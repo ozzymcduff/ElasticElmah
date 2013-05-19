@@ -13,14 +13,21 @@ namespace ElasticElmahMVC.Code
 
     public class Environment
     {
-        private readonly HttpContextBase context;
         private string _appName;
-
+        private Uri url;
         private string _hostname;
 
         public Environment(HttpContextBase context)
         {
-            this.context = context;
+            this.url = context.Request.Url;
+            if (string.IsNullOrEmpty(_appName))
+            {
+                _appName = InferApplicationName(context);
+            }
+            if (_hostname == null)
+            {
+                _hostname = TryGetMachineName(context);
+            }
         }
 
         private Environment()
@@ -31,32 +38,24 @@ namespace ElasticElmahMVC.Code
         {
             get
             {
-                if (_hostname == null)
-                {
-                    _hostname = TryGetMachineName(context);
-                }
                 return _hostname;
             }
         }
 
         public string BasePageName
         {
-            get { return ToBase(context.Request.Url); }
+            get { return ToBase(url); }
         }
 
         public Uri BasePageUrl
         {
-            get { return new Uri(ToBase(context.Request.Url)); }
+            get { return new Uri(ToBase(url)); }
         }
 
         public string ApplicationName
         {
             get
             {
-                if (string.IsNullOrEmpty(_appName))
-                {
-                    _appName = InferApplicationName(context);
-                }
                 return Mask.NullString(_appName);
             }
         }
@@ -152,5 +151,6 @@ namespace ElasticElmahMVC.Code
 
             return Mask.EmptyString(appName, "/");
         }
+
     }
 }

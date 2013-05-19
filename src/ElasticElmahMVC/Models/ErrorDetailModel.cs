@@ -11,12 +11,13 @@ using log4net.Util;
 using Environment = ElasticElmahMVC.Code.Environment;
 using log4net.Core;
 using System.Collections.Generic;
-
+using System.Linq;
+using ElasticElmah.Core;
 namespace ElasticElmahMVC.Models
 {
     #region Imports
 
-    
+
 
     #endregion
 
@@ -26,37 +27,17 @@ namespace ElasticElmahMVC.Models
     /// </summary>
     public class ErrorDetailModel
     {
-        private static readonly Regex _reStackTrace =
-            new Regex(
-                @"
-                ^
-                \s*
-                \w+ \s+ 
-                (?<type> .+ ) \.
-                (?<method> .+? ) 
-                (?<params> \( (?<params> .*? ) \) )
-                ( \s+ 
-                \w+ \s+ 
-                  (?<file> [a-z] \: .+? ) 
-                  \: \w+ \s+ 
-                  (?<line> [0-9]+ ) \p{P}? )?
-                \s*
-                $",
-                RegexOptions.IgnoreCase
-                | RegexOptions.Multiline
-                | RegexOptions.ExplicitCapture
-                | RegexOptions.CultureInvariant
-                | RegexOptions.IgnorePatternWhitespace
-                | RegexOptions.Compiled);
 
         private readonly Error _errorEntry;
 
         private readonly Environment environment;
         private string PageTitle;
+        private StackTraceTransformer stacktracetransform;
         public Dictionary<string, string> Properties { get { return _errorEntry.Properties; } }
         public ErrorDetailModel(Error errorLogEntry, Environment environment)
         {
             this.environment = environment;
+            this.stacktracetransform = new StackTraceTransformer();
             _errorEntry = errorLogEntry;
             PageTitle = string.Format("Error: {0} [{1}]", _errorEntry.Type, _errorEntry.Id);
         }
@@ -106,20 +87,19 @@ namespace ElasticElmahMVC.Models
         private string MarkupStackTrace(string text)
         {
             var writer = new StringWriter();
-            int anchor = 0;
 
-            foreach (Match match in _reStackTrace.Matches(text))
+
+            foreach (var match in this.stacktracetransform.Match(text))
             {
-                HtmlEncode(text.Substring(anchor, match.Index - anchor), writer);
+                HtmlEncode(match.First, writer);
                 MarkupStackFrame(text, match, writer);
-                anchor = match.Index + match.Length;
             }
 
-            HtmlEncode(text.Substring(anchor), writer);
+            //HtmlEncode(text.Substring(anchor), writer);
             return writer.ToString();
         }
 
-        private void MarkupStackFrame(string text, Match match, TextWriter writer)
+        private void MarkupStackFrame(string text, StackTraceTransformer.MyClass match, TextWriter writer)
         {
             int anchor = match.Index;
             GroupCollection groups = match.Groups;
