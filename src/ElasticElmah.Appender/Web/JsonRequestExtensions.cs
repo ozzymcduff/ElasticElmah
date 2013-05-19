@@ -27,7 +27,7 @@ namespace ElasticElmah.Appender.Web
                 () => resp.Item1(),
                 (iar) => mapfun(resp.Item2(iar)));
         }
-        public static T AwaitOne<T>(this Tuple<Func<IAsyncResult>, Func<IAsyncResult, T>> that)
+        public static T WaitOne<T>(this Tuple<Func<IAsyncResult>, Func<IAsyncResult, T>> that)
         {
             var iar = that.Item1();
             iar.AsyncWaitHandle.WaitOne();

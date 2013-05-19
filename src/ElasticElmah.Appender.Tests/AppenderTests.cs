@@ -38,7 +38,7 @@ namespace ElasticElmah.Appender.Tests
 
         protected void Can_read_property_when_get(string id)
         {
-            var err = _appender.GetAsync(id).AwaitOne();
+            var err = _appender.GetAsync(id).WaitOne();
             Assert.AreEqual("msg", err.Data.Properties["prop"]);
             Assert.That(err.Data.Message, Is.EqualTo("Message"));
 
@@ -47,14 +47,14 @@ namespace ElasticElmah.Appender.Tests
         protected void Can_read_property_when_paging()
         {
             ExpectedPagingResult(_appender.GetPagedAsync(0, 10));
-            _appender.GetPagedAsync(0, 10).AwaitOne().Tap(errors => {
+            _appender.GetPagedAsync(0, 10).WaitOne().Tap(errors => {
                 ExpectedPagingResult(errors);
             });
         }
 
         private void ExpectedPagingResult(Tuple<Func<IAsyncResult>, Func<IAsyncResult, LogSearchResult>> tuple)
         {
-            ExpectedPagingResult(tuple.AwaitOne());
+            ExpectedPagingResult(tuple.WaitOne());
         }
 
         protected static void ExpectedPagingResult(LogSearchResult result)
@@ -123,7 +123,7 @@ namespace ElasticElmah.Appender.Tests
 
         protected void ExpectOrderedResultASync()
         {
-            ExpectedOrderedResult(_appender.GetPagedAsync(0, 2).AwaitOne());
+            ExpectedOrderedResult(_appender.GetPagedAsync(0, 2).WaitOne());
         }
         protected void ExpectOrderedResultSync()
         {

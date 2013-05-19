@@ -44,7 +44,7 @@ namespace ElasticElmah.Tests
                     Message = "Message"
                 }));
             _appender.Refresh();
-            var result= _appender.GetPagedAsync(0, 10).AwaitOne();
+            var result= _appender.GetPagedAsync(0, 10).WaitOne();
             Assert.AreEqual(1, result.Total);
 
             Assert.That(result.Hits.Single().Data.Message, Is.EqualTo("Message"));

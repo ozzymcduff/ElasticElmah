@@ -85,8 +85,8 @@
     <Compile Include="..\ElasticElmah.Appender\Web\IJSonRequest.cs">
       <Link>Web\IJSonRequest.cs</Link>
     </Compile>
-    <Compile Include="..\ElasticElmah.Appender\Web\JsonRequestAsync.cs">
-      <Link>Web\JsonRequestAsync.cs</Link>
+    <Compile Include="..\ElasticElmah.Appender\Web\JsonRequest.cs">
+      <Link>Web\JsonRequest.cs</Link>
     </Compile>
     <Compile Include="..\ElasticElmah.Appender\Web\JsonRequestExtensions.cs">
       <Link>Web\JsonRequestExtensions.cs</Link>
