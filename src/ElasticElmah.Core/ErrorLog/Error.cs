@@ -4,6 +4,7 @@ using ElasticElmah.Core.Infrastructure;
 using log4net.Core;
 using log4net.Util;
 using System.Collections.Generic;
+using System.Collections;
 
 namespace ElasticElmah.Core.ErrorLog
 {
@@ -24,19 +25,41 @@ namespace ElasticElmah.Core.ErrorLog
 
         public string Id { get; private set; }
 
-        public Dictionary<string, object> Properties
+        public Dictionary<string, string> Properties
         {
             get { return Map(_data.Properties); }
         }
 
-        private Dictionary<string, object> Map(PropertiesDictionary propertiesDictionary)
+        private Dictionary<string, string> Map(PropertiesDictionary propertiesDictionary)
         {
-            var dic = new Dictionary<string, object>();
+            var dic = new Dictionary<string, string>();
             foreach (var key in propertiesDictionary.GetKeys())
             {
-                dic.Add(key, propertiesDictionary[key]);
+                dic.Add(key, MapToString(propertiesDictionary[key]));
             }
             return dic;
+        }
+
+        private string MapToString(object p)
+        {
+            if (p == null) 
+            {
+                return string.Empty;
+            }
+            if (p is string) 
+            {
+                return (string)p;
+            }
+            var t = typeof(KeyValuePair<,>);
+            if (p.GetType().GetGenericTypeDefinition()==t) 
+            {
+                return p.ToString();
+            }
+            if (p is IEnumerable) 
+            {
+                return String.Join(", ", ((IEnumerable)p).Cast<Object>().Select(o => MapToString(o)));
+            }
+            throw new NotImplementedException(p.GetType().Name);
         }
 
 

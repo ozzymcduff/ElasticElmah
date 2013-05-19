@@ -53,7 +53,7 @@ namespace ElasticElmahMVC.Models
 
         private readonly Environment environment;
         private string PageTitle;
-        public Dictionary<string, object> Properties { get { return _errorEntry.Properties; } }
+        public Dictionary<string, string> Properties { get { return _errorEntry.Properties; } }
         public ErrorDetailModel(Error errorLogEntry, Environment environment)
         {
             this.environment = environment;
