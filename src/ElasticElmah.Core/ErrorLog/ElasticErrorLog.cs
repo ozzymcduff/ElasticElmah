@@ -42,7 +42,7 @@ namespace ElasticElmah.Core.ErrorLog
             return new Errors
                        {
                            Total = res.Total,
-                           Entries = res.Documents.Select(e => new ElasticElmah.Core.ErrorLog.Error(e.Data, e.Id)).ToList(),
+                           Entries = res.Hits.Select(e => new ElasticElmah.Core.ErrorLog.Error(e.Data, e.Id)).ToList(),
                            pageIndex = pageIndex,
                            pageSize = pageSize
                        };

@@ -47,13 +47,17 @@
     <Compile Include="ElasticSearchRepository.cs" />
     <Compile Include="ElasticSearchWebAppender.cs" />
     <Compile Include="IJsonSerializer.cs" />
+    <Compile Include="Search\LogSearchResult.cs" />
+    <Compile Include="Search\LogWithId.cs" />
     <Compile Include="Storage\LogEventLocation.cs" />
     <Compile Include="Storage\LogEvent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Storage\Map.cs" />
     <Compile Include="Web\IJSonRequest.cs" />
     <Compile Include="Web\JsonRequestAsync.cs" />
+    <Compile Include="Web\JsonRequestExtensions.cs" />
     <Compile Include="Web\RequestException.cs" />
+    <Compile Include="Web\RequestInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

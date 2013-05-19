@@ -82,7 +82,7 @@ cat yourlogfile.xml | LogTail.exe
             {
                 var repo = new ElasticSearchRepository("Server=localhost;Index="+index+";Port=9200");
                 repo.GetPaged(0, lines, entries => {
-                    foreach (var item in entries.Documents.Select(e=>e.Data))
+                    foreach (var item in entries.Hits.Select(e=>e.Data))
                     {
                         showentry(item);
                     }

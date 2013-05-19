@@ -1,38 +1,39 @@
 ﻿using System;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ElasticElmah.Appender;
 using log4net;
 using log4net.Core;
-using Assert = NUnit.Framework.Assert;
 using System.Reflection;
 using NUnit.Framework;
-using System.Threading;
+using ElasticElmah.Appender.Tests;
+using TestAttribute = Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute;
+using IgnoreAttribute = Microsoft.VisualStudio.TestTools.UnitTesting.IgnoreAttribute;
+using SetUpAttribute = Microsoft.VisualStudio.TestTools.UnitTesting.TestInitializeAttribute;
+using TearDownAttribute = Microsoft.VisualStudio.TestTools.UnitTesting.TestCleanupAttribute;
+using TestFixtureAttribute = Microsoft.VisualStudio.TestTools.UnitTesting.TestClassAttribute;
+
 namespace ElasticElmah.Tests
 {
-    [TestClass]
-    public class DebugTest
+    [TestFixture]
+    public class DebugTest : AppenderTests
     {
-        private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-        private Guid _index;
-        private ElasticSearchRepository _appender;
-        [TestInitialize]
+        [SetUp]
         public void Init()
         {
             var fiddler = true;
-            _index = Guid.NewGuid();
+            var _index = Guid.NewGuid();
             _appender = new ElasticSearchRepository("Server="+(fiddler?Environment.MachineName:"localhost")+";Index=" + _index + ";Port=9200", 
                 new ElasticElmah.Appender.Web.JsonRequestAsync());
             _appender.CreateIndex();
         }
 
-        [TestCleanup]
+        [TearDown]
         public void Cleanup()
         {
             _appender.DeleteIndex();
         }
 
-        [TestMethod]
+        [Test]
         public void ReadAppend()
         {
             var res = _appender.Add(new LoggingEvent(GetType(), _log.Logger.Repository,
@@ -42,14 +43,25 @@ namespace ElasticElmah.Tests
                     Message = "Message"
                 }), errors => { });
             res.AsyncWaitHandle.WaitOne();
-            _appender.Flush();
+            _appender.Refresh();
             _appender.GetPaged(0, 10, result => {
                 Assert.AreEqual(1, result.Total);
 
-                Assert.That(result.Documents.Single().Data.Message, Is.EqualTo("Message"));
+                Assert.That(result.Hits.Single().Data.Message, Is.EqualTo("Message"));
             }).AsyncWaitHandle.WaitOne();
         }
-        [TestMethod]
+        [Test]
+        public override void Can_log_properties()
+        {
+            base.Can_log_properties();
+        }
+        [Test]
+        public override void Should_get_latest()
+        {
+            base.Should_get_latest();
+        }
+
+        [Test,Ignore]
         public void TestThread()
         {
             int n = 0;

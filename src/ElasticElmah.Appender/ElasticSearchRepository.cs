@@ -5,6 +5,7 @@ using ElasticElmah.Appender.Storage;
 using log4net.Core;
 using System.Net;
 using ElasticElmah.Appender.Web;
+using ElasticElmah.Appender.Search;
 
 namespace ElasticElmah.Appender
 {
@@ -86,69 +87,21 @@ namespace ElasticElmah.Appender
             return request.Async(UrlToIndex(settings, ""), "DELETE", null, (c, s) => { });
         }
 
-        public void Flush()
+        /*public void Flush()
         {
             request.Async(Url(settings, "_all/_flush?refresh=false"), "POST", null, (c, s) => { });
-        }
-
-        public class Errors
-        {
-            public readonly IEnumerable<Error> Documents;
-            public readonly int Total;
-
-            public Errors(IEnumerable<Error> docs, int count)
-            {
-                this.Documents = docs;
-                this.Total = count;
-            }
-
-        }
-        public class Error
-        {
-            public readonly string Id;
-            public readonly LoggingEventData Data;
-
-            public Error(string id, LoggingEventData data)
-            {
-                this.Id = id;
-                this.Data = data;
-            }
-        }
+        }*/
 
         public class SearchResponse
         {
             public class Hits
             {
                 public int total { get; set; }
-                public double? max_score { get; set; }
                 public Hit[] hits { get; set; }
             }
-            public class Hit
-            {
-                public string _id { get; set; }
-                public string _type { get; set; }
-                public string _index { get; set; }
-                public int? _version { get; set; }
-                public LogEvent _source { get; set; }
-                public double? _score { get; set; }
-            }
-            public int? took { get; set; }
-            public bool timed_out { get; set; }
             public Hits hits { get; set; }
         }
 
-        class RequestInfo
-        {
-            public Uri Url;
-            public string Method;
-            public string Body;
-            public RequestInfo(Uri url, string method, string body)
-            {
-                Url = url;
-                Method = method;
-                Body = body;
-            }
-        }
         private RequestInfo GetPagedRequest(int pageIndex, int pageSize)
         {
             return new RequestInfo(UrlToIndex(settings, "LoggingEvent/_search"), "POST",
@@ -173,38 +126,35 @@ namespace ElasticElmah.Appender
     ""version"":true
 }");
         }
-        public IAsyncResult GetPaged(int pageIndex, int pageSize, Action<Errors> onsuccess)
+        public IAsyncResult GetPaged(int pageIndex, int pageSize, Action<LogSearchResult> onsuccess)
         {
-            var req = GetPagedRequest(pageIndex, pageSize);
-            return request.Async(req.Url, req.Method, req.Body,
+            return request.Async(GetPagedRequest(pageIndex, pageSize),
               (c, s) =>
               {
                   onsuccess(GetPagedResult(c, s));
               });
         }
-        public Func<Errors> GetPaged(int pageIndex, int pageSize)
+        public Func<LogSearchResult> GetPaged(int pageIndex, int pageSize)
         {
-            var req = GetPagedRequest(pageIndex, pageSize);
-            var resp = request.Async(req.Url, req.Method, req.Body);
+            var resp = request.Async(GetPagedRequest(pageIndex, pageSize));
             return () =>
                 {
                     var res = resp();
                     return GetPagedResult(res.Item1, res.Item2);
                 };
         }
-        private Errors GetPagedResult(HttpStatusCode c, string s)
+        private LogSearchResult GetPagedResult(HttpStatusCode c, string s)
         {
             var res = serializer.Deserialize<SearchResponse>(s);
-            var parsed = new Errors(res.hits.hits.Select(h => new Error(h._id, Map.To(h._source))), res.hits.total);
+            var parsed = new LogSearchResult(res.hits.hits.Select(h => new LogWithId(h._id, Map.To(h._source))), res.hits.total);
             return parsed;
         }
 
-        public class GetResponse
+        public class Hit
         {
             public string _id { get; set; }
             public string _type { get; set; }
             public string _index { get; set; }
-            public int? _version { get; set; }
             public LogEvent _source { get; set; }
         }
 
@@ -212,27 +162,24 @@ namespace ElasticElmah.Appender
         {
             return new RequestInfo(UrlToIndex(settings, "LoggingEvent/" + id), "GET", null);
         }
-        public IAsyncResult Get(string id, Action<Error> success)
+        public IAsyncResult Get(string id, Action<LogWithId> success)
         {
-            var req = GetRequest(id);
-            return request.Async(req.Url, req.Method, req.Body,
+            return request.Async(GetRequest(id),
                  (code, s) =>
                  {
                      success(GetGetResponse(s));
                  });
         }
 
-        private Error GetGetResponse(string s)
+        private LogWithId GetGetResponse(string s)
         {
-            var res = serializer.Deserialize<GetResponse>(s);
-            var resp = new Error(res._id, Map.To(res._source));
-            return resp;
+            var res = serializer.Deserialize<Hit>(s);
+            return new LogWithId(res._id, Map.To(res._source));
         }
 
-        public Error Get(string id)
+        public LogWithId Get(string id)
         {
-            var req = GetRequest(id);
-            var resp = request.Async(req.Url, req.Method, req.Body);
+            var resp = request.Async(GetRequest(id));
             return GetGetResponse(resp().Item2);
         }
 
@@ -268,7 +215,7 @@ namespace ElasticElmah.Appender
         {
             Add(loggingEvent, (resp) => { });
         }
-        public class AddResponse
+        private class AddResponse
         {
             public bool ok { get; set; }
             public string _index { get; set; }
@@ -276,24 +223,50 @@ namespace ElasticElmah.Appender
             public string _id { get; set; }
             public int _version { get; set; }
         }
-        public Func<AddResponse> Add(LoggingEvent loggingEvent)
+
+        private RequestInfo AddRequest(LoggingEvent loggingEvent) 
         {
-            var data = serializer.Serialize(Map.To(loggingEvent));
-
-            var resp = request.Async(UrlToIndex(settings, "LoggingEvent/"), "POST", data);
-
-            return () => {
-                return serializer.Deserialize<AddResponse>(resp().Item2);
-            };
-            
+            return new RequestInfo(UrlToIndex(settings, "LoggingEvent/"), "POST", 
+                serializer.Serialize(Map.To(loggingEvent)));
         }
-        public IAsyncResult Add(LoggingEvent loggingEvent, Action<AddResponse> onsuccess)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="loggingEvent"></param>
+        /// <param name="onsuccess">the id of the item added</param>
+        /// <returns></returns>
+        public IAsyncResult Add(LoggingEvent loggingEvent, Action<string> onsuccess)
         {
-            var data = serializer.Serialize(Map.To(loggingEvent));
-
-            return request.Async(UrlToIndex(settings, "LoggingEvent/"), "POST", data, (code, val) =>
+            return request.Async(AddRequest(loggingEvent), (code, val) =>
             {
-                onsuccess(serializer.Deserialize<AddResponse>(val));
+                onsuccess(serializer.Deserialize<AddResponse>(val)._id);
+            });
+        }
+        class Index
+        {
+            public LogEvent index { get; set; }
+        }
+        private RequestInfo AddBulkRequest(IEnumerable<LoggingEvent> loggingEvents, bool refresh=false)
+        {
+            return new RequestInfo(UrlToIndex(settings, "LoggingEvent/_bulk"+(refresh?"?refresh=true":"")), "POST",
+                string.Join("\n",loggingEvents
+                    .Select(l => serializer.Serialize(
+                        new Index { index = Map.To(l) }
+                        ).Replace('\r',' ').Replace('\n',' ')))+"\n");
+        }
+        public IAsyncResult AddBulk(IEnumerable<LoggingEvent> loggingEvents, Action onsuccess,bool refresh=false) 
+        {
+            return request.Async(AddBulkRequest(loggingEvents, refresh), (code, val) =>
+            {
+                onsuccess();
+            });
+        }
+
+        public IAsyncResult Refresh(Action onsuccess=null)
+        {
+            return request.Async(UrlToIndex(settings, "_refresh" ),"POST", null, (code, val) =>
+            {
+                if (onsuccess != null) onsuccess();
             });
         }
     }

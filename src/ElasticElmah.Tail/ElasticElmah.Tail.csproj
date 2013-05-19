@@ -65,6 +65,12 @@
     <Compile Include="..\ElasticElmah.Appender\IJsonSerializer.cs">
       <Link>IJsonSerializer.cs</Link>
     </Compile>
+    <Compile Include="..\ElasticElmah.Appender\Search\LogSearchResult.cs">
+      <Link>Search\LogSearchResult.cs</Link>
+    </Compile>
+    <Compile Include="..\ElasticElmah.Appender\Search\LogWithId.cs">
+      <Link>Search\LogWithId.cs</Link>
+    </Compile>
     <Compile Include="..\ElasticElmah.Appender\Storage\LogEvent.cs">
       <Link>Storage\LogEvent.cs</Link>
     </Compile>
@@ -80,8 +86,14 @@
     <Compile Include="..\ElasticElmah.Appender\Web\JsonRequestAsync.cs">
       <Link>Web\JsonRequestAsync.cs</Link>
     </Compile>
+    <Compile Include="..\ElasticElmah.Appender\Web\JsonRequestExtensions.cs">
+      <Link>Web\JsonRequestExtensions.cs</Link>
+    </Compile>
     <Compile Include="..\ElasticElmah.Appender\Web\RequestException.cs">
       <Link>Web\RequestException.cs</Link>
+    </Compile>
+    <Compile Include="..\ElasticElmah.Appender\Web\RequestInfo.cs">
+      <Link>Web\RequestInfo.cs</Link>
     </Compile>
     <Compile Include="Options.cs" />
     <Compile Include="Program.cs" />

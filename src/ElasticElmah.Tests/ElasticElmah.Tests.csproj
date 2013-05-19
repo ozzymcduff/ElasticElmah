@@ -66,6 +66,10 @@
     <Compile Include="WrappedNewtonsoft.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ElasticElmah.Appender.Tests\ElasticElmah.Appender.Tests.csproj">
+      <Project>{4f8c1da9-b511-44e8-aab8-47218a7adfeb}</Project>
+      <Name>ElasticElmah.Appender.Tests</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ElasticElmah.Appender\ElasticElmah.Appender.csproj">
       <Project>{c9ea9975-0609-4330-a69f-b8c608a46e28}</Project>
       <Name>ElasticElmah.Appender</Name>

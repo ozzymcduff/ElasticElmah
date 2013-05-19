@@ -6,6 +6,7 @@ using System.Linq;
 using log4net.Core;
 using System.Collections.Generic;
 using System.Globalization;
+using ElasticElmah.Appender.Search;
 
 namespace ElasticElmah.Appender.Tests
 {
@@ -16,7 +17,7 @@ namespace ElasticElmah.Appender.Tests
         protected ElasticSearchRepository _appender;
 
         [Test]
-        public void Can_log_properties()
+        public virtual void Can_log_properties()
         {
             string id = null;
             _appender.Add(new LoggingEvent(GetType(), _log.Logger.Repository,
@@ -28,17 +29,17 @@ namespace ElasticElmah.Appender.Tests
                         {
                             d["prop"] = "msg";
                         })
-                    }),resp=>{
-                        id = resp._id;
+                    }),_id=>{
+                        id = _id;
                     });
-            _appender.Flush();
+            _appender.Refresh();
 
             Can_read_property_when_paging();
 
             Can_read_property_when_get(id);
         }
 
-        private void Can_read_property_when_get(string id)
+        protected void Can_read_property_when_get(string id)
         {
             _appender.Get(id, err => {
                 Assert.AreEqual("msg", err.Data.Properties["prop"]);
@@ -46,7 +47,7 @@ namespace ElasticElmah.Appender.Tests
             }).AsyncWaitHandle.WaitOne();
         }
 
-        private void Can_read_property_when_paging()
+        protected void Can_read_property_when_paging()
         {
             ExpectedPagingResult(_appender.GetPaged(0, 10)());
             _appender.GetPaged(0, 10, (errors) => {
@@ -54,61 +55,85 @@ namespace ElasticElmah.Appender.Tests
             }).AsyncWaitHandle.WaitOne();
         }
 
-        private static void ExpectedPagingResult(ElasticSearchRepository.Errors result)
+        protected static void ExpectedPagingResult(LogSearchResult result)
         {
             Assert.AreEqual(1, result.Total);
-            Assert.AreEqual("msg", result.Documents.First().Data.Properties["prop"]);
-            Assert.That(result.Documents.Single().Data.Message, Is.EqualTo("Message"));
+            Assert.AreEqual("msg", result.Hits.First().Data.Properties["prop"]);
+            Assert.That(result.Hits.Single().Data.Message, Is.EqualTo("Message"));
         }
 
-        [Test]
-        public void Should_get_latest()
+        [Test,Ignore]
+        public virtual void Should_get_latest_bulk()
         {
             var times = new List<DateTime>();
             for (int i = 0; i < 5; i++)
             {
                 times.Add(new DateTime(2001, 1, 1).AddDays(i));
             }
-            var list = new List<IAsyncResult>();
-            foreach (var timestamp in times)
-            {
-               list.Add(_appender.Add(new LoggingEvent(GetType(), _log.Logger.Repository,
+
+            _appender.AddBulk(times.Select(timestamp => new LoggingEvent(GetType(), _log.Logger.Repository,
                     new LoggingEventData
                     {
                         TimeStamp = timestamp,
-                        Level = Level.Alert,
-                        Message = "Message",
+                        Level = Level.Error,
+                        Message = "Message " + timestamp.ToString(),
                         Properties = new log4net.Util.PropertiesDictionary().Tap(d =>
                         {
                             d["prop"] = "msg";
                         })
-                    }), (resp) => { }));
-            }
-            foreach (var item in list)
-            {
-                item.AsyncWaitHandle.WaitOne();
-            }
-            _appender.Flush();
+                    })).ToArray(), () => { }, true);
+
+            _appender.Refresh().AsyncWaitHandle.WaitOne();
 
             ExpectOrderedResultASync();
             ExpectOrderedResultSync();
         }
 
-        private void ExpectOrderedResultASync()
+        [Test]
+        public virtual void Should_get_latest()
+        {
+            var times = new List<DateTime>();
+            for (int i = 0; i < 5; i++)
+            {
+                times.Add(new DateTime(2001, 1, 1).AddDays(i));
+            }
+            var ids= new List<string>();
+            foreach (var logitem in times.Select(timestamp => new LoggingEvent(GetType(), _log.Logger.Repository,
+                    new LoggingEventData
+                    {
+                        TimeStamp = timestamp,
+                        Level = Level.Error,
+                        Message = "Message "+timestamp.ToString(),
+                        Properties = new log4net.Util.PropertiesDictionary().Tap(d =>
+                        {
+                            d["prop"] = "msg";
+                        })
+                    })))
+            {
+                _appender.Add(logitem,id=>{ ids.Add(id); }).AsyncWaitHandle.WaitOne();
+            }
+            _appender.Refresh().AsyncWaitHandle.WaitOne();
+            //_appender.Flush();
+
+            ExpectOrderedResultASync();
+            ExpectOrderedResultSync();
+        }
+
+        protected void ExpectOrderedResultASync()
         {
             _appender.GetPaged(0, 2, errors => {
                 ExpectedOrderedResult(errors);
             }).AsyncWaitHandle.WaitOne();
         }
-        private void ExpectOrderedResultSync()
+        protected void ExpectOrderedResultSync()
         {
             ExpectedOrderedResult(_appender.GetPaged(0, 2)());
         }
 
-        private static void ExpectedOrderedResult(ElasticSearchRepository.Errors result)
+        protected static void ExpectedOrderedResult(LogSearchResult result)
         {
             Assert.AreEqual(5, result.Total);
-            Assert.That(result.Documents.Select(l => l.Data.TimeStamp).ToArray(),
+            Assert.That(result.Hits.Select(l => l.Data.TimeStamp).ToArray(),
                 Is.EquivalentTo(new[]{ 
                     new DateTime(2001,1,5),
                     new DateTime(2001,1,4)
