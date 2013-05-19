@@ -21,28 +21,39 @@ namespace ElasticElmah.Appender
             this.serializer = serializer ?? new DefaultJsonSerializer();
         }
 
+        /// <summary>
+        /// async request to create index
+        /// </summary>
         public void CreateIndexIfNotExists()
         {
-            if (!IndexExists())
+            IndexExists(exists =>
             {
-                CreateIndex(s => { });
-            }
+                if (!exists)
+                {
+                    CreateIndexAsync(s => { });
+                }
+            });
+            
         }
 
-        private bool IndexExists()
+        private IAsyncResult IndexExists(Action<bool> result)
         {
-            var resp = request.Sync(UrlToIndex(settings, ""), "HEAD", null);
-            return resp.Item1 == HttpStatusCode.OK;
+            return request.Async(UrlToIndex(settings, ""), "HEAD", null, (code, s) => {
+                result(code == HttpStatusCode.OK);
+            });
         }
 
         private readonly string _index;
         private IDictionary<string, string> settings;
 
-        public IAsyncResult CreateIndex()
+        public IAsyncResult CreateIndexAsync()
         {
-            return CreateIndex(s => { });
+            return CreateIndexAsync(s => { });
         }
-
+        public void CreateIndex() 
+        {
+            request.Sync(CreateIndexRequest());
+        }
         private RequestInfo CreateIndexRequest()
         {
             return new RequestInfo(UrlToIndex(settings, ""), "POST",
@@ -72,7 +83,7 @@ namespace ElasticElmah.Appender
   }
 }");
         }
-        public IAsyncResult CreateIndex(Action<string> onsuccess)
+        public IAsyncResult CreateIndexAsync(Action<string> onsuccess)
         {
             var req = CreateIndexRequest();
             return request.Async(req.Url, req.Method, req.Body,
@@ -82,15 +93,15 @@ namespace ElasticElmah.Appender
               });
         }
 
-        public IAsyncResult DeleteIndex()
+        public IAsyncResult DeleteIndexAsync()
         {
             return request.Async(UrlToIndex(settings, ""), "DELETE", null, (c, s) => { });
         }
 
-        /*public void Flush()
+        public void DeleteIndex()
         {
-            request.Async(Url(settings, "_all/_flush?refresh=false"), "POST", null, (c, s) => { });
-        }*/
+            request.Sync(UrlToIndex(settings, ""), "DELETE", null);
+        }
 
         public class SearchResponse
         {
@@ -263,6 +274,12 @@ namespace ElasticElmah.Appender
             return request.Sync(AddBulkRequest(loggingEvents, refresh)).Item1;
         }
 
+        /// <summary>
+        /// Doesnt work right now
+        /// </summary>
+        /// <param name="loggingEvents"></param>
+        /// <param name="refresh"></param>
+        /// <returns></returns>
         public Tuple<Func<IAsyncResult>, Func<IAsyncResult, HttpStatusCode>> AddBulkAsync(IEnumerable<LoggingEvent> loggingEvents, bool refresh = false)
         {
             return request.Map(AddBulkRequest(loggingEvents, refresh), t=>t.Item1);

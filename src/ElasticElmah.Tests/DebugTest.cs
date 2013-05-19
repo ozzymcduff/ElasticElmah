@@ -31,7 +31,7 @@ namespace ElasticElmah.Tests
         [TearDown]
         public void Cleanup()
         {
-            _appender.DeleteIndex();
+            _appender.DeleteIndexAsync();
         }
 
         [Test]

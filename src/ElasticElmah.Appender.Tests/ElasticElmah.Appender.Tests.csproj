@@ -51,7 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppenderTests.cs" />
-    <Compile Include="AppenderTestsWithAsync.cs" />
+    <Compile Include="AppenderTestsWithDefaultJson.cs" />
     <Compile Include="AppenderTestsWithNewtonSoftJson.cs" />
     <Compile Include="Helpers\Json.cs" />
     <Compile Include="JsonSerializerTests.cs" />

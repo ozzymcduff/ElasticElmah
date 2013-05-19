@@ -7,7 +7,7 @@ using System.Text;
 namespace ElasticElmah.Appender.Tests
 {
     [TestFixture]
-    public class AppenderTestsWithAsync:AppenderTests
+    public class AppenderTestsWithDefaultJson:AppenderTests
     {
         [SetUp]
         public void Init()
@@ -24,7 +24,7 @@ namespace ElasticElmah.Appender.Tests
         [TearDown]
         public void Cleanup()
         {
-            _appender.DeleteIndex();
+            _appender.DeleteIndexAsync();
         }
     }
 }

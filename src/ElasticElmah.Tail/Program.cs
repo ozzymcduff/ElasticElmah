@@ -8,6 +8,7 @@ using NDesk.Options;
 using log4net.Core;
 using log4net.Layout;
 using ElasticElmah.Appender;
+using System.Threading.Tasks;
 
 namespace ElasticElmah.Tail
 {
@@ -76,12 +77,13 @@ cat yourlogfile.xml | LogTail.exe
             return Int32.Parse(v) * 1000;
         }
 
-        private static void Tail(int lines, List<string> indexes, Action<LoggingEventData> showentry)
+        private static async void Tail(int lines, List<string> indexes, Action<LoggingEventData> showentry)
         {
             foreach (var index in indexes)
             {
                 var repo = new ElasticSearchRepository("Server=localhost;Index="+index+";Port=9200");
-                var entries = repo.GetPaged(0, lines);
+                var p = repo.GetPagedAsync(0, lines);
+                var entries = await Task.Factory.FromAsync(p.Item1(),p.Item2);
                 foreach (var item in entries.Hits.Select(e => e.Data))
                 {
                     showentry(item);
