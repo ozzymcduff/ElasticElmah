@@ -82,12 +82,12 @@ cat yourlogfile.xml | LogTail.exe
             foreach (var index in indexes)
             {
                 var repo = new ElasticSearchRepository("Server=localhost;Index="+index+";Port=9200");
-                var p = repo.GetPagedAsync(0, lines);
-                var entries = await Task.Factory.FromAsync(p.Item1(),p.Item2);
-                foreach (var item in entries.Hits.Select(e => e.Data))
-                {
-                    showentry(item);
-                }
+                await repo.GetPagedAsync(0, lines).ContinueWith(t => {
+                    foreach (var item in t.Result.Hits.Select(e => e.Data))
+                    {
+                        showentry(item);
+                    }
+                });
             }
         }
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ElasticElmah.Appender.Web
 {
@@ -25,6 +26,20 @@ namespace ElasticElmah.Appender.Web
             var resp = that.Async(info);
             return new Tuple<Func<IAsyncResult>, Func<IAsyncResult, T>>(
                 () => resp.Item1(),
+                (iar) => mapfun(resp.Item2(iar)));
+        }
+        public static Task<T> AsTask<T>(this IJSonRequest that, RequestInfo info, Func<Tuple<HttpStatusCode, string>, T> mapfun)
+        {
+            var resp = that.Async(info);
+            return Task.Factory.FromAsync(
+                resp.Item1(),
+                (iar) => mapfun(resp.Item2(iar)));
+        }
+        public static Task AsTask(this IJSonRequest that, RequestInfo info, Action<Tuple<HttpStatusCode, string>> mapfun)
+        {
+            var resp = that.Async(info);
+            return Task.Factory.FromAsync(
+                resp.Item1(),
                 (iar) => mapfun(resp.Item2(iar)));
         }
         public static T WaitOne<T>(this Tuple<Func<IAsyncResult>, Func<IAsyncResult, T>> that)

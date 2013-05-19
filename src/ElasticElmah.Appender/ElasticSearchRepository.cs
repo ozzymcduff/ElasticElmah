@@ -6,6 +6,7 @@ using log4net.Core;
 using System.Net;
 using ElasticElmah.Appender.Web;
 using ElasticElmah.Appender.Search;
+using System.Threading.Tasks;
 
 namespace ElasticElmah.Appender
 {
@@ -24,32 +25,28 @@ namespace ElasticElmah.Appender
         /// <summary>
         /// async request to create index
         /// </summary>
-        public void CreateIndexIfNotExists()
+        public Task CreateIndexIfNotExists()
         {
-            IndexExists(exists =>
-            {
-                if (!exists)
-                {
-                    CreateIndexAsync(s => { });
-                }
-            });
-            
+            return IndexExists()
+                .ContinueWith(t => {
+                    var exists = t.Result;
+                    if (!exists)
+                    {
+                        CreateIndexAsync();
+                    }
+                });
         }
 
-        private IAsyncResult IndexExists(Action<bool> result)
+        private Task<bool> IndexExists()
         {
-            return request.Async(UrlToIndex(settings, ""), "HEAD", null, (code, s) => {
-                result(code == HttpStatusCode.OK);
+            return request.AsTask(new RequestInfo(UrlToIndex(settings, ""), "HEAD", null), (t) => {
+                return (t.Item1 == HttpStatusCode.OK);
             });
         }
 
         private readonly string _index;
         private IDictionary<string, string> settings;
 
-        public IAsyncResult CreateIndexAsync()
-        {
-            return CreateIndexAsync(s => { });
-        }
         public void CreateIndex() 
         {
             request.Sync(CreateIndexRequest());
@@ -83,19 +80,15 @@ namespace ElasticElmah.Appender
   }
 }");
         }
-        public IAsyncResult CreateIndexAsync(Action<string> onsuccess)
+        public Task CreateIndexAsync()
         {
             var req = CreateIndexRequest();
-            return request.Async(req.Url, req.Method, req.Body,
-              (code, s) =>
-              {
-                  onsuccess(s);
-              });
+            return request.AsTask(req, (t) =>{});
         }
 
-        public IAsyncResult DeleteIndexAsync()
+        public Task DeleteIndexAsync()
         {
-            return request.Async(UrlToIndex(settings, ""), "DELETE", null, (c, s) => { });
+            return request.AsTask(new RequestInfo(UrlToIndex(settings, ""), "DELETE", null), (t) => { });
         }
 
         public void DeleteIndex()
@@ -142,9 +135,9 @@ namespace ElasticElmah.Appender
             var res= request.Sync(GetPagedRequest(pageIndex, pageSize));
             return GetPagedResult(res.Item1,res.Item2);
         }
-        public Tuple<Func<IAsyncResult>,Func<IAsyncResult,LogSearchResult>> GetPagedAsync(int pageIndex, int pageSize)
+        public Task<LogSearchResult> GetPagedAsync(int pageIndex, int pageSize)
         {
-            return request.Map(GetPagedRequest(pageIndex, pageSize),
+            return request.AsTask(GetPagedRequest(pageIndex, pageSize),
                 res => GetPagedResult(res.Item1, res.Item2));
         }
         private LogSearchResult GetPagedResult(HttpStatusCode c, string s)
@@ -178,9 +171,9 @@ namespace ElasticElmah.Appender
             return GetGetResponse(request.Sync(GetRequest(id)).Item2);
         }
 
-        public Tuple<Func<IAsyncResult>,Func<IAsyncResult,LogWithId>> GetAsync(string id)
+        public Task<LogWithId> GetAsync(string id)
         {
-            return request.Map(GetRequest(id), resp=> GetGetResponse(resp.Item2));
+            return request.AsTask(GetRequest(id), resp=> GetGetResponse(resp.Item2));
         }
 
         private static IDictionary<string, string> BuildElsticSearchConnection(string connectionString)
@@ -247,9 +240,9 @@ namespace ElasticElmah.Appender
         /// <param name="loggingEvent"></param>
         /// <param name="onsuccess">the id of the item added</param>
         /// <returns></returns>
-        public Tuple<Func<IAsyncResult>, Func<IAsyncResult, string>> AddAsync(LoggingEvent loggingEvent)
+        public Task<string> AddAsync(LoggingEvent loggingEvent)
         {
-            return request.Map(AddRequest(loggingEvent), t => serializer.Deserialize<AddResponse>(t.Item2)._id);
+            return request.AsTask(AddRequest(loggingEvent), t => serializer.Deserialize<AddResponse>(t.Item2)._id);
         }
         class Index
         {
@@ -280,9 +273,9 @@ namespace ElasticElmah.Appender
         /// <param name="loggingEvents"></param>
         /// <param name="refresh"></param>
         /// <returns></returns>
-        public Tuple<Func<IAsyncResult>, Func<IAsyncResult, HttpStatusCode>> AddBulkAsync(IEnumerable<LoggingEvent> loggingEvents, bool refresh = false)
+        public Task<HttpStatusCode> AddBulkAsync(IEnumerable<LoggingEvent> loggingEvents, bool refresh = false)
         {
-            return request.Map(AddBulkRequest(loggingEvents, refresh), t=>t.Item1);
+            return request.AsTask(AddBulkRequest(loggingEvents, refresh), t=>t.Item1);
         }
 
         public void Refresh()

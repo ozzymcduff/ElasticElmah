@@ -44,10 +44,9 @@ namespace ElasticElmah.Tests
                     Message = "Message"
                 }));
             _appender.Refresh();
-            var result= _appender.GetPagedAsync(0, 10).WaitOne();
-            Assert.AreEqual(1, result.Total);
-
-            Assert.That(result.Hits.Single().Data.Message, Is.EqualTo("Message"));
+            var resultt= _appender.GetPagedAsync(0, 10);
+            Assert.AreEqual(1, resultt.Result.Total);
+            Assert.That(resultt.Result.Hits.Single().Data.Message, Is.EqualTo("Message"));
         }
         [Test]
         public override void Can_log_properties()

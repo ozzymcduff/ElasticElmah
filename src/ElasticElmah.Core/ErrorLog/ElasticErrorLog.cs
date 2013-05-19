@@ -43,19 +43,18 @@ namespace ElasticElmah.Core.ErrorLog
         /// </summary>
         public override Task<Error> GetErrorAsync(string id)
         {
-                var r = appender.GetAsync(id);
-                return Task.Factory.FromAsync(r.Item1(),(iar)=>{
-                    var resp = r.Item2(iar);
-                    return new Error(resp.Data, resp.Id);
-                });
+            var r = appender.GetAsync(id);
+            return r.ContinueWith<Error>(t => {
+                return new Error(t.Result.Data, t.Result.Id);
+            });
         }
 
         public override Task<ErrorLog.Errors> GetErrorsAsync(int pageIndex, int pageSize)
         {
             var r = appender.GetPagedAsync(pageIndex,pageSize);
-            return Task.Factory.FromAsync(r.Item1(), (iar) =>
+            return r.ContinueWith(t=>
             {
-                var res = r.Item2(iar);
+                var res = t.Result;
                 return new Errors() {
                     Total = res.Total,
                     Entries = res.Hits.Select(e => new ElasticElmah.Core.ErrorLog.Error(e.Data, e.Id)).ToList(),
