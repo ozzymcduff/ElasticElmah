@@ -15,7 +15,6 @@
     </references>
     <dependencies>
       <dependency id="log4net" version="2.0.0" />
-      <dependency id="NEST" version="0.10.1.0" />
     </dependencies>
   </metadata>
 </package>

@@ -3,7 +3,7 @@
   <metadata>
     <id>ElasticElmah.Appender</id>
     <title>ElasticElmah.Appender</title>
-    <version>1.5.0</version>
+    <version>1.6.0</version>
     <authors>Oskar Gewalli</authors>
     <owners>Oskar Gewalli</owners>
     <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
@@ -16,7 +16,6 @@
     </references>
     <dependencies>
       <dependency id="log4net" version="2.0.0" />
-      <dependency id="NEST" version="0.10.1.0" />
     </dependencies>
   </metadata>
 </package>
