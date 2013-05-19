@@ -2,6 +2,7 @@
 using ElasticElmah.Core.ErrorLog;
 using ElasticElmahMVC.Code;
 using ElasticElmahMVC.Models;
+using System.Threading.Tasks;
 
 namespace ElasticElmahMVC.Controllers
 {
@@ -10,11 +11,12 @@ namespace ElasticElmahMVC.Controllers
         //
         // GET: /Detail/
 
-        public ActionResult Index(string id)
+        public async Task<ActionResult> Index(string id)
         {
             ErrorLog errorlog = Helper.GetDefault(HttpContext);
             ViewBag.ErrorLog = errorlog;
-            return View(new ErrorDetailModel(errorlog.GetError(id), new Environment(HttpContext)));
+            var error = await errorlog.GetErrorAsync(id);
+            return View(new ErrorDetailModel(error, new Environment(HttpContext)));
         }
     }
 }

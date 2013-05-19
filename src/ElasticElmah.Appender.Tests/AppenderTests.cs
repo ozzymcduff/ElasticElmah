@@ -7,7 +7,7 @@ using log4net.Core;
 using System.Collections.Generic;
 using System.Globalization;
 using ElasticElmah.Appender.Search;
-
+using ElasticElmah.Appender.Web;
 namespace ElasticElmah.Appender.Tests
 {
 
@@ -19,8 +19,7 @@ namespace ElasticElmah.Appender.Tests
         [Test]
         public virtual void Can_log_properties()
         {
-            string id = null;
-            _appender.Add(new LoggingEvent(GetType(), _log.Logger.Repository,
+            var id = _appender.Add(new LoggingEvent(GetType(), _log.Logger.Repository,
                 new LoggingEventData
                     {
                         Level = Level.Alert,
@@ -29,9 +28,7 @@ namespace ElasticElmah.Appender.Tests
                         {
                             d["prop"] = "msg";
                         })
-                    }),_id=>{
-                        id = _id;
-                    });
+                    }));
             _appender.Refresh();
 
             Can_read_property_when_paging();
@@ -41,18 +38,23 @@ namespace ElasticElmah.Appender.Tests
 
         protected void Can_read_property_when_get(string id)
         {
-            _appender.Get(id, err => {
-                Assert.AreEqual("msg", err.Data.Properties["prop"]);
-                Assert.That(err.Data.Message, Is.EqualTo("Message"));
-            }).AsyncWaitHandle.WaitOne();
+            var err = _appender.GetAsync(id).AwaitOne();
+            Assert.AreEqual("msg", err.Data.Properties["prop"]);
+            Assert.That(err.Data.Message, Is.EqualTo("Message"));
+
         }
 
         protected void Can_read_property_when_paging()
         {
-            ExpectedPagingResult(_appender.GetPaged(0, 10)());
-            _appender.GetPaged(0, 10, (errors) => {
+            ExpectedPagingResult(_appender.GetPagedAsync(0, 10));
+            _appender.GetPagedAsync(0, 10).AwaitOne().Tap(errors => {
                 ExpectedPagingResult(errors);
-            }).AsyncWaitHandle.WaitOne();
+            });
+        }
+
+        private void ExpectedPagingResult(Tuple<Func<IAsyncResult>, Func<IAsyncResult, LogSearchResult>> tuple)
+        {
+            ExpectedPagingResult(tuple.AwaitOne());
         }
 
         protected static void ExpectedPagingResult(LogSearchResult result)
@@ -81,9 +83,9 @@ namespace ElasticElmah.Appender.Tests
                         {
                             d["prop"] = "msg";
                         })
-                    })).ToArray(), () => { }, true);
+                    })).ToArray(), true);
 
-            _appender.Refresh().AsyncWaitHandle.WaitOne();
+            _appender.Refresh();
 
             ExpectOrderedResultASync();
             ExpectOrderedResultSync();
@@ -110,9 +112,9 @@ namespace ElasticElmah.Appender.Tests
                         })
                     })))
             {
-                _appender.Add(logitem,id=>{ ids.Add(id); }).AsyncWaitHandle.WaitOne();
+                ids.Add(_appender.Add(logitem));
             }
-            _appender.Refresh().AsyncWaitHandle.WaitOne();
+            _appender.Refresh();
             //_appender.Flush();
 
             ExpectOrderedResultASync();
@@ -121,13 +123,11 @@ namespace ElasticElmah.Appender.Tests
 
         protected void ExpectOrderedResultASync()
         {
-            _appender.GetPaged(0, 2, errors => {
-                ExpectedOrderedResult(errors);
-            }).AsyncWaitHandle.WaitOne();
+            ExpectedOrderedResult(_appender.GetPagedAsync(0, 2).AwaitOne());
         }
         protected void ExpectOrderedResultSync()
         {
-            ExpectedOrderedResult(_appender.GetPaged(0, 2)());
+            ExpectedOrderedResult(_appender.GetPaged(0, 2));
         }
 
         protected static void ExpectedOrderedResult(LogSearchResult result)

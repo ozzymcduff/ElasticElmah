@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ElasticElmah.Core.ErrorLog
 {
@@ -12,20 +13,6 @@ namespace ElasticElmah.Core.ErrorLog
             get { return GetType().Name; }
         }
 
-        /// <summary>
-        /// Retrieves a single application error from log given its 
-        /// identifier, or null if it does not exist.
-        /// </summary>
-        public abstract Error GetError(string id);
-
-        public abstract Errors GetErrors(int pageIndex, int pageSize);
-
-        #region Nested type: Errors
-
-        /// <summary>
-        /// Retrieves a page of application errors from the log in 
-        /// descending order of logged time.
-        /// </summary>
         public class Errors
         {
             public IList<Error> Entries;
@@ -33,7 +20,15 @@ namespace ElasticElmah.Core.ErrorLog
             public int pageIndex;
             public int pageSize;
         }
-
-        #endregion
+        /// <summary>
+        /// Retrieves a single application error from log given its 
+        /// identifier, or null if it does not exist.
+        /// </summary>
+        public abstract Task<Error> GetErrorAsync(string id);
+        /// <summary>
+        /// Retrieves a page of application errors from the log in 
+        /// descending order of logged time.
+        /// </summary>
+        public abstract Task<Errors> GetErrorsAsync(int pageIndex, int pageSize);
     }
 }

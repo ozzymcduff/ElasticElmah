@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using ElasticElmah.Appender;
+using ElasticElmah.Appender.Web;
 using log4net;
 using log4net.Core;
 using System.Reflection;
@@ -23,7 +24,7 @@ namespace ElasticElmah.Tests
             var fiddler = true;
             var _index = Guid.NewGuid();
             _appender = new ElasticSearchRepository("Server="+(fiddler?Environment.MachineName:"localhost")+";Index=" + _index + ";Port=9200", 
-                new ElasticElmah.Appender.Web.JsonRequestAsync());
+                new ElasticElmah.Appender.Web.JsonRequest());
             _appender.CreateIndex();
         }
 
@@ -36,19 +37,17 @@ namespace ElasticElmah.Tests
         [Test]
         public void ReadAppend()
         {
-            var res = _appender.Add(new LoggingEvent(GetType(), _log.Logger.Repository,
+            _appender.Add(new LoggingEvent(GetType(), _log.Logger.Repository,
                 new LoggingEventData
                 {
                     Level = Level.Alert,
                     Message = "Message"
-                }), errors => { });
-            res.AsyncWaitHandle.WaitOne();
+                }));
             _appender.Refresh();
-            _appender.GetPaged(0, 10, result => {
-                Assert.AreEqual(1, result.Total);
+            var result= _appender.GetPagedAsync(0, 10).AwaitOne();
+            Assert.AreEqual(1, result.Total);
 
-                Assert.That(result.Hits.Single().Data.Message, Is.EqualTo("Message"));
-            }).AsyncWaitHandle.WaitOne();
+            Assert.That(result.Hits.Single().Data.Message, Is.EqualTo("Message"));
         }
         [Test]
         public override void Can_log_properties()

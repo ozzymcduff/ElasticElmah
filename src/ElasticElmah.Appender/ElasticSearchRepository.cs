@@ -17,7 +17,7 @@ namespace ElasticElmah.Appender
         {
             settings = BuildElsticSearchConnection(connectionString);
             _index = settings["Index"];
-            this.request = request ?? new Web.JsonRequestAsync();
+            this.request = request ?? new Web.JsonRequest();
             this.serializer = serializer ?? new DefaultJsonSerializer();
         }
 
@@ -31,7 +31,7 @@ namespace ElasticElmah.Appender
 
         private bool IndexExists()
         {
-            var resp = request.Async(UrlToIndex(settings, ""), "HEAD", null)();
+            var resp = request.Sync(UrlToIndex(settings, ""), "HEAD", null);
             return resp.Item1 == HttpStatusCode.OK;
         }
 
@@ -126,22 +126,15 @@ namespace ElasticElmah.Appender
     ""version"":true
 }");
         }
-        public IAsyncResult GetPaged(int pageIndex, int pageSize, Action<LogSearchResult> onsuccess)
+        public LogSearchResult GetPaged(int pageIndex, int pageSize)
         {
-            return request.Async(GetPagedRequest(pageIndex, pageSize),
-              (c, s) =>
-              {
-                  onsuccess(GetPagedResult(c, s));
-              });
+            var res= request.Sync(GetPagedRequest(pageIndex, pageSize));
+            return GetPagedResult(res.Item1,res.Item2);
         }
-        public Func<LogSearchResult> GetPaged(int pageIndex, int pageSize)
+        public Tuple<Func<IAsyncResult>,Func<IAsyncResult,LogSearchResult>> GetPagedAsync(int pageIndex, int pageSize)
         {
-            var resp = request.Async(GetPagedRequest(pageIndex, pageSize));
-            return () =>
-                {
-                    var res = resp();
-                    return GetPagedResult(res.Item1, res.Item2);
-                };
+            return request.Map(GetPagedRequest(pageIndex, pageSize),
+                res => GetPagedResult(res.Item1, res.Item2));
         }
         private LogSearchResult GetPagedResult(HttpStatusCode c, string s)
         {
@@ -162,14 +155,6 @@ namespace ElasticElmah.Appender
         {
             return new RequestInfo(UrlToIndex(settings, "LoggingEvent/" + id), "GET", null);
         }
-        public IAsyncResult Get(string id, Action<LogWithId> success)
-        {
-            return request.Async(GetRequest(id),
-                 (code, s) =>
-                 {
-                     success(GetGetResponse(s));
-                 });
-        }
 
         private LogWithId GetGetResponse(string s)
         {
@@ -179,8 +164,12 @@ namespace ElasticElmah.Appender
 
         public LogWithId Get(string id)
         {
-            var resp = request.Async(GetRequest(id));
-            return GetGetResponse(resp().Item2);
+            return GetGetResponse(request.Sync(GetRequest(id)).Item2);
+        }
+
+        public Tuple<Func<IAsyncResult>,Func<IAsyncResult,LogWithId>> GetAsync(string id)
+        {
+            return request.Map(GetRequest(id), resp=> GetGetResponse(resp.Item2));
         }
 
         private static IDictionary<string, string> BuildElsticSearchConnection(string connectionString)
@@ -206,14 +195,26 @@ namespace ElasticElmah.Appender
             var port = lookup["Port"];
             return "http://" + server + ":" + port;
         }
+
         private static Uri UrlToIndex(IDictionary<string, string> lookup, string t)
         {
             var url = new Uri(ServerAndPort(lookup) + "/" + lookup["Index"] + "/" + t);
             return url;
         }
+
         public void AddWithoutReturn(LoggingEvent loggingEvent)
         {
-            Add(loggingEvent, (resp) => { });
+            request.Async(AddRequest(loggingEvent), (code, s) => { });
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="loggingEvent"></param>
+        /// <returns>the id of the logging event</returns>
+        public string Add(LoggingEvent loggingEvent)
+        {
+            var resp = request.Sync(AddRequest(loggingEvent));
+            return serializer.Deserialize<AddResponse>(resp.Item2)._id;
         }
         private class AddResponse
         {
@@ -235,12 +236,9 @@ namespace ElasticElmah.Appender
         /// <param name="loggingEvent"></param>
         /// <param name="onsuccess">the id of the item added</param>
         /// <returns></returns>
-        public IAsyncResult Add(LoggingEvent loggingEvent, Action<string> onsuccess)
+        public Tuple<Func<IAsyncResult>, Func<IAsyncResult, string>> AddAsync(LoggingEvent loggingEvent)
         {
-            return request.Async(AddRequest(loggingEvent), (code, val) =>
-            {
-                onsuccess(serializer.Deserialize<AddResponse>(val)._id);
-            });
+            return request.Map(AddRequest(loggingEvent), t => serializer.Deserialize<AddResponse>(t.Item2)._id);
         }
         class Index
         {
@@ -254,20 +252,25 @@ namespace ElasticElmah.Appender
                         new Index { index = Map.To(l) }
                         ).Replace('\r',' ').Replace('\n',' ')))+"\n");
         }
-        public IAsyncResult AddBulk(IEnumerable<LoggingEvent> loggingEvents, Action onsuccess,bool refresh=false) 
+        /// <summary>
+        /// Doesnt work right now
+        /// </summary>
+        /// <param name="loggingEvents"></param>
+        /// <param name="refresh"></param>
+        /// <returns></returns>
+        public HttpStatusCode AddBulk(IEnumerable<LoggingEvent> loggingEvents, bool refresh=false) 
         {
-            return request.Async(AddBulkRequest(loggingEvents, refresh), (code, val) =>
-            {
-                onsuccess();
-            });
+            return request.Sync(AddBulkRequest(loggingEvents, refresh)).Item1;
         }
 
-        public IAsyncResult Refresh(Action onsuccess=null)
+        public Tuple<Func<IAsyncResult>, Func<IAsyncResult, HttpStatusCode>> AddBulkAsync(IEnumerable<LoggingEvent> loggingEvents, bool refresh = false)
         {
-            return request.Async(UrlToIndex(settings, "_refresh" ),"POST", null, (code, val) =>
-            {
-                if (onsuccess != null) onsuccess();
-            });
+            return request.Map(AddBulkRequest(loggingEvents, refresh), t=>t.Item1);
+        }
+
+        public void Refresh()
+        {
+            request.Sync(UrlToIndex(settings, "_refresh" ),"POST", null);
         }
     }
     public static class Extensions

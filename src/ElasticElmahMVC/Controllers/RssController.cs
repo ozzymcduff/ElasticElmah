@@ -1,6 +1,7 @@
 ﻿using System.Web.Mvc;
 using ElasticElmah.Core.ErrorLog;
 using ElasticElmahMVC.Code;
+using System.Threading.Tasks;
 
 namespace ElasticElmahMVC.Controllers
 {
@@ -9,17 +10,17 @@ namespace ElasticElmahMVC.Controllers
         //
         // GET: /Rss/
 
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            ErrorLog errorlog = Helper.GetDefault(HttpContext);
-            ErrorLog.Errors errors = errorlog.GetErrors(0, ErrorDigestRssHandler.pageSize);
+            var errorlog = Helper.GetDefault(HttpContext);
+            var errors = await errorlog.GetErrorsAsync(0, ErrorDigestRssHandler.pageSize);
             return new ErrorRssHandler(new Environment(HttpContext), errors.Entries);
         }
 
-        public ActionResult Digest()
+        public async Task<ActionResult> Digest()
         {
-            ErrorLog errorlog = Helper.GetDefault(HttpContext);
-            ErrorLog.Errors errors = errorlog.GetErrors(0, ErrorDigestRssHandler.pageSize);
+            var errorlog = Helper.GetDefault(HttpContext);
+            var errors = await errorlog.GetErrorsAsync(0, ErrorDigestRssHandler.pageSize);
             return new ErrorDigestRssHandler(new Environment(HttpContext), errors.Entries);
         }
     }

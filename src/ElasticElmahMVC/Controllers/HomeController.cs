@@ -5,6 +5,7 @@ using ElasticElmah.Core.ErrorLog;
 using ElasticElmahMVC.Code;
 using ElasticElmahMVC.Models;
 using Environment = ElasticElmahMVC.Code.Environment;
+using System.Threading.Tasks;
 
 namespace ElasticElmahMVC.Controllers
 {
@@ -13,7 +14,7 @@ namespace ElasticElmahMVC.Controllers
         //
         // GET: /Home/
 
-        public ActionResult Index(int? size = null, int? page = null)
+        public async Task<ActionResult> Index(int? size = null, int? page = null)
         {
             const int _defaultPageSize = 15;
             const int _maximumPageSize = 100;
@@ -26,9 +27,9 @@ namespace ElasticElmahMVC.Controllers
             }
 
             int _pageIndex = Math.Max(1, page ?? 0) - 1;
-            ErrorLog errorlog = Helper.GetDefault(HttpContext);
+            var errorlog = Helper.GetDefault(HttpContext);
             ViewBag.ErrorLog = errorlog;
-            ErrorLog.Errors errors = errorlog.GetErrors(_pageIndex, _pageSize);
+            var errors = await errorlog.GetErrorsAsync(_pageIndex, _pageSize);
             return View(new ErrorLogPage(new Environment(HttpContext), errors).OnLoad());
         }
 
