@@ -12,6 +12,7 @@ namespace ElasticElmah.Appender
     {
         private ElasticSearchRepository _repo;
         public string ConnectionString { get; set; }
+        public bool Async { get; set; }
         private static readonly object _lockObj = new object();
         protected virtual ElasticSearchRepository Repo
         {
@@ -24,7 +25,14 @@ namespace ElasticElmah.Appender
                         return _repo;
                     }
                     _repo = new ElasticSearchRepository(ConnectionString);
-                    _repo.CreateIndexIfNotExists();
+                    if (Async)
+                    {
+                        _repo.CreateIndexIfNotExistsAsync();
+                    }
+                    else 
+                    {
+                        _repo.CreateIndexIfNotExists();
+                    }
                     return _repo;
                 }
             }
@@ -39,7 +47,14 @@ namespace ElasticElmah.Appender
             {
                 AddHttpContextProperties(loggingEvent, new HttpContextWrapper(HttpContext.Current));
             }
-            Repo.AddWithoutReturn(loggingEvent);
+            if (Async)
+            {
+                Repo.AddWithoutReturn(loggingEvent);
+            }
+            else 
+            {
+                Repo.Add(loggingEvent);
+            }
         }
 
         public class ErrorCodeAndHtmlMessage

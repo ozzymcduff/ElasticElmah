@@ -25,9 +25,9 @@ namespace ElasticElmah.Appender
         /// <summary>
         /// async request to create index
         /// </summary>
-        public Task CreateIndexIfNotExists()
+        public Task CreateIndexIfNotExistsAsync()
         {
-            return IndexExists()
+            return IndexExistsAsync()
                 .ContinueWith(t => {
                     var exists = t.Result;
                     if (!exists)
@@ -37,11 +37,31 @@ namespace ElasticElmah.Appender
                 });
         }
 
-        private Task<bool> IndexExists()
+        public void CreateIndexIfNotExists()
         {
-            return request.AsTask(new RequestInfo(UrlToIndex(settings, ""), "HEAD", null), (t) => {
+            var exists=IndexExists();
+            if (!exists)
+            {
+                CreateIndex();
+            }
+        }
+
+        private Task<bool> IndexExistsAsync()
+        {
+            return request.AsTask(IndexExistsRequest(), (t) =>
+            {
                 return (t.Item1 == HttpStatusCode.OK);
             });
+        }
+
+        private RequestInfo IndexExistsRequest()
+        {
+            return new RequestInfo(UrlToIndex(settings, ""), "HEAD", null);
+        }
+
+        private bool IndexExists()
+        {
+            return request.Sync(IndexExistsRequest()).Item1 == HttpStatusCode.OK;
         }
 
         private readonly string _index;
