@@ -7,7 +7,7 @@ using System.Text;
 namespace ElasticElmah.Appender.Tests
 {
     [TestFixture]
-    public class AppenderTestsWithNewtonSoftJson : AppenderTests
+    public class RepositoryTestsWithDefaultJson:RepositoryTests
     {
         [SetUp]
         public void Init()
@@ -17,7 +17,7 @@ namespace ElasticElmah.Appender.Tests
             var conn = "Server=" + (fiddler ? Environment.MachineName : "localhost") + ";Index=" + _index + ";Port=9200";
             _appender = new ElasticSearchRepository(conn,
                 new Web.JsonRequest(),
-                new WrappedNewtonsoft());
+                new DefaultJsonSerializer());
             _appender.CreateIndex();
         }
 

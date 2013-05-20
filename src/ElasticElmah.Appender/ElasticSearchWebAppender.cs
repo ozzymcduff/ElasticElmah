@@ -8,35 +8,8 @@ using System.Collections.Generic;
 
 namespace ElasticElmah.Appender
 {
-    public class ElasticSearchWebAppender : AppenderSkeleton
+    public class ElasticSearchWebAppender : ElasticSearchAppender
     {
-        private ElasticSearchRepository _repo;
-        public string ConnectionString { get; set; }
-        public bool Async { get; set; }
-        private static readonly object _lockObj = new object();
-        protected virtual ElasticSearchRepository Repo
-        {
-            get
-            {
-                lock (_lockObj)
-                {
-                    if (_repo != null)
-                    {
-                        return _repo;
-                    }
-                    _repo = new ElasticSearchRepository(ConnectionString);
-                    if (Async)
-                    {
-                        _repo.CreateIndexIfNotExistsAsync();
-                    }
-                    else 
-                    {
-                        _repo.CreateIndexIfNotExists();
-                    }
-                    return _repo;
-                }
-            }
-        }
         /// <summary>
         /// Add a log event to the ElasticSearch Repo
         /// </summary>
@@ -47,14 +20,7 @@ namespace ElasticElmah.Appender
             {
                 AddHttpContextProperties(loggingEvent, new HttpContextWrapper(HttpContext.Current));
             }
-            if (Async)
-            {
-                Repo.AddWithoutReturn(loggingEvent);
-            }
-            else 
-            {
-                Repo.Add(loggingEvent);
-            }
+            base.Append(loggingEvent);
         }
 
         public class ErrorCodeAndHtmlMessage

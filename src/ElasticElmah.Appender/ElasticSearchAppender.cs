@@ -1,11 +1,13 @@
 ﻿using log4net.Appender;
 using log4net.Core;
+using System.Threading.Tasks;
 
 namespace ElasticElmah.Appender
 {
     public class ElasticSearchAppender : AppenderSkeleton
     {
         private ElasticSearchRepository _repo;
+        private bool init = false;
         public bool Async { get; set; }
         public string ConnectionString { get; set; }
         private static readonly object _lockObj = new object();
@@ -17,21 +19,16 @@ namespace ElasticElmah.Appender
                 {
                     if (_repo != null)
                     {
+                        init = true;
                         return _repo;
                     }
                     _repo = new ElasticSearchRepository(ConnectionString);
-                    if (Async)
-                    {
-                        _repo.CreateIndexIfNotExistsAsync();
-                    }
-                    else
-                    {
-                        _repo.CreateIndexIfNotExists();
-                    }
                     return _repo;
                 }
             }
         }
+
+
         /// <summary>
         /// Add a log event to the ElasticSearch Repo
         /// </summary>
@@ -40,11 +37,36 @@ namespace ElasticElmah.Appender
         {
             if (Async)
             {
-                Repo.AddWithoutReturn(loggingEvent);
+                AppendAsync(loggingEvent);
             }
             else
             {
-                Repo.Add(loggingEvent);
+                AppendSync(loggingEvent);
+            }
+        }
+
+        public void AppendSync(LoggingEvent loggingEvent)
+        {
+            if (init)
+            {
+                Repo.CreateIndexIfNotExists();
+            }
+            Repo.Add(loggingEvent);
+        }
+
+        public Task AppendAsync(LoggingEvent loggingEvent)
+        {
+            if (init)
+            {
+                return Repo.AddAsync(loggingEvent);
+            }
+            else
+            {
+                return Repo.CreateIndexIfNotExistsAsync()
+                    .ContinueWith(t =>
+                    {
+                        return Repo.AddAsync(loggingEvent);
+                    });
             }
         }
     }

@@ -16,7 +16,7 @@ using TestFixtureAttribute = Microsoft.VisualStudio.TestTools.UnitTesting.TestCl
 namespace ElasticElmah.Tests
 {
     [TestFixture]
-    public class DebugTest : AppenderTests
+    public class DebugRepositoryTest : RepositoryTests
     {
         [SetUp]
         public void Init()
