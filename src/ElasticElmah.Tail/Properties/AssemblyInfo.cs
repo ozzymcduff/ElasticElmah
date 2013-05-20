@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("ElasticElmah.Tail")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("LLAB")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("ElasticElmah.Tail")]
-[assembly: AssemblyCopyright("Copyright © LLAB 2013")]
+[assembly: AssemblyCopyright("Copyright © 2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
