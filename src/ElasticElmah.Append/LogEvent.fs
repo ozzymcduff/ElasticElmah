@@ -1,5 +1,6 @@
 namespace ElasticElmah.Append
 open System
+open System.Collections.Generic
 type LogEventLocation=
     { className :string;
       fileName :string;
@@ -13,10 +14,10 @@ type LoggingEvent=
         level :string;
         message :string;
         threadName :string;
-        timeStamp :DateTime;
+        timeStamp :string;
         locationInfo :LogEventLocation;
         userName :string;
-        properties :Map<string,Object>;
+        properties :Dictionary<string,Object>;
         exceptionString :string;
         domain :string;
         identity :string;

@@ -1,27 +1,30 @@
 ﻿namespace ElasticElmah.Append
-open log4net;
-open log4net.Core;
-open log4net.Util;
-open System.Reflection;
-
+open System
+open log4net
+open log4net.Core
+open log4net.Util
+open System.Reflection
+open System.Web.Script.Serialization
+open System.Collections.Generic
    module Mappings=
         //type PropertyDictionary=log4net.Util.PropertyDictionary;
-        let _log =LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType)
+        let private _log =LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType)
         let tap<'typeparam>(o:'typeparam,a) : 'typeparam=
             a(o)
             o
 
-        let mapPropTo (p : log4net.Util.PropertiesDictionary) =
-            Map.ofSeq(p.GetKeys() |> Array.map (fun key ->(key, p.Item(key))) )
+        let private mapPropTo (p : log4net.Util.PropertiesDictionary) =
+            let dic = new Dictionary<string,Object>()
+            p.GetKeys() |> Array.iter (fun key -> dic.Add(key, p.Item(key)))
+            dic
         
-        let mapMapTo (m : Map<string,System.Object>) =
-            //Map.ofSeq(p.GetKeys() |> Array.map (fun key ->(key, p.Item(key))) )
+        let private mapMapTo (m : Dictionary<string,System.Object>) =
             let mutable p = new log4net.Util.PropertiesDictionary()
             for kv in m do
                 p.[kv.Key] <- kv.Value
             p
 
-        let inline isNull< ^a when ^a : not struct> (x:^a) =
+        let inline private isNull< ^a when ^a : not struct> (x:^a) =
             obj.ReferenceEquals (x, Unchecked.defaultof<_>)
 
         let mapTo (l) = 
@@ -30,7 +33,7 @@ open System.Reflection;
             d.Level <- _log.Logger.Repository.LevelMap.[l.level]
             d.Message <- l.message
             d.ThreadName <- l.threadName
-            d.TimeStamp <- l.timeStamp
+            d.TimeStamp <- DateTime.Parse(l.timeStamp)
             d.UserName <- l.userName
             d.ExceptionString <- l.exceptionString
             d.Domain <- l.domain
@@ -43,17 +46,23 @@ open System.Reflection;
                 d.LocationInfo <- new LocationInfo(i.className, i.methodName, i.fileName, i.lineNumber)
             d
 
-        //type LoggingEvent = ElasticElmah.Append.LoggingEvent
-        let empty = System.String.Empty
+        let private serializer = new JavaScriptSerializer()
+
+        let serialize(o)=
+            serializer.Serialize(o)
+
+        let deSerialize<'T>(s)=
+            serializer.Deserialize<'T>(s)
 
         let mapToLog (l : log4net.Core.LoggingEvent): ElasticElmah.Append.LoggingEvent =
+            let empty = System.String.Empty
             let i = l.LocationInformation
             {
                 loggerName = l.LoggerName;
                 level = if not(isNull( l.Level)) then l.Level.Name else empty;
                 message = l.RenderedMessage;
                 threadName = l.ThreadName;
-                timeStamp = l.TimeStamp;
+                timeStamp = l.TimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fffffffzzz");
                 userName = l.UserName;
                 exceptionString = l.GetExceptionString();
                 domain = l.Domain;

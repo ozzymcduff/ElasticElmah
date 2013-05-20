@@ -16,10 +16,10 @@ module tests=
             level="ERROR"; 
             message="msg"; 
             threadName=""; 
-            timeStamp=System.DateTime.Now; 
+            timeStamp=""; 
             locationInfo={ className=""; fileName=""; lineNumber=""; methodName=""; }; 
             userName=""; 
-            properties= Map.empty<string,System.Object>
+            properties= new System.Collections.Generic.Dictionary<string,System.Object>();
             exceptionString=""; 
             domain=""; 
             identity=""; 

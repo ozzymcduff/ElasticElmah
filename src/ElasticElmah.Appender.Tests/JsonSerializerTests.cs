@@ -11,23 +11,7 @@ namespace ElasticElmah.Appender.Tests
     [TestFixture]
     public class JsonSerializerTests
     {
-        [Test]
-        public void WillSerializeOk() 
-        {
-            var serialized = new DefaultJsonSerializer().Serialize( Map.To(new LoggingEvent(new LoggingEventData
-                    {
-                        Level = Level.Alert,
-                        Message = "Message",
-                        UserName = "",
-                        ThreadName="",
-                        Domain="",
-                        Properties = new log4net.Util.PropertiesDictionary().Tap(d =>
-                        {
-                            d["prop"] = "msg";
-                        })
-                    })));
-            Assert.That(serialized, Json.IsEqualTo(
-                @"{
+        private string expected = @"{
     ""loggerName"":null,
     ""level"":""ALERT"",
     ""message"":""Message"",
@@ -44,7 +28,40 @@ namespace ElasticElmah.Appender.Tests
     ""exceptionString"":"""",
     ""domain"":"""",
     ""identity"":""""
-}"));
+}";
+        [Test]
+        public void WillSerializeOk() 
+        {
+            var serialized = new DefaultJsonSerializer().Serialize( Map.To(new LoggingEvent(new LoggingEventData
+                    {
+                        Level = Level.Alert,
+                        Message = "Message",
+                        UserName = "",
+                        ThreadName="",
+                        Domain="",
+                        Properties = new log4net.Util.PropertiesDictionary().Tap(d =>
+                        {
+                            d["prop"] = "msg";
+                        })
+                    })));
+            Assert.That(serialized, Json.IsEqualTo(expected));
+        }
+        [Test]
+        public void WillSerializeOk2()
+        {
+            var serialized = new DefaultJsonSerializer().Serialize(Map.To(new LoggingEvent(new LoggingEventData
+            {
+                Level = Level.Alert,
+                Message = "Message",
+                UserName = "",
+                ThreadName = "",
+                Domain = "",
+                Properties = new log4net.Util.PropertiesDictionary().Tap(d =>
+                {
+                    d["prop"] = "msg";
+                })
+            })));
+            Assert.That(serialized.Replace(" ", "").Replace(Environment.NewLine, ""), Is.EqualTo(expected.Replace(" ", "").Replace(Environment.NewLine, "")));
         }
     }
 }
