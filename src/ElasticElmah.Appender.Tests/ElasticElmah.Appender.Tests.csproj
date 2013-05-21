@@ -50,6 +50,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppenderOnWrongHostTests.cs" />
     <Compile Include="AppenderTests.cs" />
     <Compile Include="RepositoryTests.cs" />
     <Compile Include="RepositoryTestsWithDefaultJson.cs" />
