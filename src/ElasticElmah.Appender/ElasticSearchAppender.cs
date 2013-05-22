@@ -56,7 +56,7 @@ namespace ElasticElmah.Appender
 
         public Task AppendAsync(LoggingEvent loggingEvent)
         {
-            if (init)
+            if (!init)
             {
                 return Repo.AddAsync(loggingEvent);
             }

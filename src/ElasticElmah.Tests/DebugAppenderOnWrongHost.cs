@@ -29,9 +29,9 @@ namespace ElasticElmah.Tests
         }
 
         [Test]
-        public void DoTest()
+        public void Should_throw()
         {
-            base.Test();
+            base.Should_throw();
         }
     }
 }

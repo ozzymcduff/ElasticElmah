@@ -3,6 +3,7 @@ using NUnit.Framework;
 using log4net.Core;
 using log4net;
 using System.Reflection;
+using System.Threading.Tasks;
 namespace ElasticElmah.Appender.Tests
 {
     [TestFixture]
@@ -26,7 +27,7 @@ namespace ElasticElmah.Appender.Tests
         }
 
         [Test]
-        public virtual void Test()
+        public virtual void Should_throw_exception_on_wait()
         {
             _appender.Async = true;// not needed
             Assert.Throws<AggregateException>(() =>
@@ -41,8 +42,27 @@ namespace ElasticElmah.Appender.Tests
                             {
                                 d["prop"] = "msg";
                             })
-                        })).Wait();
+                        })).Wait(100);
             });
+        }
+
+        [Test]
+        public virtual void Should_throw()
+        {
+            var faulted = false;
+            _appender.AppendAsync(new LoggingEvent(GetType(), _log.Logger.Repository,
+                    new LoggingEventData
+                    {
+                        TimeStamp = DateTime.Now,
+                        Level = Level.Error,
+                        Message = "Message",
+                        Properties = new log4net.Util.PropertiesDictionary().Tap(d =>
+                        {
+                            d["prop"] = "msg";
+                        })
+                    })).ContinueWith(t => { faulted = true; }, 
+                    TaskContinuationOptions.OnlyOnFaulted).Wait();
+            Assert.That(faulted);
         }
 
     }

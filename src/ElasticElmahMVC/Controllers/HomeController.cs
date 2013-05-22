@@ -6,6 +6,8 @@ using ElasticElmahMVC.Code;
 using ElasticElmahMVC.Models;
 using Environment = ElasticElmahMVC.Code.Environment;
 using System.Threading.Tasks;
+using log4net.Core;
+using System.Reflection;
 
 namespace ElasticElmahMVC.Controllers
 {
@@ -45,7 +47,13 @@ namespace ElasticElmahMVC.Controllers
             throw new TestException();
         }
 
-        //case "test":
-        //    ;
+        public ActionResult TestRaw()
+        {
+            var log = LoggerManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType.Assembly,
+    MethodBase.GetCurrentMethod().DeclaringType.FullName);
+            var loggingevent = new LoggingEvent(new LoggingEventData { Message="msg", Level=Level.Error, LocationInfo=new LocationInfo("test","test","file.cs","12") });
+            log.Log(loggingevent);
+            return Content("test");
+        }
     }
 }

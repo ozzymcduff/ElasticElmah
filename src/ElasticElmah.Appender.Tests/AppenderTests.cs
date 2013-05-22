@@ -41,6 +41,16 @@ namespace ElasticElmah.Appender.Tests
         }
 
         [Test]
+        public virtual void Test_generated_from_logging_event_data()
+        {
+            _appender.Async = true;// not needed
+            _appender.AppendAsync(new LoggingEvent(new LoggingEventData() { Message="message", Level=Level.Error, LocationInfo=new LocationInfo("?","?","http://localhost:1341243/dsfaf","21")})).Wait();
+            _repo.Refresh();
+            var paged = _repo.GetPaged(0, 10);
+            Assert.That(paged.Total, Is.EqualTo(1));
+        }
+
+        [Test]
         public virtual void Several_logs()
         {
             _appender.Async = true;// not needed
@@ -53,6 +63,26 @@ namespace ElasticElmah.Appender.Tests
             _repo.Refresh();
             var paged = _repo.GetPaged(0, 10);
             Assert.That(paged.Total, Is.EqualTo(5));
+        }
+
+        [Test]
+        public virtual void Using_doappend()
+        {
+            _appender.Async = false;
+            _appender.DoAppend(new LoggingEvent(TestData()));
+            _repo.Refresh();
+            var paged = _repo.GetPaged(0, 10);
+            Assert.That(paged.Total, Is.EqualTo(1));
+        }
+
+        [Test]
+        public virtual void Using_doappend_async()
+        {
+            _appender.Async = true;
+            _appender.DoAppend(new LoggingEvent(TestData()));
+            _repo.Refresh();
+            var paged = _repo.GetPaged(0, 10);
+            Assert.That(paged.Total, Is.EqualTo(1));
         }
 
         private static LoggingEventData TestData()
