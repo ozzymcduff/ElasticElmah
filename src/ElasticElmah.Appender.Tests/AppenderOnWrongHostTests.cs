@@ -29,17 +29,20 @@ namespace ElasticElmah.Appender.Tests
         public virtual void Test()
         {
             _appender.Async = true;// not needed
-            _appender.AppendAsync(new LoggingEvent(GetType(), _log.Logger.Repository,
-                    new LoggingEventData
-                    {
-                        TimeStamp = DateTime.Now,
-                        Level = Level.Error,
-                        Message = "Message",
-                        Properties = new log4net.Util.PropertiesDictionary().Tap(d =>
+            Assert.Throws<AggregateException>(() =>
+            {
+                _appender.AppendAsync(new LoggingEvent(GetType(), _log.Logger.Repository,
+                        new LoggingEventData
                         {
-                            d["prop"] = "msg";
-                        })
-                    })).Wait();
+                            TimeStamp = DateTime.Now,
+                            Level = Level.Error,
+                            Message = "Message",
+                            Properties = new log4net.Util.PropertiesDictionary().Tap(d =>
+                            {
+                                d["prop"] = "msg";
+                            })
+                        })).Wait();
+            });
         }
 
     }
