@@ -16,7 +16,7 @@ using System.Text.RegularExpressions;
 namespace ElasticElmah.Tests
 {
     [TestFixture]
-    public class StackTraceTransformerTests
+    public class DebugStackTraceTransformerTests : StackTraceTransformerTests
     {
         string argumentnullexception = @"System.ArgumentNullException: Value cannot be null.
 Parameter name: httpContext
@@ -46,35 +46,26 @@ Parameter name: httpContext
         public void Cleanup()
         {
         }
-
+        [Test]
+        public override void Single_line_with_type_and_method()
+        {
+            base.Single_line_with_type_and_method();
+        }
+        [Test]
+        public override void Line_with_ctor()
+        {
+            base.Line_with_ctor();
+        }
+        [Test]
+        public override void Line_without_var_name_in_parameter()
+        {
+            base.Line_without_var_name_in_parameter();
+        }
         [Test]
         public void ReadAppend()
         {
-            var matches = transfomer.Match(argumentnullexception);
-            foreach (var item in matches)
-            {
-                Console.WriteLine("m:");
-                Console.WriteLine(item.First);
-                /*                (?<type> .+ ) \.
-                (?<method> .+? ) 
-                (?<params> \( (?<params> .*? ) \) )
-                ( \s+ 
-                \w+ \s+ 
-                  (?<file> [a-z] \: .+? ) 
-                  \: \w+ \s+ 
-                  (?<line> [0-9]+ ) \p{P}? )?
-*/
-                WriteGroup(item,"type");
-                WriteGroup(item, "method");
-                WriteGroup(item, "params");
-                WriteGroup(item, "file");
-                WriteGroup(item, "line");
-                //foreach (Group g in item.Groups)
-                //{
-                //    Console.WriteLine(g);
-                //    Console.WriteLine(g.Value);
-                //}
-            }
+            var tokens = ElasticElmah.Appender.Presentation.StackTraceTransformer.Tokenize(argumentnullexception);
+            Console.WriteLine(tokens);
         }
 
         private static void WriteGroup(StackTraceTransformer.MyClass item, string name)

@@ -58,6 +58,7 @@
     <Compile Include="Helpers\Json.cs" />
     <Compile Include="JsonSerializerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StackTraceTransformerTests.cs" />
     <Compile Include="WrappedNewtonsoft.cs" />
   </ItemGroup>
   <ItemGroup>
