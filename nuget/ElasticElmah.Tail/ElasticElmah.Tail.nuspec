@@ -13,8 +13,5 @@
     <copyright>Copyright 2013</copyright>
     <references>
     </references>
-    <dependencies>
-      <dependency id="log4net" version="2.0.0" />
-    </dependencies>
   </metadata>
 </package>
