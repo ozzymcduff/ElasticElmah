@@ -87,7 +87,7 @@ cat yourlogfile.xml | LogTail.exe
                     {
                         showentry(item);
                     }
-                });
+                }).Wait();
             }
         }
     }
