@@ -67,7 +67,7 @@ cat yourlogfile.xml | LogTail.exe
 
             if (index.Any())
             {
-                Tail(lines ?? 10, index, (entry) => showentry(Console.Out, entry)).Wait();
+                Tail(lines ?? 10, index, (entry) => showentry(Console.Out, entry));
                 return;
             }
         }
@@ -77,12 +77,12 @@ cat yourlogfile.xml | LogTail.exe
             return Int32.Parse(v) * 1000;
         }
 
-        private static async Task Tail(int lines, List<string> indexes, Action<LoggingEventData> showentry)
+        private static void Tail(int lines, List<string> indexes, Action<LoggingEventData> showentry)
         {
             foreach (var index in indexes)
             {
                 var repo = new ElasticSearchRepository("Server=localhost;Index="+index+";Port=9200");
-                await repo.GetPagedAsync(0, lines).ContinueWith(t => {
+                repo.GetPagedAsync(0, lines).ContinueWith(t => {
                     foreach (var item in t.Result.Hits.Select(e => e.Data))
                     {
                         showentry(item);
