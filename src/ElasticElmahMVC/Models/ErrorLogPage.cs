@@ -10,12 +10,6 @@ using Environment = ElasticElmahMVC.Code.Environment;
 
 namespace ElasticElmahMVC.Models
 {
-    #region Imports
-
-    
-
-    #endregion
-
     /// <summary>
     /// Renders an HTML page displaying a page of errors from the error log.
     /// </summary>
