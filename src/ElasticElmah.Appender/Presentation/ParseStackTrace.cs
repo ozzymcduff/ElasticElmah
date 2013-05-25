@@ -34,34 +34,34 @@ namespace ElasticElmah.Appender.Presentation
         {
             whilemax(() =>
             {
-                whilemax(() => accept(Symbols.unreq), 1000);
-                if (accept(Symbols.none))
+                whilemax(() => accept(Symbols.Unrecognized), 1000);
+                if (accept(Symbols.None))
                 {
                     return false;
                 }
                 onEnterLine.TapNotNull(a => a());
-                if (accept(Symbols._at))
+                if (accept(Symbols.At))
                 {
                     onEnterStackFrame.TapNotNull(a => a());
-                    if (accept(Symbols.type))
+                    if (accept(Symbols.Type))
                     {
-                        expect(Symbols.type_method_delim);
-                        expect(Symbols.method);
+                        expect(Symbols.TypeMethodDelim);
+                        expect(Symbols.Method);
                     }
                     else
                     {
-                        expect(Symbols.method);
+                        expect(Symbols.Method);
                     }
-                    expect(Symbols._leftParanthesis);
+                    expect(Symbols.LeftParanthesis);
                     whilemax(() =>
                     {
-                        if (accept(Symbols.type))
+                        if (accept(Symbols.Type))
                         {
-                            if (accept(Symbols.var))
+                            if (accept(Symbols.Var))
                             {
                             }
                         }
-                        if (accept(Symbols.comma))
+                        if (accept(Symbols.Comma))
                         {
                         }
                         else
@@ -70,13 +70,13 @@ namespace ElasticElmah.Appender.Presentation
                         }
                         return true;
                     }, 1000);
-                    expect(Symbols._rightParanthesis);
-                    if (accept(Symbols._in))
+                    expect(Symbols.RightParanthesis);
+                    if (accept(Symbols.In))
                     {
-                        expect(Symbols.file);
-                        expect(Symbols._colon);
-                        expect(Symbols._line);
-                        expect(Symbols.line);
+                        expect(Symbols.File);
+                        expect(Symbols.Colon);
+                        expect(Symbols.Line);
+                        expect(Symbols.LineNumber);
                     }
                     onExitStackFrame.TapNotNull(a => a());
                 }
@@ -112,7 +112,7 @@ namespace ElasticElmah.Appender.Presentation
             {
                 if (tokens.Length > current)
                     return tokens[current].Type;
-                return Symbols.none;
+                return Symbols.None;
             }
         }
         private void getsym()

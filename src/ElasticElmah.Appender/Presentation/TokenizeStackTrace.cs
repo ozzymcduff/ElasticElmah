@@ -6,25 +6,6 @@ using System.Text.RegularExpressions;
 
 namespace ElasticElmah.Appender.Presentation
 {
-    public enum Symbols
-    {
-        none,
-        unreq,
-        _leftParanthesis,
-        _rightParanthesis,
-        type,
-        var,
-        comma,
-        _in,
-        file,
-        _colon,
-        _line,
-        line,
-        method,
-        type_method_delim,
-        _at,
-
-    }
     public class TokenizeStackTrace
     {
         List<Token> tokens=new List<Token>();
@@ -41,7 +22,7 @@ namespace ElasticElmah.Appender.Presentation
         {
             if (!TryTokenizeAtInLine(str,index,length))
             {
-                AddStr(Symbols.unreq, str, index, length);
+                AddStr(Symbols.Unrecognized, str, index, length);
             }
         }
         
@@ -52,14 +33,14 @@ namespace ElasticElmah.Appender.Presentation
             var m = atTypeMethod.Match(str, index, length);
             if (m.Success)
             {
-                Add(Symbols._at, m.Groups["at"]);
+                Add(Symbols.At, m.Groups["at"]);
                 TokenizeTypeAndMethod(str, m.Groups["typenmethod"].Index, m.Groups["typenmethod"].Length);
-                Add(Symbols._leftParanthesis, m.Groups["left"]);
+                Add(Symbols.LeftParanthesis, m.Groups["left"]);
                 if (!string.IsNullOrEmpty(m.Groups["params"].Value))
                 {
                     TokenizeParams(str, m.Groups["params"].Index, m.Groups["params"].Length);
                 }
-                Add(Symbols._rightParanthesis, m.Groups["right"]);
+                Add(Symbols.RightParanthesis, m.Groups["right"]);
                 TryTokenizeIn(str,m.Groups["rest"].Index,m.Groups["rest"].Length);
                 return true;
             }
@@ -79,7 +60,7 @@ namespace ElasticElmah.Appender.Presentation
                 if (str[j]==chars[0] && str[j+1]==chars[1])
                 {
                     TokenizeParam(str, i, j-i);
-                    AddStr(Symbols.comma,str,j,1);
+                    AddStr(Symbols.Comma,str,j,1);
                     i = j+2;
                 }
             }
@@ -94,10 +75,10 @@ namespace ElasticElmah.Appender.Presentation
             var m = param.Match(str, index, length);
             if (m.Success)
             {
-                Add(Symbols.type, m.Groups["type"]);
+                Add(Symbols.Type, m.Groups["type"]);
                 if (m.Groups["var"].Value.Length > 0)
                 {
-                    Add(Symbols.var, m.Groups["var"]);
+                    Add(Symbols.Var, m.Groups["var"]);
                 }
             }
             else
@@ -120,15 +101,15 @@ namespace ElasticElmah.Appender.Presentation
             var m = inFileLine.Match(str,index,length);
             if (m.Success)
             {
-                Add(Symbols._in, m.Groups["in"]);
-                Add(Symbols.file, m.Groups["file"]);
-                Add(Symbols._colon, m.Groups["delim"]);
-                Add(Symbols._line, m.Groups["line"]);
-                Add(Symbols.line, m.Groups["linenum"]);
+                Add(Symbols.In, m.Groups["in"]);
+                Add(Symbols.File, m.Groups["file"]);
+                Add(Symbols.Colon, m.Groups["delim"]);
+                Add(Symbols.Line, m.Groups["line"]);
+                Add(Symbols.LineNumber, m.Groups["linenum"]);
             }
             else 
             {
-                AddStr(Symbols.unreq, str, index, length);
+                AddStr(Symbols.Unrecognized, str, index, length);
             }
         }
         Regex word = new Regex(@"^(?<word>\w*)$");
@@ -138,7 +119,7 @@ namespace ElasticElmah.Appender.Presentation
             var mm = word.Match(str,index,length);
             if (mm.Success)
             {
-                Add(Symbols.method, mm.Groups["word"]);
+                Add(Symbols.Method, mm.Groups["word"]);
                 return;
             }
 
@@ -152,9 +133,9 @@ namespace ElasticElmah.Appender.Presentation
 ");
             }
 
-            AddStr(Symbols.type, str, index, length-m.Length);
-            Add(Symbols.type_method_delim, m.Groups["tdelim"]);
-            Add(Symbols.method, m.Groups["method"]);
+            AddStr(Symbols.Type, str, index, length-m.Length);
+            Add(Symbols.TypeMethodDelim, m.Groups["tdelim"]);
+            Add(Symbols.Method, m.Groups["method"]);
         }
 
         public static IEnumerable<Token> Tokenize(string str)

@@ -66,20 +66,20 @@ namespace ElasticElmah.Appender.Presentation
         {
             switch (token.Type)
             {
-                case Symbols._at:
-                case Symbols._in:
-                case Symbols._line:
+                case Symbols.At:
+                case Symbols.In:
+                case Symbols.Line:
                     return "st-keyword";
 
-                case Symbols.type:
-                case Symbols.type_method_delim:
+                case Symbols.Type:
+                case Symbols.TypeMethodDelim:
                     return "st-type";
-                case Symbols.method:
+                case Symbols.Method:
                     return "st-method";
-                case Symbols.var:
+                case Symbols.Var:
                     return "st-variable";
-                case Symbols.file:
-                case Symbols._colon:
+                case Symbols.File:
+                case Symbols.Colon:
                     return "st-file";
                 default:
                     return String.Empty;

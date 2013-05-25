@@ -49,6 +49,7 @@
     <Compile Include="IJsonSerializer.cs" />
     <Compile Include="Presentation\ColorizeStackTrace.cs" />
     <Compile Include="Presentation\ParseStackTrace.cs" />
+    <Compile Include="Presentation\Symbols.cs" />
     <Compile Include="Presentation\Token.cs" />
     <Compile Include="Presentation\TokenizeStackTrace.cs" />
     <Compile Include="Search\LogSearchResult.cs" />
