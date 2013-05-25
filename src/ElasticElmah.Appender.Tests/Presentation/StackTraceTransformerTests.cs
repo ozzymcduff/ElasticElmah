@@ -129,6 +129,7 @@ new{ t= Symbols.comma, s= ",",p=132 },
 new{ t= Symbols.type, s= "Boolean",p=134 },
 new{ t= Symbols.var, s= "requiresSynchronization",p=142 },
 new{ t= Symbols._rightParanthesis, s= ")",p=165 },
+new{ t= Symbols.unreq, s="<---",p=166}
             }.Select(t => new Token(t.t, t.s, t.p));
             var res = TokenizeStackTrace.Tokenize(str);
             //Write(res);

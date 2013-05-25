@@ -41,10 +41,7 @@ namespace ElasticElmah.Appender.Presentation
         {
             if (!TryTokenizeAtInLine(str,index,length))
             {
-                //--- End of stack trace from previous location where exception was thrown ---
-                // or message, can be random something
                 AddStr(Symbols.unreq, str, index, length);
-                //throw new Error('Line not req '+str);
             }
         }
         
@@ -128,6 +125,10 @@ namespace ElasticElmah.Appender.Presentation
                 Add(Symbols._colon, m.Groups["delim"]);
                 Add(Symbols._line, m.Groups["line"]);
                 Add(Symbols.line, m.Groups["linenum"]);
+            }
+            else 
+            {
+                AddStr(Symbols.unreq, str, index, length);
             }
         }
         Regex word = new Regex(@"^(?<word>\w*)$");
