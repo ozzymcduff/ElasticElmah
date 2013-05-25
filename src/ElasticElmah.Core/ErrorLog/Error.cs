@@ -5,6 +5,7 @@ using log4net.Core;
 using log4net.Util;
 using System.Collections.Generic;
 using System.Collections;
+using ElasticElmah.Appender.Presentation;
 
 namespace ElasticElmah.Core.ErrorLog
 {
@@ -12,7 +13,6 @@ namespace ElasticElmah.Core.ErrorLog
     /// Represents a logical application error (as opposed to the actual 
     /// exception it may be representing).
     /// </summary>
-    [Serializable]
     public sealed class Error
     {
         private readonly LoggingEventData _data;
@@ -25,43 +25,10 @@ namespace ElasticElmah.Core.ErrorLog
 
         public string Id { get; private set; }
 
-        public Dictionary<string, string> Properties
+        public string Properties
         {
-            get { return Map(_data.Properties); }
+            get { return FormatDictionary.ToTable(_data.Properties); }
         }
-
-        private Dictionary<string, string> Map(PropertiesDictionary propertiesDictionary)
-        {
-            var dic = new Dictionary<string, string>();
-            foreach (var key in propertiesDictionary.GetKeys())
-            {
-                dic.Add(key, MapToString(propertiesDictionary[key]));
-            }
-            return dic;
-        }
-
-        private string MapToString(object p)
-        {
-            if (p == null) 
-            {
-                return string.Empty;
-            }
-            if (p is string) 
-            {
-                return (string)p;
-            }
-            var t = typeof(KeyValuePair<,>);
-            if (p.GetType().GetGenericTypeDefinition()==t) 
-            {
-                return p.ToString();
-            }
-            if (p is IEnumerable) 
-            {
-                return String.Join(", ", ((IEnumerable)p).Cast<Object>().Select(o => MapToString(o)));
-            }
-            throw new NotImplementedException(p.GetType().Name);
-        }
-
 
         /// <summary>
         /// Gets or sets name of host machine where this error occurred.

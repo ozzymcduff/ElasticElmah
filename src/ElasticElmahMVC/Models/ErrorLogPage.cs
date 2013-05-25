@@ -33,20 +33,6 @@ namespace ElasticElmahMVC.Models
 
         public ErrorLogPage OnLoad()
         {
-            //
-            // Get the page index and size parameters within their bounds.
-            //
-
-
-            //
-            // Read the error records.
-            //
-
-
-            //
-            // Set the title of the page.
-            //
-
             string hostName = env.HostName;
             PageTitle = string.Format(
                 hostName.Length > 0

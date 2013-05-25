@@ -16,12 +16,6 @@ using ElasticElmah.Core;
 using ElasticElmah.Appender.Presentation;
 namespace ElasticElmahMVC.Models
 {
-    #region Imports
-
-
-
-    #endregion
-
     /// <summary>
     /// Renders an HTML page displaying details about an error from the 
     /// error log.
@@ -33,7 +27,7 @@ namespace ElasticElmahMVC.Models
 
         private readonly Environment environment;
         private string PageTitle;
-        public Dictionary<string, string> Properties { get { return _errorEntry.Properties; } }
+        public string Properties { get { return _errorEntry.Properties; } }
         public ErrorDetailModel(Error errorLogEntry, Environment environment)
         {
             this.environment = environment;

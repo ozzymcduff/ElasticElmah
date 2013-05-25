@@ -32,24 +32,5 @@
     </p>
 </div>
 <div class="scroll-view">
-    <table>
-        <thead>
-            <tr>
-                <th class="name-col">Name</th>
-                <th class="value-col">Value</th>
-            </tr>
-        </thead>
-        <tbody>
-            @{
-                int count = 0;
-            }
-            @foreach (var kv in Model.Properties)
-            {
-                <tr class="@(count++%2==0? "even-row" : "odd-row")">
-                    <td class="key-col">@kv.Key</td>
-                    <td class="value-col">@kv.Value</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    @Html.Raw(Model.Properties)
 </div>

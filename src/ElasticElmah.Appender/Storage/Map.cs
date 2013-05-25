@@ -66,7 +66,7 @@ namespace ElasticElmah.Appender.Storage
             return d;
         }
 
-        private static Dictionary<string, object> To(PropertiesDictionary p)
+        public static Dictionary<string, object> To(PropertiesDictionary p)
         {
             var d = new Dictionary<string, object>();
             foreach (var key in p.GetKeys())
@@ -76,7 +76,7 @@ namespace ElasticElmah.Appender.Storage
             return d;
         }
 
-        private static PropertiesDictionary To(Dictionary<string, object> dictionary)
+        public static PropertiesDictionary To(Dictionary<string, object> dictionary)
         {
             var dic = new PropertiesDictionary();
             foreach (var item in dictionary)
