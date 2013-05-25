@@ -1,7 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Express 2012 for Web
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElasticElmah.Core", "ElasticElmah.Core\ElasticElmah.Core.csproj", "{78D25C0C-BE6B-4771-B0D1-11B7277329E4}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElasticElmahMVC", "ElasticElmahMVC\ElasticElmahMVC.csproj", "{04CD023A-1822-43DA-82A7-D87863E613ED}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElasticElmah.Appender", "ElasticElmah.Appender\ElasticElmah.Appender.csproj", "{C9EA9975-0609-4330-A69F-B8C608A46E28}"
@@ -32,18 +30,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{78D25C0C-BE6B-4771-B0D1-11B7277329E4}.Debug|.NET.ActiveCfg = Debug|Any CPU
-		{78D25C0C-BE6B-4771-B0D1-11B7277329E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{78D25C0C-BE6B-4771-B0D1-11B7277329E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{78D25C0C-BE6B-4771-B0D1-11B7277329E4}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{78D25C0C-BE6B-4771-B0D1-11B7277329E4}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{78D25C0C-BE6B-4771-B0D1-11B7277329E4}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{78D25C0C-BE6B-4771-B0D1-11B7277329E4}.Release|.NET.ActiveCfg = Release|Any CPU
-		{78D25C0C-BE6B-4771-B0D1-11B7277329E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{78D25C0C-BE6B-4771-B0D1-11B7277329E4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{78D25C0C-BE6B-4771-B0D1-11B7277329E4}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{78D25C0C-BE6B-4771-B0D1-11B7277329E4}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{78D25C0C-BE6B-4771-B0D1-11B7277329E4}.Release|x86.ActiveCfg = Release|Any CPU
 		{04CD023A-1822-43DA-82A7-D87863E613ED}.Debug|.NET.ActiveCfg = Debug|Any CPU
 		{04CD023A-1822-43DA-82A7-D87863E613ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{04CD023A-1822-43DA-82A7-D87863E613ED}.Debug|Any CPU.Build.0 = Debug|Any CPU

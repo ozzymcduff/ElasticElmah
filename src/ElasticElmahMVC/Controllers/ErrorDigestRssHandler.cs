@@ -11,6 +11,7 @@ using ElasticElmah.Core.ErrorLog;
 using ElasticElmah.Core.Infrastructure;
 using ElasticElmahMVC.Code;
 using Environment = ElasticElmahMVC.Code.Environment;
+using ElasticElmah.Appender.Search;
 
 namespace ElasticElmahMVC.Controllers
 {
@@ -30,10 +31,10 @@ namespace ElasticElmahMVC.Controllers
         public const int pageSize = 30;
         public const int maxPageLimit = 30;
 
-        private readonly IList<Error> entries;
+        private readonly IList<LogWithId> entries;
         private readonly Environment environment;
 
-        public ErrorDigestRssHandler(Environment environment, IList<Error> entries)
+        public ErrorDigestRssHandler(Environment environment, IList<LogWithId> entries)
         {
             this.entries = entries;
             this.environment = environment;
@@ -88,10 +89,10 @@ namespace ElasticElmahMVC.Controllers
             var sb = new StringBuilder();
             var writer = new HtmlTextWriter(new StringWriter(sb));
 
-            foreach (Error entry in entries)
+            foreach (LogWithId entry in entries)
             {
-                Error error = entry;
-                DateTime time = error.Time.ToUniversalTime();
+                var error = entry;
+                DateTime time = error.Data.TimeStamp.ToUniversalTime();
                 var day = new DateTime(time.Year, time.Month, time.Day);
 
                 //
@@ -148,20 +149,21 @@ namespace ElasticElmahMVC.Controllers
             writer.RenderBeginTag(HtmlTextWriterTag.Ul);
         }
 
-        private void RenderError(HttpServerUtilityBase Server, HtmlTextWriter writer, Error entry, Uri baseUrl)
+        private void RenderError(HttpServerUtilityBase Server, HtmlTextWriter writer, LogWithId entry, Uri baseUrl)
         {
-            Error error = entry;
+            var error = entry;
             writer.RenderBeginTag(HtmlTextWriterTag.Li);
 
             string errorType = ErrorDisplay.HumaneExceptionErrorType(error);
 
             if (errorType.Length > 0)
             {
-                bool abbreviated = errorType.Length < error.Type.Length;
+                var type = (error.Data.LocationInfo != null ? error.Data.LocationInfo.ClassName : string.Empty);
+                bool abbreviated = errorType.Length < type.Length;
 
                 if (abbreviated)
                 {
-                    writer.AddAttribute(HtmlTextWriterAttribute.Title, error.Type);
+                    writer.AddAttribute(HtmlTextWriterAttribute.Title, type);
                     writer.RenderBeginTag(HtmlTextWriterTag.Span);
                 }
 
@@ -175,7 +177,7 @@ namespace ElasticElmahMVC.Controllers
 
             writer.AddAttribute(HtmlTextWriterAttribute.Href, baseUrl + "/detail?id=" + HttpUtility.UrlEncode(entry.Id));
             writer.RenderBeginTag(HtmlTextWriterTag.A);
-            Server.HtmlEncode(error.Message, writer);
+            Server.HtmlEncode(error.Data.Message, writer);
             writer.RenderEndTag( /* a */);
 
             writer.RenderEndTag( /* li */);

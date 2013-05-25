@@ -5,15 +5,10 @@ using ElasticElmah.Core;
 using ElasticElmah.Core.ErrorLog;
 using ElasticElmah.Core.Infrastructure;
 using ElasticElmahMVC.Code;
+using ElasticElmah.Appender.Search;
 
 namespace ElasticElmahMVC.Controllers
 {
-    #region Imports
-
-    
-
-    #endregion
-
     /// <summary>
     /// Renders a XML using the RSS 0.91 vocabulary that displays, at most,
     /// the 15 most recent errors recorded in the error log.
@@ -23,9 +18,9 @@ namespace ElasticElmahMVC.Controllers
         public const int pageSize = 15;
 
         private readonly Environment environment;
-        private readonly IList<Error> errorEntryList;
+        private readonly IList<LogWithId> errorEntryList;
 
-        public ErrorRssHandler(Environment environment, IList<Error> errorEntryList)
+        public ErrorRssHandler(Environment environment, IList<LogWithId> errorEntryList)
         {
             this.errorEntryList = errorEntryList;
             this.environment = environment;
@@ -69,15 +64,15 @@ namespace ElasticElmahMVC.Controllers
 
             for (int index = 0; index < errorEntryList.Count; index++)
             {
-                Error errorEntry = errorEntryList[index];
-                Error error = errorEntry;
+                var errorEntry = errorEntryList[index];
+                var error = errorEntry;
 
                 var item = new Item();
 
-                item.title = error.Message;
-                item.description = "An error of type " + error.Type + " occurred. " + error.Message;
+                item.title = error.Data.Message;
+                item.description = "An error of type " + error.Data.LocationInfo != null ? error.Data.LocationInfo.ClassName : string.Empty + " occurred. " + error.Data.Message;
                 item.link = channel.link + "/detail?id=" + HttpUtility.UrlEncode(errorEntry.Id);
-                item.pubDate = error.Time.ToUniversalTime().ToString("r");
+                item.pubDate = error.Data.TimeStamp.ToUniversalTime().ToString("r");
 
                 channel.item[index] = item;
             }

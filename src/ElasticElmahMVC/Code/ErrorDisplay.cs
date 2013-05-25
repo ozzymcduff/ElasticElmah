@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using ElasticElmah.Core.ErrorLog;
+using ElasticElmah.Appender.Search;
 
 namespace ElasticElmahMVC.Code
 {
@@ -69,12 +70,14 @@ namespace ElasticElmahMVC.Code
         /// Formats the error type of an <see cref="Error"/> object in a 
         /// short and human-readable form.
         /// </summary>
-        public static string HumaneExceptionErrorType(Error error)
+        public static string HumaneExceptionErrorType(LogWithId error)
         {
             if (error == null)
                 throw new ArgumentNullException("error");
 
-            return HumaneExceptionErrorType(error.Type);
+            return HumaneExceptionErrorType(error.Data.LocationInfo != null 
+                ? error.Data.LocationInfo.ClassName 
+                : string.Empty);
         }
     }
 }

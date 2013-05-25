@@ -113,6 +113,15 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Code\ErrorLog\ElasticErrorLog.cs" />
+    <Compile Include="Code\ErrorLog\ErrorLog.cs" />
+    <Compile Include="Code\Infrastructure\Build.cs" />
+    <Compile Include="Code\Infrastructure\InvariantStringArray.cs" />
+    <Compile Include="Code\Infrastructure\Mask.cs" />
+    <Compile Include="Code\Infrastructure\XmlSerializer.cs" />
+    <Compile Include="Code\Infrastructure\XmlText.cs" />
+    <Compile Include="Code\RichSiteSummary.cs" />
+    <Compile Include="Code\TestException.cs" />
     <Compile Include="Filters\HandleWithLog4netFilter.cs" />
     <Compile Include="Filters\RequireLocalFilter.cs" />
     <Compile Include="Code\Helper.cs" />
@@ -169,10 +178,6 @@
     <ProjectReference Include="..\ElasticElmah.Appender\ElasticElmah.Appender.csproj">
       <Project>{C9EA9975-0609-4330-A69F-B8C608A46E28}</Project>
       <Name>ElasticElmah.Appender</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ElasticElmah.Core\ElasticElmah.Core.csproj">
-      <Project>{78d25c0c-be6b-4771-b0d1-11b7277329e4}</Project>
-      <Name>ElasticElmah.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

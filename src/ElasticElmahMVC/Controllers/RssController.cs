@@ -2,7 +2,7 @@
 using ElasticElmah.Core.ErrorLog;
 using ElasticElmahMVC.Code;
 using System.Threading.Tasks;
-
+using System.Linq;
 namespace ElasticElmahMVC.Controllers
 {
     public class RssController : Controller
@@ -14,14 +14,14 @@ namespace ElasticElmahMVC.Controllers
         {
             var errorlog = Helper.GetDefault(HttpContext);
             var errors = await errorlog.GetErrorsAsync(0, ErrorDigestRssHandler.pageSize);
-            return new ErrorRssHandler(new Environment(HttpContext), errors.Entries);
+            return new ErrorRssHandler(new Environment(HttpContext), errors.Hits.ToArray());
         }
 
         public async Task<ActionResult> Digest()
         {
             var errorlog = Helper.GetDefault(HttpContext);
             var errors = await errorlog.GetErrorsAsync(0, ErrorDigestRssHandler.pageSize);
-            return new ErrorDigestRssHandler(new Environment(HttpContext), errors.Entries);
+            return new ErrorDigestRssHandler(new Environment(HttpContext), errors.Hits.ToArray());
         }
     }
 }

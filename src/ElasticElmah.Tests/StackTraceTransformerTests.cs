@@ -10,7 +10,6 @@ using IgnoreAttribute = Microsoft.VisualStudio.TestTools.UnitTesting.IgnoreAttri
 using SetUpAttribute = Microsoft.VisualStudio.TestTools.UnitTesting.TestInitializeAttribute;
 using TearDownAttribute = Microsoft.VisualStudio.TestTools.UnitTesting.TestCleanupAttribute;
 using TestFixtureAttribute = Microsoft.VisualStudio.TestTools.UnitTesting.TestClassAttribute;
-using ElasticElmah.Core;
 using System.Text.RegularExpressions;
 using ElasticElmah.Appender.Presentation;
 using ElasticElmah.Appender.Tests.Presentation;

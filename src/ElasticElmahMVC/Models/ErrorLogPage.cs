@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Globalization;
 using System.IO;
 using System.Web;
@@ -7,6 +8,7 @@ using System.Web.UI.WebControls;
 using ElasticElmah.Core.ErrorLog;
 using ElasticElmahMVC.Code;
 using Environment = ElasticElmahMVC.Code.Environment;
+using ElasticElmah.Appender.Search;
 
 namespace ElasticElmahMVC.Models
 {
@@ -17,13 +19,16 @@ namespace ElasticElmahMVC.Models
     {
         private readonly Environment env;
 
-        private readonly ErrorLog.Errors errors;
+        private readonly LogSearchResult errors;
         private string PageTitle;
-
-        public ErrorLogPage(Environment env, ErrorLog.Errors errors)
+        private int pageIndex;
+        private int pageSize;
+        public ErrorLogPage(Environment env, LogSearchResult errors, int pageIndex, int pageSize)
         {
             this.env = env;
             this.errors = errors;
+            this.pageIndex = pageIndex;
+            this.pageSize = pageSize;
         }
 
         public string BasePageName
@@ -38,7 +43,7 @@ namespace ElasticElmahMVC.Models
                 hostName.Length > 0
                     ? "Error log for {0} on {2} (Page #{1})"
                     : "Error log for {0} (Page #{1})",
-                env.ApplicationName, (errors.pageIndex + 1).ToString("N0"), hostName);
+                env.ApplicationName, (pageIndex + 1).ToString("N0"), hostName);
             return this;
         }
 
@@ -77,7 +82,7 @@ namespace ElasticElmahMVC.Models
                 SpeedBar.Help,
                 SpeedBar.About.Format(BasePageName)));
 
-            if (errors.Entries.Count != 0)
+            if (errors.Hits.Count() != 0)
             {
                 //
                 // Write error number range displayed on this page and the
@@ -126,8 +131,8 @@ namespace ElasticElmahMVC.Models
 
             writer.RenderBeginTag(HtmlTextWriterTag.P);
 
-            int nextPageIndex = errors.pageIndex + 1;
-            bool moreErrors = nextPageIndex*errors.pageSize < errors.Total;
+            int nextPageIndex = pageIndex + 1;
+            bool moreErrors = nextPageIndex*pageSize < errors.Total;
 
             if (moreErrors)
                 RenderLinkToPage(writer, HtmlLinkType.Next, "Next errors", nextPageIndex);
@@ -136,7 +141,7 @@ namespace ElasticElmahMVC.Models
             // If not on the first page then render a link to the firs page.
             //
 
-            if (errors.pageIndex > 0 && errors.Total > 0)
+            if (pageIndex > 0 && errors.Total > 0)
             {
                 if (moreErrors)
                     writer.Write("; ");
@@ -175,15 +180,15 @@ namespace ElasticElmahMVC.Models
 
         private void RenderStats(HtmlTextWriter writer)
         {
-            int firstErrorNumber = errors.pageIndex*errors.pageSize + 1;
-            int lastErrorNumber = firstErrorNumber + errors.Entries.Count - 1;
-            var totalPages = (int) Math.Ceiling((double) errors.Total/errors.pageSize);
+            int firstErrorNumber = pageIndex*pageSize + 1;
+            int lastErrorNumber = firstErrorNumber + errors.Hits.Count() - 1;
+            var totalPages = (int) Math.Ceiling((double) errors.Total/pageSize);
 
             writer.Write("Errors {0} to {1} of total {2} (page {3} of {4}). ",
                          firstErrorNumber.ToString("N0"),
                          lastErrorNumber.ToString("N0"),
                          errors.Total.ToString("N0"),
-                         (errors.pageIndex + 1).ToString("N0"),
+                         (pageIndex + 1).ToString("N0"),
                          totalPages.ToString("N0"));
         }
 
@@ -239,7 +244,7 @@ namespace ElasticElmahMVC.Models
             // However, if there are error in the log
             //
 
-            if (errors.pageIndex > 0 && errors.Total > 0)
+            if (pageIndex > 0 && errors.Total > 0)
             {
                 RenderLinkToPage(writer, HtmlLinkType.Start, "Go to first page", 0);
                 writer.Write(". ");
@@ -278,11 +283,11 @@ namespace ElasticElmahMVC.Models
             //
             // Generate a table body row for each error.
             //
-
-            for (int errorIndex = 0; errorIndex < errors.Entries.Count; errorIndex++)
+            var hits = errors.Hits.ToArray();
+            for (int errorIndex = 0; errorIndex < hits.Length; errorIndex++)
             {
-                Error errorEntry = errors.Entries[errorIndex];
-                Error error = errorEntry;
+                var errorEntry = hits[errorIndex];
+                var error = errorEntry;
 
                 var bodyRow = new TableRow();
                 bodyRow.CssClass = errorIndex%2 == 0 ? "even-row" : "odd-row";
@@ -290,11 +295,11 @@ namespace ElasticElmahMVC.Models
                 //
                 // Format host and status code cells.
                 //
-
-                bodyRow.Cells.Add(FormatCell(new TableCell(), error.HostName, "host-col"));
+                var type = error.Data.LocationInfo != null ? error.Data.LocationInfo.ClassName : string.Empty;
+                bodyRow.Cells.Add(FormatCell(new TableCell(), error.Data.Domain, "host-col"));
                 //bodyRow.Cells.Add(FormatCell(new TableCell(), error.StatusCode.ToString(), "code-col", Mask.NullString(HttpWorkerRequest.GetStatusDescription(error.StatusCode))));
                 bodyRow.Cells.Add(FormatCell(new TableCell(), ErrorDisplay.HumaneExceptionErrorType(error), "type-col",
-                                             error.Type));
+                                             type));
 
                 //
                 // Format the message cell, which contains the message 
@@ -306,7 +311,7 @@ namespace ElasticElmahMVC.Models
                 messageCell.CssClass = "error-col";
 
                 var messageLabel = new Label();
-                messageLabel.Text = HttpContext.Current.Server.HtmlEncode(error.Message);
+                messageLabel.Text = HttpContext.Current.Server.HtmlEncode(error.Data.Message);
 
                 var detailsLink = new HyperLink();
                 detailsLink.NavigateUrl = BasePageName + "/detail?id=" + HttpUtility.UrlEncode(errorEntry.Id);
@@ -322,11 +327,11 @@ namespace ElasticElmahMVC.Models
                 // Format the user, date and time cells.
                 //
 
-                bodyRow.Cells.Add(FormatCell(new TableCell(), error.User, "user-col"));
-                bodyRow.Cells.Add(FormatCell(new TableCell(), error.Time.ToShortDateString(), "date-col",
-                                             error.Time.ToLongDateString()));
-                bodyRow.Cells.Add(FormatCell(new TableCell(), error.Time.ToShortTimeString(), "time-col",
-                                             error.Time.ToLongTimeString()));
+                bodyRow.Cells.Add(FormatCell(new TableCell(), error.Data.UserName, "user-col"));
+                bodyRow.Cells.Add(FormatCell(new TableCell(), error.Data.TimeStamp.ToShortDateString(), "date-col",
+                                             error.Data.TimeStamp.ToLongDateString()));
+                bodyRow.Cells.Add(FormatCell(new TableCell(), error.Data.TimeStamp.ToShortTimeString(), "time-col",
+                                             error.Data.TimeStamp.ToLongTimeString()));
 
                 //
                 // Finally, add the row to the table.
@@ -374,7 +379,7 @@ namespace ElasticElmahMVC.Models
 
         private void RenderLinkToPage(HtmlTextWriter writer, string type, string text, int pageIndex)
         {
-            RenderLinkToPage(writer, type, text, pageIndex, errors.pageSize);
+            RenderLinkToPage(writer, type, text, pageIndex, pageSize);
         }
 
         private void RenderLinkToPage(HtmlTextWriter writer, string type, string text, int pageIndex, int pageSize)
@@ -399,7 +404,7 @@ namespace ElasticElmahMVC.Models
 
         public bool FirstPage()
         {
-            return errors.pageIndex == 0;
+            return pageIndex == 0;
         }
     }
 }

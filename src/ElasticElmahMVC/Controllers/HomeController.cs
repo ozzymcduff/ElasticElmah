@@ -33,7 +33,7 @@ namespace ElasticElmahMVC.Controllers
             var env = new Environment(HttpContext);
             ViewBag.ErrorLog = errorlog;
             var errors = await errorlog.GetErrorsAsync(_pageIndex, _pageSize);
-            return View(new ErrorLogPage(env, errors).OnLoad());
+            return View(new ErrorLogPage(env, errors, _pageIndex, _pageSize).OnLoad());
         }
 
         public ActionResult About()

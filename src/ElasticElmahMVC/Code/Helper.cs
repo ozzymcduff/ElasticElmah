@@ -15,18 +15,18 @@ namespace ElasticElmahMVC.Code
             _context = context;
         }
 
-        public static ErrorLog GetDefault(HttpContextBase context)
+        public static IErrorLog GetDefault(HttpContextBase context)
         {
             return GetDefaultImpl(context);
         }
 
-        internal static ErrorLog GetDefaultImpl(HttpContextBase context)
+        internal static IErrorLog GetDefaultImpl(HttpContextBase context)
         {
-            ErrorLog log;
+            IErrorLog log;
 
             if (context != null)
             {
-                log = (ErrorLog) context.Items[_contextKey];
+                log = (IErrorLog) context.Items[_contextKey];
 
                 if (log != null)
                     return log;
