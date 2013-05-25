@@ -9,7 +9,7 @@ namespace ElasticElmah.Appender.Presentation
     public class ColorizeStackTrace
     {
         ParseStackTrace parser;
-        StringBuilder sb;
+        StringBuilder writer;
         
         public ColorizeStackTrace(string stacktrace)
         {
@@ -17,14 +17,14 @@ namespace ElasticElmah.Appender.Presentation
             parser.onEnterStackFrame += onEnterStackFrame;
             parser.onExitStackFrame += onExitStackFrame;
             parser.onWhiteSpace += onWhiteSpace;
-            sb = new StringBuilder();
+            writer = new StringBuilder();
             parser.onAccept += onAccept;
 
         }
 
         void onWhiteSpace(string obj)
         {
-            sb.Append(HtmlEncode(obj));
+            writer.Append(HtmlEncode(obj));
         }
 
         private string HtmlEncode(string val) 
@@ -35,7 +35,7 @@ namespace ElasticElmah.Appender.Presentation
         public string Html() 
         {
             parser.Parse();
-            return sb.ToString();
+            return writer.ToString();
         }
 
         void onAccept(Token obj)
@@ -43,23 +43,23 @@ namespace ElasticElmah.Appender.Presentation
             var classOf = GetClassOf(obj);
             if (string.IsNullOrEmpty(classOf))
             {
-                sb.Append(HtmlEncode(obj.Value));
+                writer.Append(HtmlEncode(obj.Value));
             }
             else
             {
-                sb.AppendFormat("<span class=\"{0}\">",classOf);
-                sb.Append(HtmlEncode(obj.Value));
-                sb.Append("</span>");
+                writer.AppendFormat("<span class=\"{0}\">",classOf);
+                writer.Append(HtmlEncode(obj.Value));
+                writer.Append("</span>");
             }
         }
         void onEnterStackFrame()
         {
-            sb.Append("<span class=\"st-frame\">");
+            writer.Append("<span class=\"st-frame\">");
         }
 
         void onExitStackFrame()
         {
-            sb.Append("</span>");
+            writer.Append("</span>");
         }
 
         public string GetClassOf(Token token)
