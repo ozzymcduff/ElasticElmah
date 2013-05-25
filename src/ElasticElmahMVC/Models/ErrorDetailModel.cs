@@ -13,6 +13,7 @@ using log4net.Core;
 using System.Collections.Generic;
 using System.Linq;
 using ElasticElmah.Core;
+using ElasticElmah.Appender.Presentation;
 namespace ElasticElmahMVC.Models
 {
     #region Imports
@@ -32,12 +33,10 @@ namespace ElasticElmahMVC.Models
 
         private readonly Environment environment;
         private string PageTitle;
-        private StackTraceTransformer stacktracetransform;
         public Dictionary<string, string> Properties { get { return _errorEntry.Properties; } }
         public ErrorDetailModel(Error errorLogEntry, Environment environment)
         {
             this.environment = environment;
-            this.stacktracetransform = new StackTraceTransformer();
             _errorEntry = errorLogEntry;
             PageTitle = string.Format("Error: {0} [{1}]", _errorEntry.Type, _errorEntry.Id);
         }
@@ -52,7 +51,12 @@ namespace ElasticElmahMVC.Models
         //
         public string Detail
         {
-            get { return MarkupStackTrace(_errorEntry.Detail); }
+            get
+            {
+                return string.IsNullOrEmpty(_errorEntry.Data.ExceptionString)
+                    ? _errorEntry.Data.Message
+                    : new ColorizeStackTrace(_errorEntry.Data.ExceptionString).Html();
+            }
         }
 
         // Write out the error log time. This will be in the local
@@ -84,115 +88,5 @@ namespace ElasticElmahMVC.Models
             get { return _errorEntry.Message; }
         }
 
-        private string MarkupStackTrace(string text)
-        {
-            var writer = new StringWriter();
-
-
-            foreach (var match in this.stacktracetransform.Match(text))
-            {
-                HtmlEncode(match.First, writer);
-                MarkupStackFrame(text, match, writer);
-            }
-
-            //HtmlEncode(text.Substring(anchor), writer);
-            return writer.ToString();
-        }
-
-        private void MarkupStackFrame(string text, StackTraceTransformer.MyClass match, TextWriter writer)
-        {
-            int anchor = match.Index;
-            GroupCollection groups = match.Groups;
-
-            //
-            // Type + Method
-            //
-
-            Group type = groups["type"];
-            HtmlEncode(text.Substring(anchor, type.Index - anchor), writer);
-            anchor = type.Index;
-            writer.Write("<span class='st-frame'>");
-            anchor = StackFrameSpan(text, anchor, "st-type", type, writer);
-            anchor = StackFrameSpan(text, anchor, "st-method", groups["method"], writer);
-
-            //
-            // Parameters
-            //
-
-            Group parameters = groups["params"];
-            HtmlEncode(text.Substring(anchor, parameters.Index - anchor), writer);
-            writer.Write("<span class='st-params'>(");
-            int position = 0;
-            foreach (string parameter in parameters.Captures[0].Value.Split(','))
-            {
-                int spaceIndex = parameter.LastIndexOf(' ');
-                if (spaceIndex <= 0)
-                {
-                    Span(writer, "st-param", parameter.Trim());
-                }
-                else
-                {
-                    if (position++ > 0)
-                        writer.Write(", ");
-                    string argType = parameter.Substring(0, spaceIndex).Trim();
-                    Span(writer, "st-param-type", argType);
-                    writer.Write(' ');
-                    string argName = parameter.Substring(spaceIndex + 1).Trim();
-                    Span(writer, "st-param-name", argName);
-                }
-            }
-            writer.Write(")</span>");
-            anchor = parameters.Index + parameters.Length;
-
-            //
-            // File + Line
-            //
-
-            anchor = StackFrameSpan(text, anchor, "st-file", groups["file"], writer);
-            anchor = StackFrameSpan(text, anchor, "st-line", groups["line"], writer);
-
-            writer.Write("</span>");
-
-            //
-            // Epilogue
-            //
-
-            int end = match.Index + match.Length;
-            HtmlEncode(text.Substring(anchor, end - anchor), writer);
-        }
-
-        private int StackFrameSpan(string text, int anchor, string klass, Group group, TextWriter writer)
-        {
-            return group.Success
-                       ? StackFrameSpan(text, anchor, klass, group.Value, group.Index, group.Length, writer)
-                       : anchor;
-        }
-
-        private int StackFrameSpan(string text, int anchor, string klass, string value, int index, int length,
-                                   TextWriter writer)
-        {
-            HtmlEncode(text.Substring(anchor, index - anchor), writer);
-            Span(writer, klass, value);
-            return index + length;
-        }
-
-        private void Span(TextWriter writer, string klass, string value)
-        {
-            writer.Write("<span class='");
-            writer.Write(klass);
-            writer.Write("'>");
-            HtmlEncode(value, writer);
-            writer.Write("</span>");
-        }
-
-        private string HtmlEncode(string text)
-        {
-            return HttpContext.Current.Server.HtmlEncode(text);
-        }
-
-        private void HtmlEncode(string text, TextWriter writer)
-        {
-            HttpContext.Current.Server.HtmlEncode(text, writer);
-        }
     }
 }

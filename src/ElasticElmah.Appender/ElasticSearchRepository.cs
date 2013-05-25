@@ -310,6 +310,12 @@ namespace ElasticElmah.Appender
             tapaction(that);
             return that;
         }
+        public static T TapNotNull<T>(this T that, Action<T> tapaction) where T : class
+        {
+            if (that!=null)
+                tapaction(that);
+            return that;
+        }
     }
 
 }

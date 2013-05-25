@@ -52,13 +52,16 @@
   <ItemGroup>
     <Compile Include="AppenderOnWrongHostTests.cs" />
     <Compile Include="AppenderTests.cs" />
+    <Compile Include="Presentation\TestData.cs" />
+    <Compile Include="Presentation\ColorizationTests.cs" />
+    <Compile Include="Presentation\ParseStackTraceTests.cs" />
     <Compile Include="RepositoryTests.cs" />
     <Compile Include="RepositoryTestsWithDefaultJson.cs" />
     <Compile Include="RepositoryTestsWithNewtonSoftJson.cs" />
     <Compile Include="Helpers\Json.cs" />
     <Compile Include="JsonSerializerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StackTraceTransformerTests.cs" />
+    <Compile Include="Presentation\StackTraceTransformerTests.cs" />
     <Compile Include="WrappedNewtonsoft.cs" />
   </ItemGroup>
   <ItemGroup>

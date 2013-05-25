@@ -29,7 +29,7 @@ namespace ElasticElmah.Tests
         }
 
         [Test]
-        public void Should_throw()
+        public override void Should_throw()
         {
             base.Should_throw();
         }

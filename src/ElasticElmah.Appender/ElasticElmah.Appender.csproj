@@ -47,8 +47,10 @@
     <Compile Include="ElasticSearchRepository.cs" />
     <Compile Include="ElasticSearchWebAppender.cs" />
     <Compile Include="IJsonSerializer.cs" />
+    <Compile Include="Presentation\ColorizeStackTrace.cs" />
+    <Compile Include="Presentation\ParseStackTrace.cs" />
     <Compile Include="Presentation\Token.cs" />
-    <Compile Include="Presentation\StackTraceTransformer.cs" />
+    <Compile Include="Presentation\TokenizeStackTrace.cs" />
     <Compile Include="Search\LogSearchResult.cs" />
     <Compile Include="Search\LogWithId.cs" />
     <Compile Include="Storage\LogEventLocation.cs" />

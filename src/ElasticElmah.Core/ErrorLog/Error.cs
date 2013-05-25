@@ -98,20 +98,6 @@ namespace ElasticElmah.Core.ErrorLog
         }
 
         /// <summary>
-        /// Gets or sets a detailed text describing the error, such as a
-        /// stack trace.
-        /// </summary>
-        public string Detail
-        {
-            get 
-            {
-                return string.IsNullOrEmpty(_data.ExceptionString)
-                    ?_data.Message
-                    :_data.ExceptionString; 
-            }
-        }
-
-        /// <summary>
         /// Gets or sets the user logged into the application at the time 
         /// of the error.
         /// </summary>

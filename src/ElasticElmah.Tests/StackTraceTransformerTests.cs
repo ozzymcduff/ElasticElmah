@@ -12,6 +12,8 @@ using TearDownAttribute = Microsoft.VisualStudio.TestTools.UnitTesting.TestClean
 using TestFixtureAttribute = Microsoft.VisualStudio.TestTools.UnitTesting.TestClassAttribute;
 using ElasticElmah.Core;
 using System.Text.RegularExpressions;
+using ElasticElmah.Appender.Presentation;
+using ElasticElmah.Appender.Tests.Presentation;
 
 namespace ElasticElmah.Tests
 {
@@ -35,11 +37,9 @@ Parameter name: httpContext
    at System.Web.Mvc.Async.AsyncControllerActionInvoker.EndInvokeActionMethod(IAsyncResult asyncResult)
    at System.Web.Mvc.Async.AsyncControllerActionInvoker.<>c__DisplayClass37.<>c__DisplayClass39.<BeginInvokeActionMethodWithFilters>b__33()
    at System.Web.Mvc.Async.AsyncControllerActionInvoker.<>c__DisplayClass4f.<InvokeActionMethodFilterAsynchronously>b__49()";
-        private StackTraceTransformer transfomer;
         [SetUp]
         public void Init()
         {
-            transfomer = new StackTraceTransformer();
         }
 
         [TearDown]
@@ -62,16 +62,22 @@ Parameter name: httpContext
             base.Line_without_var_name_in_parameter();
         }
         [Test]
+        public override void Lines()
+        {
+            base.Lines();
+        }
+        [Test]
         public void ReadAppend()
         {
-            var tokens = ElasticElmah.Appender.Presentation.StackTraceTransformer.Tokenize(argumentnullexception);
+            var tokens = ElasticElmah.Appender.Presentation.TokenizeStackTrace.Tokenize(argumentnullexception);
             Console.WriteLine(tokens);
         }
-
-        private static void WriteGroup(StackTraceTransformer.MyClass item, string name)
+        
+        [Test]
+        public override void Another_wierd_line()
         {
-            Console.WriteLine(name+":");
-            Console.WriteLine(item.Groups[name]);
+            base.Another_wierd_line();
         }
+
     }
 }

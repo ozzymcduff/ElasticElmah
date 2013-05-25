@@ -6,19 +6,35 @@ using System.Text.RegularExpressions;
 
 namespace ElasticElmah.Appender.Presentation
 {
-    public class StackTraceTransformer
+    public enum Symbols
+    {
+        none,
+        unreq,
+        _leftParanthesis,
+        _rightParanthesis,
+        type,
+        var,
+        comma,
+        _in,
+        file,
+        _colon,
+        _line,
+        line,
+        method,
+        type_method_delim,
+        _at,
+
+    }
+    public class TokenizeStackTrace
     {
         List<Token> tokens=new List<Token>();
-        int position = 0;
-        void Add(string type, string value, int index, int length)
+        void AddStr(Symbols type, string value, int index, int length)
         {
-            tokens.Add(new Token(type, value.Substring(index,length), position));
-            position = index+ length;
+            tokens.Add(new Token(type, value.Substring(index,length), index));
         }
-        void Add(string type, Group value)
+        void Add(Symbols type, Group value)
         {
             tokens.Add(new Token(type, value.Value, value.Index));
-            position = value.Index + value.Length;
         }
         
         void TokenizeLine(string str, int index, int length)
@@ -27,7 +43,7 @@ namespace ElasticElmah.Appender.Presentation
             {
                 //--- End of stack trace from previous location where exception was thrown ---
                 // or message, can be random something
-                Add("unreq", str, position, length);
+                AddStr(Symbols.unreq, str, index, length);
                 //throw new Error('Line not req '+str);
             }
         }
@@ -39,14 +55,14 @@ namespace ElasticElmah.Appender.Presentation
             var m = atTypeMethod.Match(str, index, length);
             if (m.Success)
             {
-                Add("_at", m.Groups["at"]);
+                Add(Symbols._at, m.Groups["at"]);
                 TokenizeTypeAndMethod(str, m.Groups["typenmethod"].Index, m.Groups["typenmethod"].Length);
-                Add("_(", m.Groups["left"]);
+                Add(Symbols._leftParanthesis, m.Groups["left"]);
                 if (!string.IsNullOrEmpty(m.Groups["params"].Value))
                 {
                     TokenizeParams(str, m.Groups["params"].Index, m.Groups["params"].Length);
                 }
-                Add("_)", m.Groups["right"]);
+                Add(Symbols._rightParanthesis, m.Groups["right"]);
                 TryTokenizeIn(str,m.Groups["rest"].Index,m.Groups["rest"].Length);
                 return true;
             }
@@ -55,27 +71,45 @@ namespace ElasticElmah.Appender.Presentation
                 return false;
             }
         }
-        Regex param = new Regex(@"^(\s*)(?<type>\w*)(?<ws2>\s*)(?<var>[^, ]*)(\s*)(?<comma>,?)");
+        Regex param = new Regex(@"^(\s*)(?<type>[^ ]*)(\s*)(?<var>[^ ]*)(\s*)");
 
         void TokenizeParams(string str, int index, int length)
+        {
+            var i = index;
+            var chars = new[] { ',', ' ' };
+            for (int j = index; j < index+length; j++)
+            {
+                if (str[j]==chars[0] && str[j+1]==chars[1])
+                {
+                    TokenizeParam(str, i, j-i);
+                    AddStr(Symbols.comma,str,j,1);
+                    i = j+2;
+                }
+            }
+            if (i < index+length)
+            {
+                TokenizeParam(str, i, index+length-i);
+            }
+        }
+
+        private void TokenizeParam(string str, int index, int length)
         {
             var m = param.Match(str, index, length);
             if (m.Success)
             {
-                Add("type", m.Groups["type"]);
+                Add(Symbols.type, m.Groups["type"]);
                 if (m.Groups["var"].Value.Length > 0)
                 {
-                    Add("var", m.Groups["var"]);
-                }
-                if (m.Groups["comma"].Success && m.Groups["comma"].Length>0)
-                {
-                    Add("_,", m.Groups["comma"]);
-                    TokenizeParams(str, m.Index + m.Length, length - m.Length);
+                    Add(Symbols.var, m.Groups["var"]);
                 }
             }
             else
             {
-                throw new Exception("expected param expression, but found " + str);
+                throw new Exception(@"#expected param expression, but found :
+
+""" + str.Substring(index, length) + @"""
+
+");
             }
         }
         Regex inFileLine = new Regex(@"^(\s*)(?<in>in)(\s)(?<file>\w?\:?[^:]*)(?<delim>\:)(?<line>line)(\s)(?<linenum>\d*)$");
@@ -89,54 +123,56 @@ namespace ElasticElmah.Appender.Presentation
             var m = inFileLine.Match(str,index,length);
             if (m.Success)
             {
-                Add("_in", m.Groups["in"]);
-                Add("file", m.Groups["file"]);
-                Add("_:", m.Groups["delim"]);
-                Add("_line", m.Groups["line"]);
-                Add("line", m.Groups["linenum"]);
+                Add(Symbols._in, m.Groups["in"]);
+                Add(Symbols.file, m.Groups["file"]);
+                Add(Symbols._colon, m.Groups["delim"]);
+                Add(Symbols._line, m.Groups["line"]);
+                Add(Symbols.line, m.Groups["linenum"]);
             }
         }
         Regex word = new Regex(@"^(?<word>\w*)$");
-        Regex delimMethod = new Regex(@"(?<tdelim>\.)(?<method>\.?\w*)$");
+        Regex delimMethod = new Regex(@"(?<tdelim>\.)(?<method>\.?[^\.]*)$");
         void TokenizeTypeAndMethod(string str, int index, int length)
         {
             var mm = word.Match(str,index,length);
             if (mm.Success)
             {
-                Add("method", mm.Groups["word"]);
+                Add(Symbols.method, mm.Groups["word"]);
                 return;
             }
 
             var m = delimMethod.Match(str,index,length);
             if (!m.Success)
             {
-                throw new Exception("expected type and method but found: " + str);
+                throw new Exception(@"#expected type and method but found: 
+
+""" + str.Substring(index,length) + @"""
+
+");
             }
-            //var type = str.Substring(0, str.Length - m.Length);
-            Add("type", str, index, length-m.Length);
-            Add("type_method_delim", m.Groups["tdelim"]);
-            Add("method", m.Groups["method"]);
+
+            AddStr(Symbols.type, str, index, length-m.Length);
+            Add(Symbols.type_method_delim, m.Groups["tdelim"]);
+            Add(Symbols.method, m.Groups["method"]);
         }
 
         public static IEnumerable<Token> Tokenize(string str)
         {
-            var transformer = new StackTraceTransformer();
+            var transformer = new TokenizeStackTrace();
             var tokens = transformer.tokens;
-            var list = new List<Tuple<int, int>>();
-            var i = 0; 
-            while (i < str.Length)
+            var i = 0;
+            var chars = new[]{'\r','\n'};
+            for (int j = 0; j < str.Length; j++)
             {
-                var next = str.IndexOf(Environment.NewLine,i);
-                if (next < 0)
+                if (chars.Contains(str[j]) && i+1<j)
                 {
-                    next = str.Length;
+                    transformer.TokenizeLine(str, i, j-i);
+                    i = j;
                 }
-                list.Add(new Tuple<int, int>(i, next));
-                i=next;
             }
-            foreach (var item in list)
+            if (i < str.Length - 1) 
             {
-                transformer.TokenizeLine(str,item.Item1,item.Item2);
+                transformer.TokenizeLine(str, i, str.Length - i);
             }
                 //
             return tokens;
