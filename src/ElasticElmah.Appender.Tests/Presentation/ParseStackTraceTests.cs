@@ -12,17 +12,9 @@ namespace ElasticElmah.Appender.Tests.Presentation
     public class ParseStackTraceTests
     {
         [Test]
-        public void Test() 
+        public void Real_data_smoke_test() 
         {
-            var str = "   at ElasticElmahMVC.Models.ErrorLogPage.OnLoad() in c:\\Users\\Oskar\\Documents\\GitHub\\ElasticElmah\\src\\ElasticElmahMVC\\Models\\ErrorLogPage.cs:line 56";
-
-            var p = new ParseStackTrace(str).Tap(t=>t.Parse());
+            new ParseStackTrace(TestData.AggregateException).Parse();
         }
-        [Test]
-        public void Real() 
-        {
-            var p = new ParseStackTrace(TestData.AggregateException).Tap(t => t.Parse());
-        }
-
     }
 }

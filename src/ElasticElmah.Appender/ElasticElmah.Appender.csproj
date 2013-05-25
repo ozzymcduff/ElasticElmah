@@ -51,7 +51,7 @@
     <Compile Include="Presentation\ParseStackTrace.cs" />
     <Compile Include="Presentation\Symbols.cs" />
     <Compile Include="Presentation\Token.cs" />
-    <Compile Include="Presentation\TokenizeStackTrace.cs" />
+    <Compile Include="Presentation\LexStackTrace.cs" />
     <Compile Include="Search\LogSearchResult.cs" />
     <Compile Include="Search\LogWithId.cs" />
     <Compile Include="Storage\LogEventLocation.cs" />

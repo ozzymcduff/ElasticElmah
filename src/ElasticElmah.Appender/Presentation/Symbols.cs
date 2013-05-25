@@ -22,5 +22,6 @@ namespace ElasticElmah.Appender.Presentation
         Method,
         TypeMethodDelim,
         At,
+        Whitespace,
     }
 }

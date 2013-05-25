@@ -69,7 +69,7 @@ Parameter name: httpContext
         [Test]
         public void ReadAppend()
         {
-            var tokens = ElasticElmah.Appender.Presentation.TokenizeStackTrace.Tokenize(argumentnullexception);
+            var tokens = ElasticElmah.Appender.Presentation.LexStackTrace.Tokenize(argumentnullexception);
             Console.WriteLine(tokens);
         }
         

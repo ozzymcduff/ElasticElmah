@@ -12,7 +12,7 @@ namespace ElasticElmah.Appender.Presentation
         public ParseStackTrace(string stacktrace)
         {
             this.stacktrace = stacktrace;
-            tokens = TokenizeStackTrace.Tokenize(stacktrace).ToArray();
+            tokens = new LexStackTrace(stacktrace).Tap(t=>t.TokenizeLines()).Tokens.ToArray();
         }
         public event Action<Token> onAccept;
         public event Action onEnterLine;
@@ -122,13 +122,14 @@ namespace ElasticElmah.Appender.Presentation
 
         bool accept(Symbols s)
         {
+            while (sym==Symbols.Whitespace)
+            {
+                onWhiteSpace.TapNotNull(a => a(CurrentToken.Value.Value));
+                getsym();
+            }
+
             if (sym == s)
             {
-
-                if (PreviousToken.HasValue && CurrentToken.HasValue && PreviousToken.Value.LastPosition()<CurrentToken.Value.Position-1)
-                {
-                    onWhiteSpace.TapNotNull(a => a(stacktrace.Substring(PreviousToken.Value.LastPosition() + 1, CurrentToken.Value.Position - PreviousToken.Value.LastPosition()-1)));
-                }
                 if (CurrentToken.HasValue)
                 {
                     onAccept.TapNotNull(a => a(CurrentToken.Value)); 

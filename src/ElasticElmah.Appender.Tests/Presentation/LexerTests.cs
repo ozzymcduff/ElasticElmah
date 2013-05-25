@@ -15,17 +15,17 @@ namespace ElasticElmah.Appender.Tests
         {
             Console.WriteLine();
             Console.WriteLine("----------------------------------------------------");
-            Console.WriteLine(string.Join(Environment.NewLine, res.Select(r => 
-                string.Format("new{{ t= Symbols.{0}, s= \"{1}\",p={2} }},",r.Type.ToString(),r.Value,r.Position)
+            Console.WriteLine(string.Join(Environment.NewLine, res.Select(r =>
+                string.Format("new{{ t= Symbols.{0}, s= \"{1}\",p={2} }},", r.Type.ToString(), r.Value, r.Position)
                 )));
             Console.WriteLine("----------------------------------------------------");
         }
-        
+
         [Test]
         public virtual void Single_line_with_type_and_method()
         {
             var str = "   at ElasticElmahMVC.Models.ErrorLogPage.OnLoad() in c:\\Users\\Oskar\\Documents\\GitHub\\ElasticElmah\\src\\ElasticElmahMVC\\Models\\ErrorLogPage.cs:line 56";
-  
+
             var tokenized = new[]{
                 new{ t= Symbols.At, s= "at" ,p=3},
                 new{ t= Symbols.Type, s= "ElasticElmahMVC.Models.ErrorLogPage", p= 6},
@@ -38,9 +38,9 @@ namespace ElasticElmah.Appender.Tests
                 new{ t= Symbols.Colon, s= ":" , p=141},
                 new{ t= Symbols.Line, s= "line" , p=142},
                 new{ t= Symbols.LineNumber, s= "56" , p=147}
-            }.Select(t => new Token(t.t, t.s, t.p)).ToArray();
+            }.Select(t => new Token(t.t, t.s, t.p));
 
-            var res = TokenizeStackTrace.Tokenize(str).ToArray();
+            var res = LexStackTrace.Tokenize(str);
             Assert.That(res, Is.EquivalentTo(tokenized));
         }
 
@@ -58,7 +58,7 @@ namespace ElasticElmah.Appender.Tests
                 new{ t= Symbols.Var, s= "httpContext", p=56 },
                 new{ t= Symbols.RightParanthesis, s= ")" , p=67} 
             }.Select(t => new Token(t.t, t.s, t.p));
-            var res = TokenizeStackTrace.Tokenize(str);
+            var res = LexStackTrace.Tokenize(str);
             Assert.That(res, Is.EquivalentTo(tokenized));
         }
 
@@ -75,12 +75,35 @@ namespace ElasticElmah.Appender.Tests
                 new{ t= Symbols.Type, s= "Task",p=30 },
                 new{ t= Symbols.RightParanthesis, s= ")",p=35 }
             }.Select(t => new Token(t.t, t.s, t.p));
-            var res = TokenizeStackTrace.Tokenize(str);
+            var res = LexStackTrace.Tokenize(str);
             Assert.That(res, Is.EquivalentTo(tokenized));
         }
 
         [Test]
-        public virtual void Wierd_looking_line() 
+        public virtual void Line_without_var_name_in_parameter_whitespaces()
+        {
+            var str = "   at lambda_method(Closure , Task )";
+            var tokenized = new[]{
+                new{ t= Symbols.Whitespace, s= "   ",p=0 },
+                new{ t= Symbols.At, s= "at",p=3 },
+                new{ t= Symbols.Whitespace, s= " ", p=5 },
+                new{ t= Symbols.Method, s= "lambda_method", p=6 },
+                new{ t= Symbols.LeftParanthesis, s= "(",p=19 },
+                new{ t= Symbols.Type, s= "Closure",p=20 },
+                new{ t= Symbols.Whitespace, s= " ", p=27 },
+                new{ t= Symbols.Comma, s= ",",p=28 },
+                new{ t= Symbols.Whitespace, s= " ", p=29 },
+                new{ t= Symbols.Type, s= "Task",p=30 },
+                new{ t= Symbols.Whitespace, s= " ", p=34 },
+                new{ t= Symbols.RightParanthesis, s= ")",p=35 },
+            }.Select(t => new Token(t.t, t.s, t.p));
+            var res = new LexStackTrace(str).Tap(t => t.TokenizeLines()).Tokens;
+            //Write(res);
+            Assert.That(res, Is.EquivalentTo(tokenized));
+        }
+
+        [Test]
+        public virtual void Wierd_looking_line()
         {
             var str = @" at ElasticElmah.Appender.Web.JsonRequest.<>c__DisplayClass6.<Async>b__5(IAsyncResult iar) in c:\Users\Oskar\Documents\GitHub\ElasticElmah\src\ElasticElmah.Appender\Web\JsonRequest.cs:line 70";
             var tokenized = new[]{
@@ -99,13 +122,13 @@ namespace ElasticElmah.Appender.Tests
                 new{ t= Symbols.LineNumber, s= "70",p=189 }
 
             }.Select(t => new Token(t.t, t.s, t.p));
-            var res = TokenizeStackTrace.Tokenize(str);
+            var res = LexStackTrace.Tokenize(str);
 
             Assert.That(res, Is.EquivalentTo(tokenized));
         }
 
         [Test]
-        public virtual void Another_wierd_line() 
+        public virtual void Another_wierd_line()
         {
             var str = @" at System.Threading.Tasks.TaskFactory`1.FromAsyncCoreLogic(IAsyncResult iar, Func`2 endFunction, Action`1 endAction, Task`1 promise, Boolean requiresSynchronization)<---";
             var tokenized = new[]{
@@ -131,18 +154,18 @@ new{ t= Symbols.Var, s= "requiresSynchronization",p=142 },
 new{ t= Symbols.RightParanthesis, s= ")",p=165 },
 new{ t= Symbols.Unrecognized, s="<---",p=166}
             }.Select(t => new Token(t.t, t.s, t.p));
-            var res = TokenizeStackTrace.Tokenize(str);
+            var res = LexStackTrace.Tokenize(str);
             //Write(res);
             Assert.That(res, Is.EquivalentTo(tokenized));
         }
 
         [Test]
-        public virtual void Lines() 
+        public virtual void Lines()
         {
-            var lines = TestData.AggregateException.Split(new []{Environment.NewLine},StringSplitOptions.RemoveEmptyEntries);
+            var lines = TestData.AggregateException.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var line in lines)
             {
-                TokenizeStackTrace.Tokenize(line);
+                LexStackTrace.Tokenize(line);
             }
         }
     }
