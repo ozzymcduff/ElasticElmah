@@ -72,7 +72,7 @@ namespace ElasticElmah.Appender.Presentation
 
         void TokenizeParams(string str, int index, int length)
         {
-            var i = index;
+            var i = index;//todo:regex instead
             var chars = new[] { ',', ' ' };
             for (int j = index; j < index+length; j++)
             {
@@ -161,7 +161,7 @@ namespace ElasticElmah.Appender.Presentation
         {
             var transformer = new TokenizeStackTrace();
             var tokens = transformer.tokens;
-            var i = 0;
+            var i = 0;//todo:regex instead
             var chars = new[]{'\r','\n'};
             for (int j = 0; j < str.Length; j++)
             {
