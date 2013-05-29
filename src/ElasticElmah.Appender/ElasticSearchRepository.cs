@@ -266,15 +266,23 @@ namespace ElasticElmah.Appender
         }
         class Index
         {
-            public LogEvent index { get; set; }
+            public IndexOp index { get; set; }
+        }
+        class IndexOp
+        {
+            public string _index { get; set; }
+            public string _type { get; set; }
         }
         private RequestInfo AddBulkRequest(IEnumerable<LoggingEvent> loggingEvents, bool refresh=false)
         {
-            return new RequestInfo(UrlToIndex(settings, "LoggingEvent/_bulk"+(refresh?"?refresh=true":"")), "POST",
-                string.Join("\n",loggingEvents
+            return new RequestInfo(UrlToIndex(settings, "LoggingEvent/_bulk" + (refresh ? "?refresh=true" : "")), "POST",
+                string.Join(Environment.NewLine, loggingEvents
                     .Select(l => serializer.Serialize(
-                        new Index { index = Map.To(l) }
-                        ).Replace('\r',' ').Replace('\n',' ')))+"\n");
+                        new Index { index = new IndexOp() { _index = _index, _type = "LoggingEvent" }}
+                        )//.Replace('\r',' ').Replace('\n',' ')
+                        + Environment.NewLine
+                        + serializer.Serialize(Map.To(l))
+                        )) + Environment.NewLine);
         }
         /// <summary>
         /// Doesnt work right now

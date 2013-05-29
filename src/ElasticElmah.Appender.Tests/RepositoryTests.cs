@@ -65,7 +65,7 @@ namespace ElasticElmah.Appender.Tests
             Assert.That(result.Hits.Single().Data.Message, Is.EqualTo("Message"));
         }
 
-        [Test,Ignore]
+        [Test]
         public virtual void Should_get_latest_bulk()
         {
             var times = new List<DateTime>();

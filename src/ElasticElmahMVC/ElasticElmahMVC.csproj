@@ -114,7 +114,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Code\ErrorLog\ElasticErrorLog.cs" />
-    <Compile Include="Code\ErrorLog\ErrorLog.cs" />
+    <Compile Include="Code\ErrorLog\IErrorLog.cs" />
     <Compile Include="Code\Infrastructure\Build.cs" />
     <Compile Include="Code\Infrastructure\InvariantStringArray.cs" />
     <Compile Include="Code\Infrastructure\Mask.cs" />
