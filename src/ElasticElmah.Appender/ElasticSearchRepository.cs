@@ -275,32 +275,19 @@ namespace ElasticElmah.Appender
         }
         private RequestInfo AddBulkRequest(IEnumerable<LoggingEvent> loggingEvents, bool refresh=false)
         {
+            string operation = serializer.Serialize(new Index { index = new IndexOp() { _index = _index, _type = "LoggingEvent" } });
             return new RequestInfo(UrlToIndex(settings, "LoggingEvent/_bulk" + (refresh ? "?refresh=true" : "")), "POST",
                 string.Join(Environment.NewLine, loggingEvents
-                    .Select(l => serializer.Serialize(
-                        new Index { index = new IndexOp() { _index = _index, _type = "LoggingEvent" }}
-                        )//.Replace('\r',' ').Replace('\n',' ')
+                    .Select(l => operation + Environment.NewLine 
+                        + serializer.Serialize(Map.To(l)))) 
                         + Environment.NewLine
-                        + serializer.Serialize(Map.To(l))
-                        )) + Environment.NewLine);
+                        );
         }
-        /// <summary>
-        /// Doesnt work right now
-        /// </summary>
-        /// <param name="loggingEvents"></param>
-        /// <param name="refresh"></param>
-        /// <returns></returns>
         public HttpStatusCode AddBulk(IEnumerable<LoggingEvent> loggingEvents, bool refresh=false) 
         {
             return request.Sync(AddBulkRequest(loggingEvents, refresh)).Item1;
         }
 
-        /// <summary>
-        /// Doesnt work right now
-        /// </summary>
-        /// <param name="loggingEvents"></param>
-        /// <param name="refresh"></param>
-        /// <returns></returns>
         public Task<HttpStatusCode> AddBulkAsync(IEnumerable<LoggingEvent> loggingEvents, bool refresh = false)
         {
             return request.AsTask(AddBulkRequest(loggingEvents, refresh), t=>t.Item1);
