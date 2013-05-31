@@ -30,15 +30,15 @@ namespace ElasticElmah.Appender.Tests
     ""identity"":""""
 }";
         [Test]
-        public void WillSerializeOk() 
+        public void WillSerializeOk()
         {
-            var serialized = new DefaultJsonSerializer().Serialize( Map.To(new LoggingEvent(new LoggingEventData
+            var serialized = new DefaultJsonSerializer().Serialize(Map.To(new LoggingEvent(new LoggingEventData
                     {
                         Level = Level.Alert,
                         Message = "Message",
                         UserName = "",
-                        ThreadName="",
-                        Domain="",
+                        ThreadName = "",
+                        Domain = "",
                         Properties = new log4net.Util.PropertiesDictionary().Tap(d =>
                         {
                             d["prop"] = "msg";
@@ -61,7 +61,7 @@ namespace ElasticElmah.Appender.Tests
                     d["prop"] = "msg";
                 })
             })));
-            Assert.That(serialized.Replace(" ", "").Replace(Environment.NewLine, ""), Is.EqualTo(expected.Replace(" ", "").Replace(Environment.NewLine, "")));
+            Assert.That(serialized.Replace(" ", "").Replace("\r", "").Replace("\n", ""), Is.EqualTo(expected.Replace(" ", "").Replace("\n", "").Replace("\n", "")));
         }
     }
 }
