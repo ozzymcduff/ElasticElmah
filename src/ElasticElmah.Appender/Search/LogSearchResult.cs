@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace ElasticElmah.Appender.Search
 {
@@ -12,8 +9,8 @@ namespace ElasticElmah.Appender.Search
 
         public LogSearchResult(IEnumerable<LogWithId> hits, int total)
         {
-            this.Hits = hits;
-            this.Total = total;
+            Hits = hits;
+            Total = total;
         }
     }
 }

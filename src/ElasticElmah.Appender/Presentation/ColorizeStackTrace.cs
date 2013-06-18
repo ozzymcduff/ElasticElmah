@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Web;
 
@@ -8,23 +6,23 @@ namespace ElasticElmah.Appender.Presentation
 {
     public class ColorizeStackTrace
     {
-        ParseStackTrace parser;
-        StringBuilder writer;
+        readonly ParseStackTrace _parser;
+        readonly StringBuilder _writer;
         
         public ColorizeStackTrace(string stacktrace)
         {
-            parser = new ParseStackTrace(stacktrace);
-            parser.onEnterStackFrame += onEnterStackFrame;
-            parser.onExitStackFrame += onExitStackFrame;
-            parser.onWhiteSpace += onWhiteSpace;
-            writer = new StringBuilder();
-            parser.onAccept += onAccept;
+            _parser = new ParseStackTrace(stacktrace);
+            _parser.OnEnterStackFrame += OnEnterStackFrame;
+            _parser.OnExitStackFrame += OnExitStackFrame;
+            _parser.OnWhiteSpace += OnWhiteSpace;
+            _writer = new StringBuilder();
+            _parser.OnAccept += OnAccept;
 
         }
 
-        void onWhiteSpace(string obj)
+        void OnWhiteSpace(string obj)
         {
-            writer.Append(HtmlEncode(obj));
+            _writer.Append(HtmlEncode(obj));
         }
 
         private string HtmlEncode(string val) 
@@ -34,32 +32,32 @@ namespace ElasticElmah.Appender.Presentation
 
         public string Html() 
         {
-            parser.Parse();
-            return writer.ToString();
+            _parser.Parse();
+            return _writer.ToString();
         }
 
-        void onAccept(Token obj)
+        void OnAccept(Token obj)
         {
             var classOf = GetClassOf(obj);
             if (string.IsNullOrEmpty(classOf))
             {
-                writer.Append(HtmlEncode(obj.Value));
+                _writer.Append(HtmlEncode(obj.Value));
             }
             else
             {
-                writer.AppendFormat("<span class=\"{0}\">",classOf);
-                writer.Append(HtmlEncode(obj.Value));
-                writer.Append("</span>");
+                _writer.AppendFormat("<span class=\"{0}\">",classOf);
+                _writer.Append(HtmlEncode(obj.Value));
+                _writer.Append("</span>");
             }
         }
-        void onEnterStackFrame()
+        void OnEnterStackFrame()
         {
-            writer.Append("<span class=\"st-frame\">");
+            _writer.Append("<span class=\"st-frame\">");
         }
 
-        void onExitStackFrame()
+        void OnExitStackFrame()
         {
-            writer.Append("</span>");
+            _writer.Append("</span>");
         }
 
         public string GetClassOf(Token token)

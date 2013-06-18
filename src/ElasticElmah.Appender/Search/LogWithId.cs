@@ -1,8 +1,4 @@
 ﻿using log4net.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace ElasticElmah.Appender.Search
 {
@@ -13,8 +9,8 @@ namespace ElasticElmah.Appender.Search
 
         public LogWithId(string id, LoggingEventData data)
         {
-            this.Id = id;
-            this.Data = data;
+            Id = id;
+            Data = data;
         }
     }
 }

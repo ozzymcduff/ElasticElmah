@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace ElasticElmah.Appender.Presentation
 {
@@ -12,13 +9,13 @@ namespace ElasticElmah.Appender.Presentation
         public int Position;
         public Token(Symbols type, string value, int position)
         {
-            this.Type = type;
-            this.Value = value;
-            this.Position = position;
+            Type = type;
+            Value = value;
+            Position = position;
         }
         public override int GetHashCode()
         {
-            return this.Type.GetHashCode() + this.Value.GetHashCode() + 423;
+            return Type.GetHashCode() + Value.GetHashCode() + 423;
         }
         public override bool Equals(object obj)
         {

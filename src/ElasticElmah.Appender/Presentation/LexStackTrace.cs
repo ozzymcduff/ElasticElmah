@@ -1,52 +1,52 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace ElasticElmah.Appender.Presentation
 {
     public class LexStackTrace
     {
-        List<Token> tokens = new List<Token>();
+        readonly List<Token> _tokens = new List<Token>();
         public IEnumerable<Token> Tokens
         {
             get
             {
-                return tokens;
+                return _tokens;
             }
         }
-        int position = 0;
-        string str;
+        int _position;
+        readonly string _str;
         public LexStackTrace(string str)
         {
-            this.str = str;
+            _str = str;
         }
         void AddStr(Symbols type, int index, int length)
         {
-            CheckForWhiteSpace(str, index);
-            tokens.Add(new Token(type, str.Substring(index, length), index));
-            position = index + length;
+            CheckForWhiteSpace(_str, index);
+            _tokens.Add(new Token(type, _str.Substring(index, length), index));
+            _position = index + length;
         }
         void Add(Symbols type, Group value)
         {
-            CheckForWhiteSpace(str, value.Index);
-            tokens.Add(new Token(type, value.Value, value.Index));
-            position = value.Index + value.Length;
+            CheckForWhiteSpace(_str, value.Index);
+            _tokens.Add(new Token(type, value.Value, value.Index));
+            _position = value.Index + value.Length;
         }
-        char[] whitespaces = new char[] { '\n', '\r', '\t', ' ' };
+
+        readonly char[] _whitespaces = new[] { '\n', '\r', '\t', ' ' };
         void CheckForWhiteSpace(string str, int index)
         {
-            if (position < index)
+            if (_position < index)
             {
-                for (int i = position + 1; i < index; i++)
+                for (int i = _position + 1; i < index; i++)
                 {
-                    if (!whitespaces.Contains(str[i]))
+                    if (!_whitespaces.Contains(str[i]))
                     {
                         throw new Exception(string.Format("'{0}'", str[i]));
                     }
                 }
-                tokens.Add(new Token(Symbols.Whitespace, str.Substring(position, index - position), position));
+                _tokens.Add(new Token(Symbols.Whitespace, str.Substring(_position, index - _position), _position));
             }
         }
 
@@ -58,15 +58,15 @@ namespace ElasticElmah.Appender.Presentation
             }
         }
 
-        Regex atTypeMethod = new Regex(@"^(\s*)(?<at>at)(\s+)(?<typenmethod>[^\(]+)(?<left>\()(?<params>[^\(]*)(?<right>\))(?<rest>.*)$");
+        readonly Regex _atTypeMethod = new Regex(@"^(\s*)(?<at>at)(\s+)(?<typenmethod>[^\(]+)(?<left>\()(?<params>[^\(]*)(?<right>\))(?<rest>.*)$");
 
         bool TryTokenizeAtInLine(int index, int length)
         {
-            var m = atTypeMethod.Match(str, index, length);
+            var m = _atTypeMethod.Match(_str, index, length);
             if (m.Success)
             {
                 Add(Symbols.At, m.Groups["at"]);
-                TokenizeTypeAndMethod(str, m.Groups["typenmethod"].Index, m.Groups["typenmethod"].Length);
+                TokenizeTypeAndMethod(_str, m.Groups["typenmethod"].Index, m.Groups["typenmethod"].Length);
                 Add(Symbols.LeftParanthesis, m.Groups["left"]);
                 if (!string.IsNullOrEmpty(m.Groups["params"].Value))
                 {
@@ -81,7 +81,8 @@ namespace ElasticElmah.Appender.Presentation
                 return false;
             }
         }
-        Regex param = new Regex(@"^(\s*)(?<type>[^ ]*)(\s*)(?<var>[^ ]*)(\s*)");
+
+        readonly Regex _param = new Regex(@"^(\s*)(?<type>[^ ]*)(\s*)(?<var>[^ ]*)(\s*)");
 
         void TokenizeParams(int index, int length)
         {
@@ -89,7 +90,7 @@ namespace ElasticElmah.Appender.Presentation
             var chars = new[] { ',', ' ' };
             for (int j = index; j < index + length; j++)
             {
-                if (str[j] == chars[0] && str[j + 1] == chars[1])
+                if (_str[j] == chars[0] && _str[j + 1] == chars[1])
                 {
                     TokenizeParam(i, j - i);
                     AddStr(Symbols.Comma, j, 1);
@@ -104,7 +105,7 @@ namespace ElasticElmah.Appender.Presentation
 
         private void TokenizeParam(int index, int length)
         {
-            var m = param.Match(str, index, length);
+            var m = _param.Match(_str, index, length);
             if (m.Success)
             {
                 Add(Symbols.Type, m.Groups["type"]);
@@ -117,20 +118,21 @@ namespace ElasticElmah.Appender.Presentation
             {
                 throw new Exception(@"#expected param expression, but found :
 
-""" + str.Substring(index, length) + @"""
+""" + _str.Substring(index, length) + @"""
 
 ");
             }
         }
-        Regex inFileLine = new Regex(@"^(\s*)(?<in>in)(\s)(?<file>\w?\:?[^:]*)(?<delim>\:)(?<line>line)(\s)(?<linenum>\d*)$");
+
+        readonly Regex _inFileLine = new Regex(@"^(\s*)(?<in>in)(\s)(?<file>\w?\:?[^:]*)(?<delim>\:)(?<line>line)(\s)(?<linenum>\d*)$");
 
         void TryTokenizeIn(int index, int length)
         {
-            if (string.IsNullOrEmpty(str.Substring(index, length)))
+            if (string.IsNullOrEmpty(_str.Substring(index, length)))
             {
                 return;
             }
-            var m = inFileLine.Match(str, index, length);
+            var m = _inFileLine.Match(_str, index, length);
             if (m.Success)
             {
                 Add(Symbols.In, m.Groups["in"]);
@@ -144,18 +146,19 @@ namespace ElasticElmah.Appender.Presentation
                 AddStr(Symbols.Unrecognized, index, length);
             }
         }
-        Regex word = new Regex(@"^(?<word>\w*)$");
-        Regex delimMethod = new Regex(@"(?<tdelim>\.)(?<method>\.?[^\.]*)$");
+
+        readonly Regex _word = new Regex(@"^(?<word>\w*)$");
+        readonly Regex _delimMethod = new Regex(@"(?<tdelim>\.)(?<method>\.?[^\.]*)$");
         void TokenizeTypeAndMethod(string str, int index, int length)
         {
-            var mm = word.Match(str, index, length);
+            var mm = _word.Match(str, index, length);
             if (mm.Success)
             {
                 Add(Symbols.Method, mm.Groups["word"]);
                 return;
             }
 
-            var m = delimMethod.Match(str, index, length);
+            var m = _delimMethod.Match(str, index, length);
             if (!m.Success)
             {
                 throw new Exception(@"#expected type and method but found: 
@@ -174,7 +177,7 @@ namespace ElasticElmah.Appender.Presentation
         {
             var transformer = new LexStackTrace(str);
             transformer.TokenizeLines();
-            return transformer.tokens
+            return transformer._tokens
                 .Where(t => t.Type != Symbols.Whitespace)
                 .ToArray();
         }
@@ -183,17 +186,17 @@ namespace ElasticElmah.Appender.Presentation
         {
             var i = 0;//todo:regex instead
             var chars = new[] { '\r', '\n' };
-            for (int j = 0; j < str.Length; j++)
+            for (int j = 0; j < _str.Length; j++)
             {
-                if (chars.Contains(str[j]) && i + 1 < j)
+                if (chars.Contains(_str[j]) && i + 1 < j)
                 {
                     TokenizeLine(i, j - i);
                     i = j;
                 }
             }
-            if (i < str.Length - 1)
+            if (i < _str.Length - 1)
             {
-                TokenizeLine(i, str.Length - i);
+                TokenizeLine(i, _str.Length - i);
             }
         }
     }

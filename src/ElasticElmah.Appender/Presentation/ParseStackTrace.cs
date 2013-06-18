@@ -1,25 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace ElasticElmah.Appender.Presentation
 {
     public class ParseStackTrace
     {
-        private Token[] tokens;
-        private string stacktrace;
+        private readonly Token[] _tokens;
+
         public ParseStackTrace(string stacktrace)
         {
-            this.stacktrace = stacktrace;
-            tokens = new LexStackTrace(stacktrace).Tap(t=>t.TokenizeLines()).Tokens.ToArray();
+            _tokens = new LexStackTrace(stacktrace).Tap(t=>t.TokenizeLines()).Tokens.ToArray();
         }
-        public event Action<Token> onAccept;
-        public event Action onEnterLine;
-        public event Action onExitLine;
-        public event Action onEnterStackFrame;
-        public event Action onExitStackFrame;
-        public event Action<string> onWhiteSpace;
+        public event Action<Token> OnAccept;
+        public event Action OnEnterLine;
+        public event Action OnExitLine;
+        public event Action OnEnterStackFrame;
+        public event Action OnExitStackFrame;
+        public event Action<string> OnWhiteSpace;
         private void whilemax(Func<bool> action, int max)
         {
             int count = 0;
@@ -34,34 +31,34 @@ namespace ElasticElmah.Appender.Presentation
         {
             whilemax(() =>
             {
-                whilemax(() => accept(Symbols.Unrecognized), 1000);
-                if (accept(Symbols.None))
+                whilemax(() => Accept(Symbols.Unrecognized), 1000);
+                if (Accept(Symbols.None))
                 {
                     return false;
                 }
-                onEnterLine.TapNotNull(a => a());
-                if (accept(Symbols.At))
+                OnEnterLine.TapNotNull(a => a());
+                if (Accept(Symbols.At))
                 {
-                    onEnterStackFrame.TapNotNull(a => a());
-                    if (accept(Symbols.Type))
+                    OnEnterStackFrame.TapNotNull(a => a());
+                    if (Accept(Symbols.Type))
                     {
-                        expect(Symbols.TypeMethodDelim);
-                        expect(Symbols.Method);
+                        Expect(Symbols.TypeMethodDelim);
+                        Expect(Symbols.Method);
                     }
                     else
                     {
-                        expect(Symbols.Method);
+                        Expect(Symbols.Method);
                     }
-                    expect(Symbols.LeftParanthesis);
+                    Expect(Symbols.LeftParanthesis);
                     whilemax(() =>
                     {
-                        if (accept(Symbols.Type))
+                        if (Accept(Symbols.Type))
                         {
-                            if (accept(Symbols.Var))
+                            if (Accept(Symbols.Var))
                             {
                             }
                         }
-                        if (accept(Symbols.Comma))
+                        if (Accept(Symbols.Comma))
                         {
                         }
                         else
@@ -70,28 +67,28 @@ namespace ElasticElmah.Appender.Presentation
                         }
                         return true;
                     }, 1000);
-                    expect(Symbols.RightParanthesis);
-                    if (accept(Symbols.In))
+                    Expect(Symbols.RightParanthesis);
+                    if (Accept(Symbols.In))
                     {
-                        expect(Symbols.File);
-                        expect(Symbols.Colon);
-                        expect(Symbols.Line);
-                        expect(Symbols.LineNumber);
+                        Expect(Symbols.File);
+                        Expect(Symbols.Colon);
+                        Expect(Symbols.Line);
+                        Expect(Symbols.LineNumber);
                     }
-                    onExitStackFrame.TapNotNull(a => a());
+                    OnExitStackFrame.TapNotNull(a => a());
                 }
-                onExitLine.TapNotNull(a => a());
+                OnExitLine.TapNotNull(a => a());
                 return true;
             }, 2000);
         }
 
-        private int current = 0;
+        private int _current;
         public Token? CurrentToken
         {
             get
             {
-                if (tokens.Length > current)
-                    return tokens[current];
+                if (_tokens.Length > _current)
+                    return _tokens[_current];
                 return null;
             }
         }
@@ -99,51 +96,51 @@ namespace ElasticElmah.Appender.Presentation
         {
             get 
             {
-                if (current - 1 >= 0) 
+                if (_current - 1 >= 0) 
                 {
-                    return tokens[current - 1];
+                    return _tokens[_current - 1];
                 }
                 return null;
             }
         }
-        private Symbols sym
+        private Symbols Sym
         {
             get
             {
-                if (tokens.Length > current)
-                    return tokens[current].Type;
+                if (_tokens.Length > _current)
+                    return _tokens[_current].Type;
                 return Symbols.None;
             }
         }
-        private void getsym()
+        private void GetSym()
         {
-            current++;
+            _current++;
         }
 
-        bool accept(Symbols s)
+        bool Accept(Symbols s)
         {
-            while (sym==Symbols.Whitespace)
+            while (Sym==Symbols.Whitespace)
             {
-                onWhiteSpace.TapNotNull(a => a(CurrentToken.Value.Value));
-                getsym();
+                OnWhiteSpace.TapNotNull(a => a(CurrentToken.Value.Value));
+                GetSym();
             }
 
-            if (sym == s)
+            if (Sym == s)
             {
                 if (CurrentToken.HasValue)
                 {
-                    onAccept.TapNotNull(a => a(CurrentToken.Value)); 
+                    OnAccept.TapNotNull(a => a(CurrentToken.Value)); 
                 }
-                getsym();
+                GetSym();
                 return true;
             }
             return false;
         }
 
-        bool expect(Symbols s)
+        void Expect(Symbols s)
         {
-            if (accept(s))
-                return true;
+            if (Accept(s))
+                return;
             throw new Exception("expect: unexpected symbol");
         }
     }
