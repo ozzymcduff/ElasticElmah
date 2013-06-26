@@ -37,7 +37,7 @@ namespace ElasticElmah.Appender
         {
             if (Async)
             {
-                AppendAsync(loggingEvent);
+                ObserveExceptions(AppendAsync(loggingEvent));
             }
             else
             {
@@ -58,16 +58,26 @@ namespace ElasticElmah.Appender
         {
             if (!init)
             {
-                return Repo.AddAsync(loggingEvent);
+                return ObserveExceptions(Repo.AddAsync(loggingEvent));
             }
             else
             {
-                return Repo.CreateIndexIfNotExistsAsync()
+                return ObserveExceptions(Repo.CreateIndexIfNotExistsAsync()
                     .ContinueWith(t =>
                     {
                         return Repo.AddAsync(loggingEvent);
-                    });
+                    }));
             }
+        }
+        private Task ObserveExceptions(Task t) 
+        {
+            return t.ContinueWith(task =>
+            {
+                if (task.Exception != null)
+                {
+                    ErrorHandler.Error("Unhandled", task.Exception);
+                }
+            });
         }
     }
 }

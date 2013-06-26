@@ -120,7 +120,6 @@ namespace ElasticElmah.Appender
 
         private static string TryGetHtmlErrorMessage(HttpException e)
         {
-
             try
             {
                 return e.GetHtmlErrorMessage();

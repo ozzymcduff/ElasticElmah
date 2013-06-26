@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ElasticElmah.Appender.Web
 {
@@ -59,36 +60,15 @@ namespace ElasticElmah.Appender.Web
             }
         }
 
-        public Tuple<Func<IAsyncResult>, Func<IAsyncResult, Tuple<HttpStatusCode, string>>> Async(Uri uri, string method, string bytes)
+        public Task<Tuple<HttpStatusCode, string>> Async(Uri uri, string method, string bytes)
         {
             var request = (HttpWebRequest)WebRequest.Create(uri).Tap(r =>
             {
                 Request(r, method, bytes);
             });
-
-            return new Tuple<Func<IAsyncResult>, Func<IAsyncResult,Tuple<HttpStatusCode, string>>>(
-                () =>
-                {
-                    return request.BeginGetResponse(null, null);
-                },
-                (iar) =>
-            {
-                return Response(request, iar);
-            });
-        }
-
-        public IAsyncResult Async(Uri uri, string method, string bytes, Action<HttpStatusCode, string> onsuccess)
-        {
-            var request = (HttpWebRequest)WebRequest.Create(uri).Tap(r =>
-            {
-                Request(r, method, bytes);
-            });
-
-            return request.BeginGetResponse(iar =>
-            {
-                var resp = Response(request, iar);
-                onsuccess(resp.Item1, resp.Item2);
-            }, null);
+            return Task.Factory.FromAsync(
+                request.BeginGetResponse(null, null),
+                (iar) => Response(request, iar));
         }
 
         private static Tuple<HttpStatusCode, string> Response(HttpWebRequest request, IAsyncResult iar)

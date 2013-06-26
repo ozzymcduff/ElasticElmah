@@ -14,6 +14,7 @@ namespace ElasticElmah.Appender
     {
         private readonly IJSonRequest request;
         private readonly IJsonSerializer serializer;
+        private readonly static Task EmptyTask = new Task(() => { });
         public ElasticSearchRepository(string connectionString, IJSonRequest request = null, IJsonSerializer serializer = null)
         {
             settings = BuildElsticSearchConnection(connectionString);
@@ -33,7 +34,11 @@ namespace ElasticElmah.Appender
                     var exists = t.Result;
                     if (!exists)
                     {
-                        CreateIndexAsync();
+                        return CreateIndexAsync();
+                    }
+                    else 
+                    {
+                        return EmptyTask;
                     }
                 });
         }
@@ -271,7 +276,7 @@ namespace ElasticElmah.Appender
 
         public void AddWithoutReturn(LoggingEvent loggingEvent)
         {
-            request.Async(AddRequest(loggingEvent), (code, s) => { });
+            request.Async(AddRequest(loggingEvent));
         }
         /// <summary>
         /// 
