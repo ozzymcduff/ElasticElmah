@@ -162,7 +162,14 @@ namespace ElasticElmah.Appender.Tests
         {
             ExpectedEmptyResult(_appender.GetPaged(search, 0, 2));
         }
-
+        protected void ExpectEmptyResultASync()
+        {
+            ExpectedEmptyResult(_appender.GetPagedAsync(0, 2).Result);
+        }
+        protected void ExpectEmptyResultSync()
+        {
+            ExpectedEmptyResult(_appender.GetPaged(0, 2));
+        }
         [Test]
         public virtual void Should_get_latest_with_property()
         {

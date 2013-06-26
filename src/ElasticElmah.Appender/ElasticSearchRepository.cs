@@ -36,7 +36,7 @@ namespace ElasticElmah.Appender
                     {
                         return CreateIndexAsync();
                     }
-                    else 
+                    else
                     {
                         return EmptyTask;
                     }
@@ -54,9 +54,9 @@ namespace ElasticElmah.Appender
 
         private Task<bool> IndexExistsAsync()
         {
-            return request.AsTask(IndexExistsRequest(), (t) =>
+            return request.Async(IndexExistsRequest()).ContinueWith(t =>
             {
-                return (t.Item1 == HttpStatusCode.OK);
+                return (t.Result.Item1 == HttpStatusCode.OK);
             });
         }
 
@@ -109,12 +109,12 @@ namespace ElasticElmah.Appender
         public Task CreateIndexAsync()
         {
             var req = CreateIndexRequest();
-            return request.AsTask(req, (t) => { });
+            return request.Async(req);
         }
 
         public Task DeleteIndexAsync()
         {
-            return request.AsTask(new RequestInfo(UrlToIndex(settings, ""), "DELETE", null), (t) => { });
+            return request.Async(new RequestInfo(UrlToIndex(settings, ""), "DELETE", null));
         }
 
         public void DeleteIndex()
@@ -164,8 +164,8 @@ namespace ElasticElmah.Appender
         }
         public Task<LogSearchResult> GetPagedAsync(int pageIndex, int pageSize)
         {
-            return request.AsTask(GetPagedRequest(pageIndex, pageSize),
-                res => GetPagedResult(res.Item1, res.Item2));
+            return request.Async(GetPagedRequest(pageIndex, pageSize))
+                .ContinueWith(res => GetPagedResult(res.Result.Item1, res.Result.Item2));
         }
         private LogSearchResult GetPagedResult(HttpStatusCode c, string s)
         {
@@ -180,8 +180,8 @@ namespace ElasticElmah.Appender
         }
         public Task<LogSearchResult> GetPagedAsync(SearchTerm search, int pageIndex, int pageSize)
         {
-            return request.AsTask(GetPagedRequest(search, pageIndex, pageSize),
-                res => GetPagedResult(res.Item1, res.Item2));
+            return request.Async(GetPagedRequest(search, pageIndex, pageSize))
+                .ContinueWith(res => GetPagedResult(res.Result.Item1, res.Result.Item2));
         }
 
         public class SearchTerm
@@ -241,7 +241,8 @@ namespace ElasticElmah.Appender
 
         public Task<LogWithId> GetAsync(string id)
         {
-            return request.AsTask(GetRequest(id), resp => GetGetResponse(resp.Item2));
+            return request.Async(GetRequest(id))
+                .ContinueWith(resp => GetGetResponse(resp.Result.Item2));
         }
 
         private static IDictionary<string, string> BuildElsticSearchConnection(string connectionString)
@@ -310,7 +311,8 @@ namespace ElasticElmah.Appender
         /// <returns></returns>
         public Task<string> AddAsync(LoggingEvent loggingEvent)
         {
-            return request.AsTask(AddRequest(loggingEvent), t => serializer.Deserialize<AddResponse>(t.Item2)._id);
+            return request.Async(AddRequest(loggingEvent))
+                .ContinueWith(t => serializer.Deserialize<AddResponse>(t.Result.Item2)._id);
         }
         class Index
         {
@@ -338,7 +340,8 @@ namespace ElasticElmah.Appender
 
         public Task<HttpStatusCode> AddBulkAsync(IEnumerable<LoggingEvent> loggingEvents, bool refresh = false)
         {
-            return request.AsTask(AddBulkRequest(loggingEvents, refresh), t => t.Item1);
+            return request.Async(AddBulkRequest(loggingEvents, refresh))
+                .ContinueWith(t => t.Result.Item1);
         }
 
         public void Refresh()

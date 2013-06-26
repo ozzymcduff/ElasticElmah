@@ -5,6 +5,10 @@ using ElasticElmah.Appender;
 using log4net.Core;
 using System.Threading.Tasks;
 using ElasticElmah.Appender.Search;
+using ElasticElmah.Appender.Web;
+using System.Net;
+using log4net;
+using System.Reflection;
 
 namespace ElasticElmah.Core.ErrorLog
 {
@@ -42,13 +46,19 @@ namespace ElasticElmah.Core.ErrorLog
             });
         }
 
-        public Task<LogSearchResult> GetErrorsAsync(int pageIndex, int pageSize)
+        private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
+        public async Task<LogSearchResult> GetErrorsAsync(int pageIndex, int pageSize)
         {
-            var r = appender.GetPagedAsync(pageIndex,pageSize);
-            return r.ContinueWith(t=>
+            try
             {
-                return t.Result;
-            });
+                return await appender.GetPagedAsync(pageIndex, pageSize);
+            }
+            catch (Exception ex)
+            {
+                _log.Warn(ex);
+                return new LogSearchResult(new LogWithId[0], 0);
+            }
         }
     }
 }
