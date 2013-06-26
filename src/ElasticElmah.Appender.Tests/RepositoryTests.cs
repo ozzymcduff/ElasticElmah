@@ -131,6 +131,15 @@ namespace ElasticElmah.Appender.Tests
             ExpectedOrderedResult(_appender.GetPaged(0, 2));
         }
 
+        protected void ExpectOrderedResultASync(ElasticSearchRepository.SearchTerm search)
+        {
+            ExpectedOrderedResult(_appender.GetPagedAsync(search, 0, 2).Result);
+        }
+        protected void ExpectOrderedResultSync(ElasticSearchRepository.SearchTerm search)
+        {
+            ExpectedOrderedResult(_appender.GetPaged(search, 0, 2));
+        }
+
         protected static void ExpectedOrderedResult(LogSearchResult result)
         {
             Assert.AreEqual(5, result.Total);
@@ -139,6 +148,36 @@ namespace ElasticElmah.Appender.Tests
                     new DateTime(2001,1,5),
                     new DateTime(2001,1,4)
                 }));
+        }
+
+        [Test]
+        public virtual void Should_get_latest_with_property()
+        {
+            var times = new List<DateTime>();
+            for (int i = 0; i < 5; i++)
+            {
+                times.Add(new DateTime(2001, 1, 1).AddDays(i));
+            }
+            var ids = new List<string>();
+            foreach (var logitem in times.Select(timestamp => new LoggingEvent(GetType(), _log.Logger.Repository,
+                    new LoggingEventData
+                    {
+                        TimeStamp = timestamp,
+                        Level = Level.Error,
+                        Message = "Message " + timestamp.ToString(),
+                        Properties = new log4net.Util.PropertiesDictionary().Tap(d =>
+                        {
+                            d["prop"] = "msg";
+                        })
+                    })))
+            {
+                ids.Add(_appender.Add(logitem));
+            }
+            _appender.Refresh();
+            //_appender.Flush();
+            var s = new ElasticSearchRepository.SearchTerm { PropertyName = "LoggingEvent.properties.prop", Value = "msg" };
+            ExpectOrderedResultASync(s);
+            ExpectOrderedResultSync(s);
         }
     }
 }

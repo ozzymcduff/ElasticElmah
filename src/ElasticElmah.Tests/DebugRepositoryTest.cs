@@ -59,6 +59,12 @@ namespace ElasticElmah.Tests
             base.Should_get_latest();
         }
 
+        [Test]
+        public override void Should_get_latest_with_property()
+        {
+            base.Should_get_latest_with_property();
+        }
+
         [Test,Ignore]
         public void TestThread()
         {

@@ -37,22 +37,28 @@ namespace ElasticElmah.Appender.Web
             }
             catch (WebException ex)
             {
-                if (ex.Response != null)
-                {
-                    using (var rstream = ex.Response.GetResponseStream())
-                    using (var reader = new StreamReader(rstream, Encoding.UTF8))
-                    {
-                        var c = reader.ReadToEnd();
-                        var resp = ((HttpWebResponse)ex.Response);
-                        throw new RequestException(resp.StatusCode, c);
-                    }
-                }
-                else
-                {
-                    throw new RequestException(HttpStatusCode.InternalServerError, ex.Message);
-                }
+                throw GetRequestException(ex);
             }
         }
+
+        private static RequestException GetRequestException(WebException ex) 
+        {
+            if (ex.Response != null)
+            {
+                using (var rstream = ex.Response.GetResponseStream())
+                using (var reader = new StreamReader(rstream, Encoding.UTF8))
+                {
+                    var c = reader.ReadToEnd().Replace("\\n","\n").Replace("\\r","\r");
+                    var resp = ((HttpWebResponse)ex.Response);
+                    return new RequestException(resp.StatusCode, c);
+                }
+            }
+            else
+            {
+                return new RequestException(HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
         public Tuple<Func<IAsyncResult>, Func<IAsyncResult, Tuple<HttpStatusCode, string>>> Async(Uri uri, string method, string bytes)
         {
             var request = (HttpWebRequest)WebRequest.Create(uri).Tap(r =>
@@ -81,7 +87,7 @@ namespace ElasticElmah.Appender.Web
             return request.BeginGetResponse(iar =>
             {
                 var resp = Response(request, iar);
-                onsuccess(resp.Item1,resp.Item2);
+                onsuccess(resp.Item1, resp.Item2);
             }, null);
         }
 
@@ -95,8 +101,12 @@ namespace ElasticElmah.Appender.Web
                 using (var reader = new StreamReader(rstream, Encoding.UTF8))
                 {
                     var c = reader.ReadToEnd();
-                    return new Tuple<HttpStatusCode, string>(response.StatusCode,c);
+                    return new Tuple<HttpStatusCode, string>(response.StatusCode, c);
                 }
+            }
+            catch (WebException webex) 
+            {
+                throw GetRequestException(webex);
             }
             finally { if (response != null) response.Close(); }
         }
