@@ -149,6 +149,19 @@ namespace ElasticElmah.Appender.Tests
                     new DateTime(2001,1,4)
                 }));
         }
+        protected static void ExpectedEmptyResult(LogSearchResult result) 
+        {
+            Assert.AreEqual(0, result.Total);
+        }
+
+        protected void ExpectEmptyResultASync(ElasticSearchRepository.SearchTerm search)
+        {
+            ExpectedEmptyResult(_appender.GetPagedAsync(search, 0, 2).Result);
+        }
+        protected void ExpectEmptyResultSync(ElasticSearchRepository.SearchTerm search)
+        {
+            ExpectedEmptyResult(_appender.GetPaged(search, 0, 2));
+        }
 
         [Test]
         public virtual void Should_get_latest_with_property()
@@ -178,6 +191,9 @@ namespace ElasticElmah.Appender.Tests
             var s = new ElasticSearchRepository.SearchTerm { PropertyName = "LoggingEvent.properties.prop", Value = "msg" };
             ExpectOrderedResultASync(s);
             ExpectOrderedResultSync(s);
+            var s2 = new ElasticSearchRepository.SearchTerm { PropertyName = "LoggingEvent.properties.prop", Value = "msg2" };
+            ExpectEmptyResultASync(s2);
+            ExpectEmptyResultSync(s2);
         }
     }
 }
