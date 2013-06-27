@@ -72,7 +72,7 @@ namespace ElasticElmah.Appender.Tests
                             throw new Exception("Unrecognized token: " + reader.TokenType.ToString());
                     }
                 }
-                return dic;
+                throw new Exception("Missing end");
             }
 
             private static object ExpectArray(JsonReader reader)
@@ -91,6 +91,9 @@ namespace ElasticElmah.Appender.Tests
                         case JsonToken.Null:
                             array.Add(reader.Value);
                             break;
+                        case JsonToken.StartObject:
+                            array.Add(ExpectDictionaryOrPrimitive(reader));
+                            break;
                         case JsonToken.EndArray:
                             return array.ToArray();
                         default:
@@ -98,7 +101,7 @@ namespace ElasticElmah.Appender.Tests
                     }
 
                 }
-                return array.ToArray();
+                throw new Exception("Missing end");
             }
 
             public override bool CanConvert(Type objectType)

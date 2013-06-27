@@ -32,7 +32,8 @@ namespace ElasticElmah.Appender.Tests
                                 { "key1", "val1" }, 
                                 { "key2", "val2" },
                                 { "key3", new[]{"val3"}},
-                                { "key4", new[]{1, 12345}}
+                                { "key4", new[]{1, 12345}},
+                                { "key5", new[]{new Dictionary<string,object>{{"key6","val6"}}}}
                             };
                             d["array"] = new[] { "val4" };
                             d["int"] = 1;
@@ -61,7 +62,8 @@ namespace ElasticElmah.Appender.Tests
             Assert.That(str, Is.StringContaining("val3"));
             Assert.That(str, Is.StringContaining("val4"));
             Assert.That(str, Is.StringContaining("12345"));
-
+            Assert.That(str, Is.StringContaining("key6"));
+            Assert.That(str, Is.StringContaining("val6"));
             Assert.That(err.Data.Message, Is.EqualTo("Message"));
 
         }
