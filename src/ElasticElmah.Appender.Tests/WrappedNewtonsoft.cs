@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using log4net.Util;
 
-namespace ElasticElmah.Appender
+namespace ElasticElmah.Appender.Tests
 {
     public class WrappedNewtonsoft : IJsonSerializer
     {
@@ -44,7 +43,7 @@ namespace ElasticElmah.Appender
                 return dic;
             }
 
-            private object ExpectDictionaryOrPrimitive(JsonReader reader)
+            private static object ExpectDictionaryOrPrimitive(JsonReader reader)
             {
                 var dic = new Dictionary<string, object>();
                 while (reader.Read())
@@ -52,7 +51,13 @@ namespace ElasticElmah.Appender
                     switch (reader.TokenType)
                     {
                         case JsonToken.String:
-                            return reader.Value.ToString();
+                        case JsonToken.Integer:
+                        case JsonToken.Boolean:
+                        case JsonToken.Bytes:
+                        case JsonToken.Date:
+                        case JsonToken.Float:
+                        case JsonToken.Null:
+                            return reader.Value;
 
                         case JsonToken.StartObject:
                             return ExpectDictionaryOrPrimitive(reader);
@@ -61,11 +66,39 @@ namespace ElasticElmah.Appender
                             break;
                         case JsonToken.EndObject:
                             return dic;
+                        case JsonToken.StartArray:
+                            return ExpectArray(reader);
                         default:
                             throw new Exception("Unrecognized token: " + reader.TokenType.ToString());
                     }
                 }
                 return dic;
+            }
+
+            private static object ExpectArray(JsonReader reader)
+            {
+                var array = new List<Object>();
+                while (reader.Read())
+                {
+                    switch (reader.TokenType)
+                    {
+                        case JsonToken.String:
+                        case JsonToken.Integer:
+                        case JsonToken.Boolean:
+                        case JsonToken.Bytes:
+                        case JsonToken.Date:
+                        case JsonToken.Float:
+                        case JsonToken.Null:
+                            array.Add(reader.Value);
+                            break;
+                        case JsonToken.EndArray:
+                            return array.ToArray();
+                        default:
+                            throw new Exception("Array: Unrecognized token: " + reader.TokenType.ToString());
+                    }
+
+                }
+                return array.ToArray();
             }
 
             public override bool CanConvert(Type objectType)

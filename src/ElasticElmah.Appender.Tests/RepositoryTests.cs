@@ -8,7 +8,7 @@ using log4net.Core;
 using System.Collections.Generic;
 using System.Globalization;
 using ElasticElmah.Appender.Search;
-using ElasticElmah.Appender.Web;
+
 namespace ElasticElmah.Appender.Tests
 {
 
@@ -28,10 +28,17 @@ namespace ElasticElmah.Appender.Tests
                         Properties = new log4net.Util.PropertiesDictionary().Tap(d =>
                         {
                             d["prop"] = "msg";
-                            d["dic"] = new Dictionary<string, string> { 
+                            d["dic"] = new Dictionary<string, object> { 
                                 { "key1", "val1" }, 
-                                { "key2", "val2" } 
+                                { "key2", "val2" },
+                                { "key3", new[]{"val3"}},
+                                { "key4", new[]{1, 12345}}
                             };
+                            d["array"] = new[] { "val4" };
+                            d["int"] = 1;
+                            d["double"] = 1.2;
+                            d["null"] = null;
+                            d["bool"]=true;
                         })
                     }));
             _appender.Refresh();
@@ -51,6 +58,9 @@ namespace ElasticElmah.Appender.Tests
             Assert.That(str, Is.StringContaining("val1"));
             Assert.That(str, Is.StringContaining("key2"));
             Assert.That(str, Is.StringContaining("val2"));
+            Assert.That(str, Is.StringContaining("val3"));
+            Assert.That(str, Is.StringContaining("val4"));
+            Assert.That(str, Is.StringContaining("12345"));
 
             Assert.That(err.Data.Message, Is.EqualTo("Message"));
 
@@ -59,14 +69,7 @@ namespace ElasticElmah.Appender.Tests
         protected void Can_read_property_when_paging()
         {
             ExpectedPagingResult(_appender.GetPagedAsync(0, 10).Result);
-            _appender.GetPagedAsync(0, 10).Result.Tap(errors => {
-                ExpectedPagingResult(errors);
-            });
-        }
-
-        private void ExpectedPagingResult(Tuple<Func<IAsyncResult>, Func<IAsyncResult, LogSearchResult>> tuple)
-        {
-            ExpectedPagingResult(tuple.WaitOne());
+            _appender.GetPagedAsync(0, 10).Result.Tap(ExpectedPagingResult);
         }
 
         protected static void ExpectedPagingResult(LogSearchResult result)

@@ -51,7 +51,7 @@ namespace ElasticElmah.Appender.Presentation
                 return "<pre>" + Encode((string)that) + "</pre>";
             }
 
-            if (that.GetType().IsPrimitive)
+            if (that.GetType().IsPrimitive || that.GetType().IsValueType)
             {
                 return Encode(that.ToString());
             }
