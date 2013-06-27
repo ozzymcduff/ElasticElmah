@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using ElasticElmah.Appender.Presentation;
 using NUnit.Framework;
 using log4net;
 using System.Linq;
@@ -27,6 +28,10 @@ namespace ElasticElmah.Appender.Tests
                         Properties = new log4net.Util.PropertiesDictionary().Tap(d =>
                         {
                             d["prop"] = "msg";
+                            d["dic"] = new Dictionary<string, string> { 
+                                { "key1", "val1" }, 
+                                { "key2", "val2" } 
+                            };
                         })
                     }));
             _appender.Refresh();
@@ -41,6 +46,12 @@ namespace ElasticElmah.Appender.Tests
             var errt = _appender.GetAsync(id);
             var err = errt.Result;
             Assert.AreEqual("msg", err.Data.Properties["prop"]);
+            var str = FormatDictionary.ToTable(err.Data.Properties);
+            Assert.That(str, Is.StringContaining("key1"));
+            Assert.That(str, Is.StringContaining("val1"));
+            Assert.That(str, Is.StringContaining("key2"));
+            Assert.That(str, Is.StringContaining("val2"));
+
             Assert.That(err.Data.Message, Is.EqualTo("Message"));
 
         }
