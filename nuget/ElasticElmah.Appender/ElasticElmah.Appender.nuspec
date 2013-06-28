@@ -3,13 +3,13 @@
   <metadata>
     <id>ElasticElmah.Appender</id>
     <title>ElasticElmah.Appender</title>
-    <version>1.9.0</version>
+    <version>1.10.0</version>
     <authors>Oskar Gewalli</authors>
     <owners>Oskar Gewalli</owners>
     <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
     <projectUrl>https://github.com/wallymathieu/ElasticElmah</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>ElasticElmah appender is a small library to serialize log4net data in elastic search.</description>
+    <description>ElasticElmah appender is a small library to serialize log4net data using elasticsearch as a store.</description>
     <copyright>Copyright 2013</copyright>
     <references>
       <reference file="ElasticElmah.Appender.dll" />
