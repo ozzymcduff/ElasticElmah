@@ -97,6 +97,11 @@ namespace ElasticElmah.Appender
         ""enabled"": true,
         ""default"": ""24d""
       },
+      ""_timestamp"" : {
+        ""enabled"" : true,
+        ""path"" : ""timeStamp"",
+        ""store"" : true
+      },
       ""properties"": {
         ""timeStamp"": {
           ""type"": ""date""
