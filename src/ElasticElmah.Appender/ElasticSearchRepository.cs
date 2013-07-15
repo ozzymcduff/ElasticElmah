@@ -150,8 +150,9 @@ namespace ElasticElmah.Appender
             public long time { get; set; }
             public DateTime GetTime()
             {
-                var epoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-                return epoch.AddMilliseconds(time);
+                var epoch = new DateTime(1970, 1, 1, 0, 0, 0, 0);
+                //var offset= TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now);
+                return epoch.AddMilliseconds(time);//.Add(offset);
             }
         }
         private RequestInfo GetPagedRequest(int pageIndex, int pageSize)
@@ -363,7 +364,11 @@ namespace ElasticElmah.Appender
         {
             var res = serializer.Deserialize<SearchResponse>(s);
             var parsed = new LogSearchHistogramResult();
-            parsed.Histogram = res.facets.Single().Value.entries.Select(e => new HistogramEntry { Count=e.count, Time=e.GetTime() }).ToArray();
+            parsed.Histogram = res.facets.Single().Value.entries.Select(e => 
+                new HistogramEntry { 
+                    Count=e.count, 
+                    Time=e.GetTime() 
+                }).ToArray();
             return parsed;
         }
         public LogSearchResult GetPaged(SearchTerm search, int pageIndex, int pageSize)
