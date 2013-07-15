@@ -53,6 +53,8 @@
     <Compile Include="Presentation\Symbols.cs" />
     <Compile Include="Presentation\Token.cs" />
     <Compile Include="Presentation\LexStackTrace.cs" />
+    <Compile Include="Search\LogSearchFacetResult.cs" />
+    <Compile Include="Search\LogSearchHistogramResult.cs" />
     <Compile Include="Search\LogSearchResult.cs" />
     <Compile Include="Search\LogWithId.cs" />
     <Compile Include="Storage\LogEventLocation.cs" />

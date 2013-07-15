@@ -40,6 +40,7 @@ namespace ElasticElmah.Tests
             _appender.Add(new LoggingEvent(GetType(), _log.Logger.Repository,
                 new LoggingEventData
                 {
+                    TimeStamp = now,
                     Level = Level.Alert,
                     Message = "Message"
                 }));

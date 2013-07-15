@@ -135,8 +135,25 @@ namespace ElasticElmah.Appender
                 public Hit[] hits { get; set; }
             }
             public Hits hits { get; set; }
+            public Dictionary<string, FacetResult> facets { get; set; }
         }
 
+        public class FacetResult 
+        {
+            public int? count { get; set; }
+            public string _type { get; set; }// query, date_histogram
+            public FacetEntry[] entries { get; set; }
+        }
+        public class FacetEntry
+        {
+            public int count { get; set; }
+            public long time { get; set; }
+            public DateTime GetTime()
+            {
+                var epoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+                return epoch.AddMilliseconds(time);
+            }
+        }
         private RequestInfo GetPagedRequest(int pageIndex, int pageSize)
         {
             return new RequestInfo(UrlToIndex(settings, "LoggingEvent/_search"), "POST",
@@ -162,6 +179,163 @@ namespace ElasticElmah.Appender
 }");
         }
 
+
+        public LogSearchHistogramResult GetTimestampHistogram(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
+        {
+            var res = request.Sync(GetTimestampHistogramRequest(query, @from, @to, pageIndex, pageSize));
+            return GetLogSearchHistogramResultResult(res.Item1, res.Item2);
+        }
+        public Task<LogSearchHistogramResult> GetTimestampHistogramAsync(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
+        {
+            return request.Async(GetTimestampHistogramRequest(query, @from, @to, pageIndex, pageSize))
+                .ContinueWith(res => GetLogSearchHistogramResultResult(res.Result.Item1, res.Result.Item2));
+        }
+
+        private RequestInfo GetTimestampHistogramRequest(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                query = "*";
+            var _from = FormatTime(@from);
+            var _to = FormatTime(@to);
+            return new RequestInfo(UrlToIndex(settings, "LoggingEvent/_search"), "POST",
+                  @"{
+    ""from"": " + pageIndex + @",
+    ""size"": " + pageSize + @",
+    ""facets"": {
+        ""facetchart"": {
+          ""date_histogram"": {
+            ""field"": ""timeStamp"",
+            ""interval"": ""5m""
+          },
+          ""facet_filter"": {
+            ""fquery"": {
+              ""query"": {
+                ""filtered"": {
+                  ""query"": {
+                    ""query_string"": {
+                      ""query"": """ + query + @"""
+                    }
+                  },
+                  ""filter"": {
+                    ""range"": {
+                      ""timeStamp"": {
+                        ""from"": """ + _from + @""",
+                        ""to"": """ + _to + @"""
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+    ""version"":true
+}");
+        }
+
+        public static string FormatTime(DateTime time) 
+        {
+            return time.ToString("yyyy-MM-ddTHH:mm:ss.fffffffzzz");
+        }
+
+        public LogSearchFacetResult GetTimestampFacet(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
+        {
+            var res = request.Sync(GetTimestampFacetsRequest(query, @from, @to, pageIndex, pageSize));
+            return GetFacetResult(res.Item1, res.Item2);
+        }
+        public Task<LogSearchFacetResult> GetTimestampFacetAsync(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
+        {
+            return request.Async(GetTimestampFacetsRequest(query, @from, @to, pageIndex, pageSize))
+                .ContinueWith(res => GetFacetResult(res.Result.Item1, res.Result.Item2));
+        }
+
+        private RequestInfo GetTimestampFacetsRequest(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                query = "*";
+            var _from = FormatTime(@from);
+            var _to = FormatTime(@to);
+            return new RequestInfo(UrlToIndex(settings, "LoggingEvent/_search"), "POST",
+                  @"{
+    ""from"": " + pageIndex + @",
+    ""size"": " + pageSize + @",
+      ""facets"": {
+        ""facetquery0"": {
+          ""query"": {
+            ""filtered"": {
+              ""query"": {
+                ""query_string"": {
+                  ""query"": """ + query + @"""
+                }
+              },
+              ""filter"": {
+                ""range"": {
+                  ""timeStamp"": {
+                    ""from"": """ + _from + @""",
+                    ""to"": """ + _to + @"""
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+
+    ""version"":true
+}");
+        }
+
+        public LogSearchResult GetTimestampRange(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
+        {
+            var res = request.Sync(GetTimestampRangeRequest(query, @from, @to, pageIndex, pageSize));
+            return GetPagedResult(res.Item1, res.Item2);
+        }
+        public Task<LogSearchResult> GetTimestampRangeAsync(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
+        {
+            return request.Async(GetTimestampRangeRequest(query, @from, @to, pageIndex, pageSize))
+                .ContinueWith(res => GetPagedResult(res.Result.Item1, res.Result.Item2));
+        }
+        private RequestInfo GetTimestampRangeRequest(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                query = "*";
+            var _from = FormatTime(@from);
+            var _to = FormatTime(@to);
+            return new RequestInfo(UrlToIndex(settings, "LoggingEvent/_search"), "POST",
+                  @"{
+    ""fields"" : [""_parent"",""_source""],
+      ""query"": {
+    ""filtered"": {
+      ""query"": {
+        ""query_string"": {
+          ""query"": """+query+@"""
+        }
+      },
+      ""filter"": {
+        ""range"": {
+          ""timeStamp"": {
+            ""from"": """ + _from+ @""",
+            ""to"": """ + _to + @"""
+          }
+        }
+      }
+    }
+  },
+    ""from"": " + pageIndex + @",
+    ""size"": " + pageSize + @",
+    ""sort"":[
+        {""timeStamp"": {
+                ""order"":""desc""
+            }
+        }
+    ],
+    ""facets"":{},
+    ""version"":true
+}");
+        }
+
+        
         public LogSearchResult GetPaged(int pageIndex, int pageSize)
         {
             var res = request.Sync(GetPagedRequest(pageIndex, pageSize));
@@ -176,6 +350,20 @@ namespace ElasticElmah.Appender
         {
             var res = serializer.Deserialize<SearchResponse>(s);
             var parsed = new LogSearchResult(res.hits.hits.Select(h => new LogWithId(h._id, Map.To(h._source))), res.hits.total);
+            return parsed;
+        }
+        private LogSearchFacetResult GetFacetResult(HttpStatusCode c, string s) 
+        {
+            var res = serializer.Deserialize<SearchResponse>(s);
+            var parsed = new LogSearchFacetResult();
+            parsed.Count = res.facets.Single().Value.count.Value;
+            return parsed;
+        }
+        private LogSearchHistogramResult GetLogSearchHistogramResultResult(HttpStatusCode c, string s)
+        {
+            var res = serializer.Deserialize<SearchResponse>(s);
+            var parsed = new LogSearchHistogramResult();
+            parsed.Histogram = res.facets.Single().Value.entries.Select(e => new HistogramEntry { Count=e.count, Time=e.GetTime() }).ToArray();
             return parsed;
         }
         public LogSearchResult GetPaged(SearchTerm search, int pageIndex, int pageSize)

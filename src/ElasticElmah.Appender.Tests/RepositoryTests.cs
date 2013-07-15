@@ -16,6 +16,7 @@ namespace ElasticElmah.Appender.Tests
     {
         protected static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         protected ElasticSearchRepository _appender;
+        protected static DateTime now = DateTime.Now;
 
         [Test]
         public virtual void Can_log_properties()
@@ -25,6 +26,7 @@ namespace ElasticElmah.Appender.Tests
                     {
                         Level = Level.Alert,
                         Message = "Message",
+                        TimeStamp = now,
                         Properties = new log4net.Util.PropertiesDictionary().Tap(d =>
                         {
                             d["prop"] = "msg";
@@ -47,6 +49,11 @@ namespace ElasticElmah.Appender.Tests
             Can_read_property_when_paging();
 
             Can_read_property_when_get(id);
+
+            _appender.GetTimestampRangeAsync(null,
+                now.AddMilliseconds(-1),
+                now.AddMilliseconds(1), 0, 10).Result.Tap(ExpectedPagingResult);
+
         }
 
         protected void Can_read_property_when_get(string id)
@@ -87,7 +94,7 @@ namespace ElasticElmah.Appender.Tests
             var times = new List<DateTime>();
             for (int i = 0; i < 5; i++)
             {
-                times.Add(new DateTime(2001, 1, 1).AddDays(i));
+                times.Add(now.AddDays(i));
             }
 
             _appender.AddBulk(times.Select(timestamp => new LoggingEvent(GetType(), _log.Logger.Repository,
@@ -114,7 +121,7 @@ namespace ElasticElmah.Appender.Tests
             var times = new List<DateTime>();
             for (int i = 0; i < 5; i++)
             {
-                times.Add(new DateTime(2001, 1, 1).AddDays(i));
+                times.Add(now.AddDays(i));
             }
             var ids= new List<string>();
             foreach (var logitem in times.Select(timestamp => new LoggingEvent(GetType(), _log.Logger.Repository,
@@ -136,6 +143,8 @@ namespace ElasticElmah.Appender.Tests
 
             ExpectOrderedResultASync();
             ExpectOrderedResultSync();
+            ExpectOrderedFacetResultASync();
+            ExpectOrderedHistogramResultASync();
         }
 
         protected void ExpectOrderedResultASync()
@@ -155,14 +164,39 @@ namespace ElasticElmah.Appender.Tests
         {
             ExpectedOrderedResult(_appender.GetPaged(search, 0, 2));
         }
-
+        protected void ExpectOrderedFacetResultASync() 
+        {
+            ExpectedFacetResult(_appender.GetTimestampFacetAsync(null,now.AddDays(-1), now.AddDays(10), 0, 2).Result);
+        }
+        protected void ExpectOrderedHistogramResultASync() 
+        {
+            ExpectedHistogramResult(_appender.GetTimestampHistogramAsync(null, now.AddDays(-1), now.AddDays(10), 0, 2).Result);
+        }
+        protected static void ExpectedFacetResult(LogSearchFacetResult result) 
+        {
+            Assert.AreEqual(5, result.Count);
+            //Assert.That(result.Hits.Select(l => l.Data.TimeStamp).ToArray(),
+            //    Is.EquivalentTo(new[]{ 
+            //        now.AddDays(4), now.AddDays(3)
+            //    }));
+        }
+        protected static void ExpectedHistogramResult(LogSearchHistogramResult result) 
+        {
+            Assert.That(result.Histogram.Select(l => new KeyValuePair<DateTime,int>( l.Time,l.Count)).ToArray(),
+                Is.EquivalentTo(new[]{ 
+                    new KeyValuePair<DateTime,int>(now.AddDays(0),1),
+                    new KeyValuePair<DateTime,int>(now.AddDays(1),1),
+                    new KeyValuePair<DateTime,int>(now.AddDays(2),1),
+                    new KeyValuePair<DateTime,int>(now.AddDays(3),1),
+                    new KeyValuePair<DateTime,int>(now.AddDays(4),1),
+                }));
+        }
         protected static void ExpectedOrderedResult(LogSearchResult result)
         {
             Assert.AreEqual(5, result.Total);
             Assert.That(result.Hits.Select(l => l.Data.TimeStamp).ToArray(),
                 Is.EquivalentTo(new[]{ 
-                    new DateTime(2001,1,5),
-                    new DateTime(2001,1,4)
+                    now.AddDays(4), now.AddDays(3)
                 }));
         }
         protected static void ExpectedEmptyResult(LogSearchResult result) 
@@ -192,7 +226,7 @@ namespace ElasticElmah.Appender.Tests
             var times = new List<DateTime>();
             for (int i = 0; i < 5; i++)
             {
-                times.Add(new DateTime(2001, 1, 1).AddDays(i));
+                times.Add(now.AddDays(i));
             }
             var ids = new List<string>();
             foreach (var logitem in times.Select(timestamp => new LoggingEvent(GetType(), _log.Logger.Repository,
