@@ -56,6 +56,13 @@ namespace ElasticElmah.Appender
         {
             return request.Async(IndexExistsRequest()).ContinueWith(t =>
             {
+                if (t.Exception != null)
+                {
+                    if (t.Exception.InnerExceptions.Any(
+                            ex => ex is RequestException &&
+                                ((RequestException) ex).HttpStatusCode == HttpStatusCode.NotFound))
+                        return false;
+                }
                 return (t.Result.Item1 == HttpStatusCode.OK);
             });
         }
@@ -67,7 +74,16 @@ namespace ElasticElmah.Appender
 
         private bool IndexExists()
         {
-            return request.Sync(IndexExistsRequest()).Item1 == HttpStatusCode.OK;
+            try
+            {
+                return request.Sync(IndexExistsRequest()).Item1 == HttpStatusCode.OK;
+            }
+            catch (RequestException reqException)
+            {
+                if (reqException.HttpStatusCode == HttpStatusCode.NotFound)
+                    return false;
+                throw;
+            }
         }
 
         private readonly string _index;
