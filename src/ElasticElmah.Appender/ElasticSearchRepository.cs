@@ -26,29 +26,21 @@ namespace ElasticElmah.Appender
         /// <summary>
         /// async request to create index
         /// </summary>
-        public Task CreateIndexIfNotExistsAsync()
+        public Task CreateIndexOrRefreshMappingsAsync()
         {
             return IndexExistsAsync()
-                .ContinueWith(t =>
-                {
-                    var exists = t.Result;
-                    if (!exists)
-                    {
-                        return CreateIndexAsync();
-                    }
-                    else
-                    {
-                        return EmptyTask;
-                    }
-                });
+                .ContinueWith(t => !t.Result ? CreateIndexAsync() : PutMappingAsync());
         }
 
-        public void CreateIndexIfNotExists()
+        public void CreateIndexOrRefreshMappings()
         {
             var exists = IndexExists();
             if (!exists)
             {
                 CreateIndex();
+            }else
+            {
+                PutMapping();
             }
         }
 
@@ -89,10 +81,27 @@ namespace ElasticElmah.Appender
         private readonly string _index;
         private IDictionary<string, string> settings;
 
+        public Task PutMappingAsync()
+        {
+            var req = PutMappingRequestInfo();
+            return request.Async(req);
+        }
+        public void PutMapping()
+        {
+            request.Sync(PutMappingRequestInfo());
+        }
+
         public void CreateIndex()
         {
             request.Sync(CreateIndexRequest());
         }
+
+        public Task CreateIndexAsync()
+        {
+            var req = CreateIndexRequest();
+            return request.Async(req);
+        }
+
         private RequestInfo CreateIndexRequest()
         {
             return new RequestInfo(UrlToIndex(settings, ""), "POST",
@@ -104,7 +113,23 @@ namespace ElasticElmah.Appender
     }
   },
   ""mappings"": {
-    ""LoggingEvent"": {
+    ""LoggingEvent"": " + LoggingEventMappings() + @"
+  }
+}");
+        }
+        private RequestInfo PutMappingRequestInfo()
+        {
+            return new RequestInfo(UrlToIndex(settings, "LoggingEvent/_mapping"), "PUT",
+@"{
+  ""mappings"": {
+    ""LoggingEvent"": " + LoggingEventMappings() + @"
+  }
+}");
+        }
+
+        private static string LoggingEventMappings()
+        {
+            return @"{
       ""_source"": {
         ""enabled"": true,
         ""compress"": false
@@ -121,16 +146,28 @@ namespace ElasticElmah.Appender
       ""properties"": {
         ""timeStamp"": {
           ""type"": ""date""
-        }
+        },
+        ""message"":{""type"" : ""string""},
+        ""exceptionString"":{""type"" : ""string""},
+        ""domain"":{""type"" : ""string""},
+        ""identity"":{""type"" : ""string""},
+        ""userName"": {""type"" : ""string""},
+        ""locationInfo"":{
+            ""type"" : ""object"",
+            ""properties"" : {
+                ""className"":{""type"" : ""string""},
+                ""fileName"":{""type"" : ""string""},
+                ""lineNumber"":{""type"" : ""string""},
+                ""methodName"":{""type"" : ""string""}
+            }
+        },
+        ""threadName"":{""type"" : ""string""},
+        ""loggerName"":{""type"" : ""string""},
+        ""level"":{""type"":""string""},
+        ""level"":{""type"":""string""},
+        ""properties"":{ ""type"" : ""object"", ""index"" : ""not_analyzed"" }
       }
-    }
-  }
-}");
-        }
-        public Task CreateIndexAsync()
-        {
-            var req = CreateIndexRequest();
-            return request.Async(req);
+    }";
         }
 
         public Task DeleteIndexAsync()

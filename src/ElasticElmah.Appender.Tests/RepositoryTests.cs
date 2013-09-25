@@ -257,5 +257,38 @@ namespace ElasticElmah.Appender.Tests
             ExpectEmptyResultASync(s2);
             ExpectEmptyResultSync(s2);
         }
+
+        [Test]
+        public virtual void Should_get_latest_after_put_mapping()
+        {
+            var times = new List<DateTime>();
+            for (int i = 0; i < 5; i++)
+            {
+                times.Add(now.AddDays(i));
+            }
+            var ids = new List<string>();
+            foreach (var logitem in times.Select(timestamp => new LoggingEvent(GetType(), _log.Logger.Repository,
+                    new LoggingEventData
+                    {
+                        TimeStamp = timestamp,
+                        Level = Level.Error,
+                        Message = "Message " + timestamp.ToString(),
+                        Properties = new log4net.Util.PropertiesDictionary().Tap(d =>
+                        {
+                            d["prop"] = "msg";
+                        })
+                    })))
+            {
+                ids.Add(_appender.Add(logitem));
+            }
+            _appender.Refresh();
+            _appender.PutMapping();
+            var s = new ElasticSearchRepository.SearchTerm { PropertyName = "LoggingEvent.properties.prop", Value = "msg" };
+            ExpectOrderedResultASync(s);
+            ExpectOrderedResultSync(s);
+            var s2 = new ElasticSearchRepository.SearchTerm { PropertyName = "LoggingEvent.properties.prop", Value = "msg2" };
+            ExpectEmptyResultASync(s2);
+            ExpectEmptyResultSync(s2);
+        }
     }
 }

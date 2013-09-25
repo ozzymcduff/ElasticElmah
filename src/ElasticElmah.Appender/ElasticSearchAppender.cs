@@ -49,7 +49,7 @@ namespace ElasticElmah.Appender
         {
             if (init)
             {
-                Repo.CreateIndexIfNotExists();
+                Repo.CreateIndexOrRefreshMappings();
             }
             Repo.Add(loggingEvent);
         }
@@ -62,7 +62,7 @@ namespace ElasticElmah.Appender
             }
             else
             {
-                return ObserveExceptions(Repo.CreateIndexIfNotExistsAsync()
+                return ObserveExceptions(Repo.CreateIndexOrRefreshMappingsAsync()
                     .ContinueWith(t =>
                     {
                         return Repo.AddAsync(loggingEvent);
