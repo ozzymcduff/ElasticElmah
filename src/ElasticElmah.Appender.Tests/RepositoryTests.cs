@@ -1,7 +1,13 @@
 ﻿using System;
+using System.Collections.Specialized;
+using System.IO;
+using System.Net;
 using System.Reflection;
+using System.Text;
+using System.Web;
 using ElasticElmah.Appender.Presentation;
 using NUnit.Framework;
+using Subtext.TestLibrary;
 using log4net;
 using System.Linq;
 using log4net.Core;
@@ -86,6 +92,41 @@ namespace ElasticElmah.Appender.Tests
             Assert.AreEqual(1, result.Total);
             Assert.AreEqual("msg", result.Hits.First().Data.Properties["prop"]);
             Assert.That(result.Hits.Single().Data.Message, Is.EqualTo("Message"));
+        }
+
+        [Test]
+        public virtual void Can_log_web_properties()
+        {
+            string id;
+            using (var simulator = new HttpSimulator())
+            {
+                var form = new WebHeaderCollection();
+                form.Add("variable1", "keyvalue1");
+
+                simulator.SimulateRequest(new Uri("http://localhost/path/to/something/filename.aspx?query=somevalue"),form);
+                
+                id = _appender.Add(new LoggingEvent(GetType(), _log.Logger.Repository,
+                                                    new LoggingEventData
+                                                        {
+                                                            Level = Level.Alert,
+                                                            Message = "Message",
+                                                            TimeStamp = now,
+                                                        }).Tap(evt => ElasticSearchWebAppender.AddHttpContextProperties(evt,
+                                                                                                   new HttpContextWrapper
+                                                                                                       (HttpContext.Current))));
+            }
+            _appender.Refresh();
+
+            var err = _appender.Get(id);
+            var str = FormatDictionary.ToTable(err.Data.Properties);
+            Assert.That(str, Is.StringContaining("filename.aspx"));
+            Assert.That(str, Is.StringContaining("localhost"));
+            Assert.That(str, Is.StringContaining("something"));
+            Assert.That(str, Is.StringContaining("query"));
+            Assert.That(str, Is.StringContaining("somevalue"));
+            Assert.That(str, Is.StringContaining("variable1"));
+            Assert.That(str, Is.StringContaining("keyvalue1"));
+            Assert.That(err.Data.Message, Is.EqualTo("Message"));
         }
 
         [Test]

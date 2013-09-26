@@ -101,20 +101,23 @@ namespace ElasticElmah.Appender
         private static Dictionary<string, object> CopyCollection(HttpCookieCollection httpCookieCollection)
         {
             var dic = new Dictionary<string, object>();
-            foreach (var key in httpCookieCollection.AllKeys)
-            {
-                dic[key] = httpCookieCollection[key].Value;
-            }
+            if (httpCookieCollection != null)
+                foreach (var key in httpCookieCollection.AllKeys)
+                {
+                    var httpCookie = httpCookieCollection[key];
+                    if (httpCookie != null) dic[key] = httpCookie.Value;
+                }
             return dic;
         }
 
         private static Dictionary<string, object> CopyCollection(System.Collections.Specialized.NameValueCollection nameValueCollection)
         {
             var dic = new Dictionary<string, object>();
-            foreach (var key in nameValueCollection.AllKeys)
-            {
-                dic[key] = nameValueCollection[key];
-            }
+            if (nameValueCollection!=null)
+                foreach (var key in nameValueCollection.AllKeys.Where(key=>null!=key))
+                {
+                    dic[key] = nameValueCollection[key];
+                }
             return dic;
         }
 
