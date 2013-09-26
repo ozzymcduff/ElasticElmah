@@ -165,7 +165,7 @@ namespace ElasticElmah.Appender
         ""loggerName"":{""type"" : ""string""},
         ""level"":{""type"":""string""},
         ""level"":{""type"":""string""},
-        ""properties"":{ ""type"" : ""object"", ""index"" : ""not_analyzed"" }
+        ""properties"":{ ""type"" : ""object"", ""store"" : ""yes"" }
       }
     }";
         }
