@@ -12,7 +12,7 @@ msbuild :build do |msb|
   msb.properties :configuration => :Debug
   msb.targets :Clean, :Rebuild
   msb.verbosity = 'quiet'
-  msb.solution =File.join(dir,"src", "ElasticElmah.Core.sln")
+  msb.solution =File.join(dir,"src", "ElasticElmah.sln")
 end
 desc "test using nunit console"
 nunit :test => :build do |nunit|
@@ -58,9 +58,23 @@ exec :install_packages do |cmd|
   end
 end
 
-desc "Install missing NuGet packages."
-task :install_packages_mono do |cmd|
-  FileList["src/**/packages.config"].each do |filepath|
-    sh "mono ./src/.nuget/NuGet.exe i #{filepath} -o ./src/packages"
+namespace :mono do
+  dir = File.dirname(__FILE__)
+  desc "build isop on mono"
+  xbuild :build do |msb|
+    msb.properties :configuration => :Debug
+    msb.targets :Clean, :Rebuild
+    msb.verbosity = 'quiet'
+    msb.solution =File.join(dir,"src", "ElasticElmah.sln")
   end
+
+  desc "Install missing NuGet packages."
+  task :install_packages do |cmd|
+    FileList["src/**/packages.config"].each do |filepath|
+      sh "mono ./src/.nuget/NuGet.exe i #{filepath} -o ./src/packages"
+    end
+  end
+
 end
+
+
