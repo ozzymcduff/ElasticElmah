@@ -61,6 +61,6 @@ end
 desc "Install missing NuGet packages."
 task :install_packages_mono do |cmd|
   FileList["src/**/packages.config"].each do |filepath|
-    sh "mono –runtime=v4.0.30319 ./src/.nuget/NuGet.exe i #{filepath} -o ./src/packages"
+    sh "mono ./src/.nuget/NuGet.exe i #{filepath} -o ./src/packages"
   end
 end
