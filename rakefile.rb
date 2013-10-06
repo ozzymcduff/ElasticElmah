@@ -20,17 +20,6 @@ nunit :test => :build do |nunit|
   nunit.assemblies File.join(dir,"src","ElasticElmah.Appender.Tests/bin/Debug/ElasticElmah.Appender.Tests.dll")
 end
 
-msbuild :buildfsharp do |msb|
-  msb.properties :configuration => :Debug
-  msb.targets :Clean, :Rebuild
-  msb.verbosity = 'quiet'
-  msb.solution =File.join(dir,"src", "ElasticElmahFsharp.sln")
-end
-nunit :testfsharp => :buildfsharp do |nunit|
-  nunit.command = nunit_cmd()
-  nunit.assemblies File.join(dir,"src","ElasticElmah.Append.Tests/bin/Debug/ElasticElmah.Append.Tests.dll")
-end
-
 task :core_copy_to_nuspec => [:build] do
   output_directory_lib = File.join(dir,"nuget/ElasticElmah.Appender/lib/40/")
   mkdir_p output_directory_lib
@@ -58,6 +47,14 @@ end
 task :runners_nugetpack => [:runners_copy_to_nuspec] do |nuget|
   cd File.join(dir,"nuget/ElasticElmah.Tail") do
     sh "..\\..\\src\\.nuget\\NuGet.exe pack ElasticElmah.Tail.nuspec"
+  end
+end
+
+desc "Install missing NuGet packages."
+exec :install_packages do |cmd|
+  FileList["src/**/packages.config"].each do |filepath|
+    cmd.command = "./src/.nuget/NuGet.exe"
+    cmd.parameters = "i #{filepath} -o ./src/packages"
   end
 end
 
