@@ -1,0 +1,36 @@
+﻿@using ElasticElmahMVC.Code
+@model ElasticElmahMVC.Models.ErrorDetailModel
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1 id="PageTitle">@Model.Title</h1>
+@Html.Raw(SpeedBar.Render(
+    SpeedBar.Home.Format(Model.BasePageName),
+    SpeedBar.Help,
+    SpeedBar.About.Format(Model.BasePageName)))
+<p id="ErrorTitle">
+    <span id="ErrorType">
+        @Model.Type
+    </span>
+    <span id="ErrorTypeMessageSeparator">: </span>
+    <span id="ErrorMessage">@Model.Message</span>
+</p>
+@if (!string.IsNullOrEmpty(Model.Detail))
+{
+    <pre id="ErrorDetail">@Html.Raw(Model.Detail)</pre>
+}
+<p id="ErrorLogTime">@string.Format("Logged on {0} at {1}",
+                         Model.Time.ToLongDateString(),
+                         Model.Time.ToLongTimeString())
+</p>
+<div id="Properties">
+    <p class="table-caption">
+        Properties
+    </p>
+</div>
+<div class="scroll-view">
+    @Html.Raw(Model.Properties)
+</div>

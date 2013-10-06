@@ -1,0 +1,26 @@
+﻿@using System.Globalization
+@using ElasticElmahMVC.Code
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width" />
+        <title>@ViewBag.Title</title>
+        <link href="~/Static/ErrorLog.css" rel="stylesheet" />
+        @RenderSection("Head", required: false)
+    </head>
+    <body>
+        <div>
+            @RenderBody()
+        </div>
+        <p id="Footer">
+            @Html.Raw(new PoweredBy().RenderContents())
+            Server date is  @DateTime.Now.ToString("D", CultureInfo.InvariantCulture)
+            . Server time is @DateTime.Now.ToString("T", CultureInfo.InvariantCulture)
+            . All dates and times displayed are in the @(TimeZone.CurrentTimeZone.IsDaylightSavingTime(DateTime.Now) ?
+                                                                           TimeZone.CurrentTimeZone.DaylightName : TimeZone.CurrentTimeZone.StandardName)
+            zone.
+            .
+        </p>
+    </body>
+</html>

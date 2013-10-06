@@ -1,0 +1,22 @@
+﻿@using ElasticElmahMVC.Code
+@{
+    ViewBag.Title = Model.PageTitle;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>@Model.PageTitle</h2>
+<script type='text/javascript' language='JavaScript'>                     @*var ELMAH = {
+                        info : {
+                            version     : '@Model.GetVersion() @:',
+                            fileVersion: '@Model.GetFileVersion()@:',
+                            type: '@Elmah.Build.TypeLowercase @:',
+                            status: '@Elmah.Build.Status @:',
+                            framework: '@Elmah.Build.Framework @:',
+                            imageRuntime: '@Elmah.Build.ImageRuntimeVersion @:'
+                        }
+                    };*@
+                </script>
+@SpeedBar.Render(
+    SpeedBar.Home.Format(Model.BasePageName),
+    SpeedBar.Help,
+    SpeedBar.About.Format(Model.BasePageName))
