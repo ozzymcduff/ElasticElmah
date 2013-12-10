@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Specialized;
-using System.IO;
 using System.Net;
 using System.Reflection;
-using System.Text;
 using System.Web;
 using ElasticElmah.Appender.Presentation;
 using NUnit.Framework;
@@ -12,7 +9,6 @@ using log4net;
 using System.Linq;
 using log4net.Core;
 using System.Collections.Generic;
-using System.Globalization;
 using ElasticElmah.Appender.Search;
 
 namespace ElasticElmah.Appender.Tests

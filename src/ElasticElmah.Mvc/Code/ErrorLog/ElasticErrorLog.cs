@@ -1,12 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using ElasticElmah.Appender;
-using log4net.Core;
 using System.Threading.Tasks;
 using ElasticElmah.Appender.Search;
-using ElasticElmah.Appender.Web;
-using System.Net;
 using log4net;
 using System.Reflection;
 
@@ -40,10 +35,7 @@ namespace ElasticElmah.Core.ErrorLog
         public Task<LogWithId> GetErrorAsync(string id)
         {
             var r = appender.GetAsync(id);
-            return r.ContinueWith<LogWithId>(t =>
-            {
-                return t.Result;
-            });
+            return r.ContinueWith(t => t.Result);
         }
 
         private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
