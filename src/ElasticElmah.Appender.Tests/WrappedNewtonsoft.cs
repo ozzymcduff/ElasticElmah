@@ -1,5 +1,6 @@
 ﻿using Makrill;
 using Newtonsoft.Json;
+using JsonConvert = Newtonsoft.Json.JsonConvert;
 
 namespace ElasticElmah.Appender.Tests
 {

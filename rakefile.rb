@@ -12,7 +12,7 @@ msbuild :build do |msb|
   msb.properties :configuration => :Debug
   msb.targets :Clean, :Rebuild
   msb.verbosity = 'quiet'
-  msb.solution =File.join(dir,"src", "ElasticElmah.sln")
+  msb.solution =File.join(dir,"src", "ElasticElmah.Core.sln")
 end
 desc "test using nunit console"
 nunit :test => :build do |nunit|

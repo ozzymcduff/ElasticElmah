@@ -3,7 +3,7 @@
   <metadata>
     <id>ElasticElmah.Appender</id>
     <title>ElasticElmah.Appender</title>
-    <version>1.15.0</version>
+    <version>1.15.1</version>
     <authors>Oskar Gewalli</authors>
     <owners>Oskar Gewalli</owners>
     <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
@@ -15,7 +15,7 @@
       <reference file="ElasticElmah.Appender.dll" />
     </references>
     <dependencies>
-      <dependency id="log4net" version="2.0.0" />
+      <dependency id="log4net" version="2.0.3" />
     </dependencies>
     <releaseNotes>In order to read all of the http info from source (when using ElasticSearchWebAppender), need to store the properties field.
     </releaseNotes>
