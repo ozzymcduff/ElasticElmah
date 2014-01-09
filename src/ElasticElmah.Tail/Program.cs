@@ -2,18 +2,39 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading;
 using NDesk.Options;
 using log4net.Core;
 using log4net.Layout;
 using ElasticElmah.Appender;
-using System.Threading.Tasks;
 
 namespace ElasticElmah.Tail
 {
     class Program
     {
+        private static string helpTest = @"Usage:
+-i|index={an index}
+    The elastic index to read
+
+-l|lines={tail x lines}	
+    Display the last x lines. Defaults to 10 lines. 
+
+-y|layout={pattern layout syntax as defined in log4net.Layout.PatternLayout}
+
+-f|format={a named layout format}
+    The available formats are:
+        -f=minusminus Information delimited by newline and ----------------------
+
+-h|?|help
+    Display help
+
+For instance to :
+LogTail.exe -i=log
+LogTail.exe -index=log
+
+If you are in powershell (or cygwin) you can do the following:
+cat yourlogfile.xml | LogTail.exe
+";
+
         static void Main(string[] args)
         {
             var index = new List<string>();
@@ -43,29 +64,7 @@ namespace ElasticElmah.Tail
 
             if (help)
             {
-                Console.WriteLine(@"Usage:
--i|index={an index}
-    The elastic index to read
-
--l|lines={tail x lines}	
-    Display the last x lines. Defaults to 10 lines. 
-
--y|layout={pattern layout syntax as defined in log4net.Layout.PatternLayout}
-
--f|format={a named layout format}
-    The available formats are:
-        -f=minusminus Information delimited by newline and ----------------------
-
--h|?|help
-    Display help
-
-For instance to :
-LogTail.exe -i=log
-LogTail.exe -index=log
-
-If you are in powershell (or cygwin) you can do the following:
-cat yourlogfile.xml | LogTail.exe
-");
+                Console.WriteLine(helpTest);
                 return;
             }
 
@@ -74,6 +73,8 @@ cat yourlogfile.xml | LogTail.exe
                 Tail(lines ?? 10, index, (entry) => showentry(Console.Out, entry), s => Console.Out.WriteLine("Missing index: '{0}'", s));
                 return;
             }
+            // No indexes, display help before exit
+            Console.WriteLine(helpTest);
         }
 
         private static LayoutSkeleton GetFormatLayout(string format)
@@ -83,7 +84,7 @@ cat yourlogfile.xml | LogTail.exe
                 case "minusminus":
                     return
                         new PatternLayout(
-                            "%newline----------------------BEGIN LOG----------------------date:%newline %date %newline##level: %newline%-5level %newline##logger:%newline  %logger %newline########message:########%newline%message %newline########exception:########%newline %exception%newline----------------------END LOG----------------------%newline");
+                            "%newline----------------------BEGIN LOG----------------------%newline##date: %newline%date %newline##level: %newline%-5level %newline##logger: %newline%logger %newline########message:########%newline%message %newline########exception:########%newline %exception%newline----------------------END LOG----------------------%newline");
                 default:
                     Console.Error.WriteLine("Unknown format '{0}'", format);
                     return null;
