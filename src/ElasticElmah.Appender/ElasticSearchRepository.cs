@@ -307,8 +307,6 @@ namespace ElasticElmah.Appender
         {
             if (string.IsNullOrWhiteSpace(query))
                 query = "*";
-            var _from = FormatTime(@from);
-            var _to = FormatTime(@to);
             return new RequestInfo(UrlToIndex(settings, "LoggingEvent/_search"), "POST",
                   @"{
     ""from"": " + pageIndex + @",
@@ -325,8 +323,8 @@ namespace ElasticElmah.Appender
               ""filter"": {
                 ""range"": {
                   ""timeStamp"": {
-                    ""from"": """ + _from + @""",
-                    ""to"": """ + _to + @"""
+                    ""from"": """ + FormatTime(@from) + @""",
+                    ""to"": """ + FormatTime(@to) + @"""
                   }
                 }
               }

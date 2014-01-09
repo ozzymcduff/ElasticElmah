@@ -67,27 +67,41 @@ cat yourlogfile.xml | LogTail.exe
 
             if (index.Any())
             {
-                Tail(lines ?? 10, index, (entry) => showentry(Console.Out, entry));
+                Tail(lines ?? 10, index, (entry) => showentry(Console.Out, entry), s => Console.Out.WriteLine("Missing index: '{0}'", s));
                 return;
             }
         }
 
-        private static int ParseInterval(string v)
-        {
-            return Int32.Parse(v) * 1000;
-        }
-
-        private static void Tail(int lines, List<string> indexes, Action<LoggingEventData> showentry)
+        private static void Tail(int lines, List<string> indexes, Action<LoggingEventData> showentry, Action<string> showmissingindex)
         {
             foreach (var index in indexes)
             {
-                var repo = new ElasticSearchRepository("Server=localhost;Index="+index+";Port=9200");
-                repo.GetPagedAsync(0, lines).ContinueWith(t => {
-                    foreach (var item in t.Result.Hits.Select(e => e.Data))
+                var repo = new ElasticSearchRepository("Server=localhost;Index=" + index + ";Port=9200");
+                try
+                {
+                    repo.GetPagedAsync(0, lines).ContinueWith(t =>
                     {
-                        showentry(item);
+                        if (t.IsFaulted)
+                        {
+                            t.Wait();
+                        }
+                        foreach (var item in t.Result.Hits.Select(e => e.Data))
+                        {
+                            showentry(item);
+                        }
+                    }).Wait();
+                }
+                catch (AggregateException ex)
+                {
+                    if (ex.UnWrapInnerExceptions().Any(ex2 => ex2 is IndexMissingException))
+                    {
+                        showmissingindex(index);
                     }
-                }).Wait();
+                    else
+                    {
+                        throw;
+                    }
+                }
             }
         }
     }
