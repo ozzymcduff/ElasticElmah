@@ -24,7 +24,8 @@ namespace ElasticElmah.Tail
                 { "i|index=",   v => { index.Add(v); } },
                 { "l|lines=", v => { lines=Int32.Parse(v);}},
                 { "h|?|help", v => { help = true;}},
-                { "y|layout=",v=> { layout=new PatternLayout(v);}}
+                { "y|layout=",v=> { layout=new PatternLayout(v);}},
+                { "f|format=", v=> { layout = GetFormatLayout(v); }}
             };
             var detectedFiles = args
                 .Where(a => !(a.StartsWith("-") || a.StartsWith("/")))
@@ -51,6 +52,10 @@ namespace ElasticElmah.Tail
 
 -y|layout={pattern layout syntax as defined in log4net.Layout.PatternLayout}
 
+-f|format={a named layout format}
+    The available formats are:
+        -f=minusminus Information delimited by newline and ----------------------
+
 -h|?|help
     Display help
 
@@ -64,11 +69,24 @@ cat yourlogfile.xml | LogTail.exe
                 return;
             }
 
-
             if (index.Any())
             {
                 Tail(lines ?? 10, index, (entry) => showentry(Console.Out, entry), s => Console.Out.WriteLine("Missing index: '{0}'", s));
                 return;
+            }
+        }
+
+        private static LayoutSkeleton GetFormatLayout(string format)
+        {
+            switch (format)
+            {
+                case "minusminus":
+                    return
+                        new PatternLayout(
+                            "%newline----------------------BEGIN LOG----------------------date:%newline %date %newline##level: %newline%-5level %newline##logger:%newline  %logger %newline########message:########%newline%message %newline########exception:########%newline %exception%newline----------------------END LOG----------------------%newline");
+                default:
+                    Console.Error.WriteLine("Unknown format '{0}'", format);
+                    return null;
             }
         }
 
