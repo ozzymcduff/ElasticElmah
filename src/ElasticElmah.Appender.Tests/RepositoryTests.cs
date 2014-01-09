@@ -21,6 +21,15 @@ namespace ElasticElmah.Appender.Tests
         protected static DateTime now = DateTime.Now;
 
         [Test]
+        public virtual void When_nothing_inserted()
+        {
+            _appender.Refresh();
+            System.Threading.Thread.Sleep(50);
+            ExpectEmptyResultSync();
+            ExpectEmptyResultASync();
+        }
+
+        [Test]
         public virtual void Can_log_properties()
         {
             var id = _appender.Add(new LoggingEvent(GetType(), _log.Logger.Repository,
