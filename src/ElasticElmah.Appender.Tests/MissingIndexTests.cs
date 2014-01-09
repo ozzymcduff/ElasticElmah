@@ -24,10 +24,10 @@ namespace ElasticElmah.Appender.Tests
         }
 
         [Test]
-        public void Should_give_empty_result_when_no_index()
+        public void Should_give_missing_index_result_when_no_index()
         {
-            ExpectEmptyResultSync();
-            ExpectEmptyResultASync();
+            ExpectMissingIndexResultSync();
+            ExpectMissingIndexResultASync();
         }
     }
 }

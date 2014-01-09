@@ -22,6 +22,23 @@ namespace ElasticElmah.Appender.Tests
             Assert.AreEqual("msg", result.Hits.First().Data.Properties["prop"]);
             Assert.That(result.Hits.Single().Data.Message, Is.EqualTo("Message"));
         }
+        protected void ExpectMissingIndexResultSync()
+        {
+            Assert.Throws<IndexMissingException>(() => _appender.GetPaged(0, 2));
+        }
+
+        protected void ExpectMissingIndexResultASync()
+        {
+            try
+            {
+                var res = _appender.GetPagedAsync(0, 2).Result;
+            }
+            catch (AggregateException exception)
+            {
+                Assert.That(exception.UnWrapInnerExceptions().Any(ex => ex is IndexMissingException));
+            }
+        }
+
         protected void ExpectOrderedResultASync(DateTime now)
         {
             ExpectedOrderedResult(_appender.GetPagedAsync(0, 2).Result, now);

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using ElasticElmah.Appender.Storage;
 using log4net.Core;
 using System.Net;
@@ -12,15 +13,15 @@ namespace ElasticElmah.Appender
 {
     public class ElasticSearchRepository
     {
-        private readonly IJSonRequest request;
-        private readonly IJsonSerializer serializer;
-        private readonly static Task EmptyTask = new Task(() => { });
+        private readonly IJSonRequest _request;
+        private readonly IJsonSerializer _serializer;
+
         public ElasticSearchRepository(string connectionString, IJSonRequest request = null, IJsonSerializer serializer = null)
         {
             settings = BuildElsticSearchConnection(connectionString);
             _index = settings["Index"];
-            this.request = request ?? new Web.JsonRequest();
-            this.serializer = serializer ?? new DefaultJsonSerializer();
+            _request = request ?? new JsonRequest();
+            _serializer = serializer ?? new DefaultJsonSerializer();
         }
 
         /// <summary>
@@ -29,7 +30,7 @@ namespace ElasticElmah.Appender
         public Task CreateIndexOrRefreshMappingsAsync()
         {
             return IndexExistsAsync()
-                .ContinueWith(t => !t.Result ? CreateIndexAsync() : PutMappingAsync());
+                .ContinueWith(t => { t.PropagateExceptions(); return !t.Result ? CreateIndexAsync() : PutMappingAsync(); });
         }
 
         public void CreateIndexOrRefreshMappings()
@@ -46,7 +47,7 @@ namespace ElasticElmah.Appender
 
         private Task<bool> IndexExistsAsync()
         {
-            return request.Async(IndexExistsRequest()).ContinueWith(t =>
+            return _request.Async(IndexExistsRequest()).ContinueWith(t =>
             {
                 if (t.Exception != null)
                 {
@@ -68,7 +69,7 @@ namespace ElasticElmah.Appender
         {
             try
             {
-                return request.Sync(IndexExistsRequest()).Item1 == HttpStatusCode.OK;
+                return _request.Sync(IndexExistsRequest()).Item1 == HttpStatusCode.OK;
             }
             catch (RequestException reqException)
             {
@@ -84,22 +85,22 @@ namespace ElasticElmah.Appender
         public Task PutMappingAsync()
         {
             var req = PutMappingRequestInfo();
-            return request.Async(req);
+            return _request.Async(req);
         }
         public void PutMapping()
         {
-            request.Sync(PutMappingRequestInfo());
+            _request.Sync(PutMappingRequestInfo());
         }
 
         public void CreateIndex()
         {
-            request.Sync(CreateIndexRequest());
+            _request.Sync(CreateIndexRequest());
         }
 
         public Task CreateIndexAsync()
         {
             var req = CreateIndexRequest();
-            return request.Async(req);
+            return _request.Async(req);
         }
 
         private RequestInfo CreateIndexRequest()
@@ -172,12 +173,12 @@ namespace ElasticElmah.Appender
 
         public Task DeleteIndexAsync()
         {
-            return request.Async(new RequestInfo(UrlToIndex(settings, ""), "DELETE", null));
+            return _request.Async(new RequestInfo(UrlToIndex(settings, ""), "DELETE", null));
         }
 
         public void DeleteIndex()
         {
-            request.Sync(UrlToIndex(settings, ""), "DELETE", null);
+            _request.Sync(UrlToIndex(settings, ""), "DELETE", null);
         }
 
         public class SearchResponse
@@ -236,21 +237,19 @@ namespace ElasticElmah.Appender
 
         public LogSearchHistogramResult GetTimestampHistogram(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
         {
-            var res = request.Sync(GetTimestampHistogramRequest(query, @from, @to, pageIndex, pageSize));
+            var res = _request.Sync(GetTimestampHistogramRequest(query, @from, @to, pageIndex, pageSize));
             return GetLogSearchHistogramResultResult(res.Item1, res.Item2);
         }
         public Task<LogSearchHistogramResult> GetTimestampHistogramAsync(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
         {
-            return request.Async(GetTimestampHistogramRequest(query, @from, @to, pageIndex, pageSize))
-                .ContinueWith(res => GetLogSearchHistogramResultResult(res.Result.Item1, res.Result.Item2));
+            return _request.Async(GetTimestampHistogramRequest(query, @from, @to, pageIndex, pageSize))
+                .ContinueWith(res => { res.PropagateExceptions(); return GetLogSearchHistogramResultResult(res.Result.Item1, res.Result.Item2); });
         }
 
         private RequestInfo GetTimestampHistogramRequest(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
         {
             if (string.IsNullOrWhiteSpace(query))
                 query = "*";
-            var _from = FormatTime(@from);
-            var _to = FormatTime(@to);
             return new RequestInfo(UrlToIndex(settings, "LoggingEvent/_search"), "POST",
                   @"{
     ""from"": " + pageIndex + @",
@@ -273,8 +272,8 @@ namespace ElasticElmah.Appender
                   ""filter"": {
                     ""range"": {
                       ""timeStamp"": {
-                        ""from"": """ + _from + @""",
-                        ""to"": """ + _to + @"""
+                        ""from"": """ + FormatTime(@from) + @""",
+                        ""to"": """ + FormatTime(@to) + @"""
                       }
                     }
                   }
@@ -295,13 +294,13 @@ namespace ElasticElmah.Appender
 
         public LogSearchFacetResult GetTimestampFacet(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
         {
-            var res = request.Sync(GetTimestampFacetsRequest(query, @from, @to, pageIndex, pageSize));
+            var res = _request.Sync(GetTimestampFacetsRequest(query, @from, @to, pageIndex, pageSize));
             return GetFacetResult(res.Item1, res.Item2);
         }
         public Task<LogSearchFacetResult> GetTimestampFacetAsync(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
         {
-            return request.Async(GetTimestampFacetsRequest(query, @from, @to, pageIndex, pageSize))
-                .ContinueWith(res => GetFacetResult(res.Result.Item1, res.Result.Item2));
+            return _request.Async(GetTimestampFacetsRequest(query, @from, @to, pageIndex, pageSize))
+                .ContinueWith(res => { res.PropagateExceptions(); return GetFacetResult(res.Result.Item1, res.Result.Item2); });
         }
 
         private RequestInfo GetTimestampFacetsRequest(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
@@ -342,20 +341,18 @@ namespace ElasticElmah.Appender
 
         public LogSearchResult GetTimestampRange(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
         {
-            var res = request.Sync(GetTimestampRangeRequest(query, @from, @to, pageIndex, pageSize));
+            var res = _request.Sync(GetTimestampRangeRequest(query, @from, @to, pageIndex, pageSize));
             return GetPagedResult(res.Item1, res.Item2);
         }
         public Task<LogSearchResult> GetTimestampRangeAsync(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
         {
-            return request.Async(GetTimestampRangeRequest(query, @from, @to, pageIndex, pageSize))
-                .ContinueWith(res => GetPagedResult(res.Result.Item1, res.Result.Item2));
+            return _request.Async(GetTimestampRangeRequest(query, @from, @to, pageIndex, pageSize))
+                .ContinueWith(res => { res.PropagateExceptions(); return GetPagedResult(res.Result.Item1, res.Result.Item2); });
         }
         private RequestInfo GetTimestampRangeRequest(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
         {
             if (string.IsNullOrWhiteSpace(query))
                 query = "*";
-            var _from = FormatTime(@from);
-            var _to = FormatTime(@to);
             return new RequestInfo(UrlToIndex(settings, "LoggingEvent/_search"), "POST",
                   @"{
     ""fields"" : [""_parent"",""_source""],
@@ -369,8 +366,8 @@ namespace ElasticElmah.Appender
       ""filter"": {
         ""range"": {
           ""timeStamp"": {
-            ""from"": """ + _from+ @""",
-            ""to"": """ + _to + @"""
+            ""from"": """ + FormatTime(@from)+ @""",
+            ""to"": """ + FormatTime(@to) + @"""
           }
         }
       }
@@ -392,30 +389,45 @@ namespace ElasticElmah.Appender
         
         public LogSearchResult GetPaged(int pageIndex, int pageSize)
         {
-            var res = request.Sync(GetPagedRequest(pageIndex, pageSize));
-            return GetPagedResult(res.Item1, res.Item2);
+            try
+            {
+                var res = _request.Sync(GetPagedRequest(pageIndex, pageSize));
+                return GetPagedResult(res.Item1, res.Item2);
+            }
+            catch (RequestException ex)
+            {
+                if (ex.Message.Contains("IndexMissingException"))
+                {
+                    throw new IndexMissingException("Missing index!", ex);
+                }
+                throw;
+            }
         }
         public Task<LogSearchResult> GetPagedAsync(int pageIndex, int pageSize)
         {
-            return request.Async(GetPagedRequest(pageIndex, pageSize))
-                .ContinueWith(res => GetPagedResult(res.Result.Item1, res.Result.Item2));
+            return _request.Async(GetPagedRequest(pageIndex, pageSize))
+                .ContinueWith(res =>
+                                  {
+                                      res.PropagateExceptions();
+                                      return GetPagedResult(res.Result.Item1, res.Result.Item2);
+                                  });
         }
         private LogSearchResult GetPagedResult(HttpStatusCode c, string s)
         {
-            var res = serializer.Deserialize<SearchResponse>(s);
+            var res = _serializer.Deserialize<SearchResponse>(s);
             var parsed = new LogSearchResult(res.hits.hits.Select(h => new LogWithId(h._id, Map.To(h._source))), res.hits.total);
             return parsed;
         }
         private LogSearchFacetResult GetFacetResult(HttpStatusCode c, string s) 
         {
-            var res = serializer.Deserialize<SearchResponse>(s);
+            var res = _serializer.Deserialize<SearchResponse>(s);
             var parsed = new LogSearchFacetResult();
             parsed.Count = res.facets.Single().Value.count.Value;
             return parsed;
         }
         private LogSearchHistogramResult GetLogSearchHistogramResultResult(HttpStatusCode c, string s)
         {
-            var res = serializer.Deserialize<SearchResponse>(s);
+            var res = _serializer.Deserialize<SearchResponse>(s);
             var parsed = new LogSearchHistogramResult();
             parsed.Histogram = res.facets.Single().Value.entries.Select(e => 
                 new HistogramEntry { 
@@ -426,13 +438,13 @@ namespace ElasticElmah.Appender
         }
         public LogSearchResult GetPaged(SearchTerm search, int pageIndex, int pageSize)
         {
-            var res = request.Sync(GetPagedRequest(search, pageIndex, pageSize));
+            var res = _request.Sync(GetPagedRequest(search, pageIndex, pageSize));
             return GetPagedResult(res.Item1, res.Item2);
         }
         public Task<LogSearchResult> GetPagedAsync(SearchTerm search, int pageIndex, int pageSize)
         {
-            return request.Async(GetPagedRequest(search, pageIndex, pageSize))
-                .ContinueWith(res => GetPagedResult(res.Result.Item1, res.Result.Item2));
+            return _request.Async(GetPagedRequest(search, pageIndex, pageSize))
+                .ContinueWith(res => { res.PropagateExceptions(); return GetPagedResult(res.Result.Item1, res.Result.Item2); });
         }
 
         public class SearchTerm
@@ -481,19 +493,19 @@ namespace ElasticElmah.Appender
 
         private LogWithId GetGetResponse(string s)
         {
-            var res = serializer.Deserialize<Hit>(s);
+            var res = _serializer.Deserialize<Hit>(s);
             return new LogWithId(res._id, Map.To(res._source));
         }
 
         public LogWithId Get(string id)
         {
-            return GetGetResponse(request.Sync(GetRequest(id)).Item2);
+            return GetGetResponse(_request.Sync(GetRequest(id)).Item2);
         }
 
         public Task<LogWithId> GetAsync(string id)
         {
-            return request.Async(GetRequest(id))
-                .ContinueWith(resp => GetGetResponse(resp.Result.Item2));
+            return _request.Async(GetRequest(id))
+                .ContinueWith(resp => { resp.PropagateExceptions(); return GetGetResponse(resp.Result.Item2); });
         }
 
         private static IDictionary<string, string> BuildElsticSearchConnection(string connectionString)
@@ -528,7 +540,7 @@ namespace ElasticElmah.Appender
 
         public void AddWithoutReturn(LoggingEvent loggingEvent)
         {
-            request.Async(AddRequest(loggingEvent));
+            _request.Async(AddRequest(loggingEvent));
         }
         /// <summary>
         /// 
@@ -537,8 +549,8 @@ namespace ElasticElmah.Appender
         /// <returns>the id of the logging event</returns>
         public string Add(LoggingEvent loggingEvent)
         {
-            var resp = request.Sync(AddRequest(loggingEvent));
-            return serializer.Deserialize<AddResponse>(resp.Item2)._id;
+            var resp = _request.Sync(AddRequest(loggingEvent));
+            return _serializer.Deserialize<AddResponse>(resp.Item2)._id;
         }
         private class AddResponse
         {
@@ -552,7 +564,7 @@ namespace ElasticElmah.Appender
         private RequestInfo AddRequest(LoggingEvent loggingEvent)
         {
             return new RequestInfo(UrlToIndex(settings, "LoggingEvent/"), "POST",
-                serializer.Serialize(Map.To(loggingEvent)));
+                _serializer.Serialize(Map.To(loggingEvent)));
         }
         /// <summary>
         /// 
@@ -562,8 +574,8 @@ namespace ElasticElmah.Appender
         /// <returns></returns>
         public Task<string> AddAsync(LoggingEvent loggingEvent)
         {
-            return request.Async(AddRequest(loggingEvent))
-                .ContinueWith(t => serializer.Deserialize<AddResponse>(t.Result.Item2)._id);
+            return _request.Async(AddRequest(loggingEvent))
+                .ContinueWith(t => { t.PropagateExceptions(); return _serializer.Deserialize<AddResponse>(t.Result.Item2)._id; });
         }
         class Index
         {
@@ -576,31 +588,45 @@ namespace ElasticElmah.Appender
         }
         private RequestInfo AddBulkRequest(IEnumerable<LoggingEvent> loggingEvents, bool refresh = false)
         {
-            string operation = serializer.Serialize(new Index { index = new IndexOp() { _index = _index, _type = "LoggingEvent" } });
+            string operation = _serializer.Serialize(new Index { index = new IndexOp() { _index = _index, _type = "LoggingEvent" } });
             return new RequestInfo(UrlToIndex(settings, "LoggingEvent/_bulk" + (refresh ? "?refresh=true" : "")), "POST",
                 string.Join(Environment.NewLine, loggingEvents
                     .Select(l => operation + Environment.NewLine
-                        + serializer.Serialize(Map.To(l))))
+                        + _serializer.Serialize(Map.To(l))))
                         + Environment.NewLine
                         );
         }
         public HttpStatusCode AddBulk(IEnumerable<LoggingEvent> loggingEvents, bool refresh = false)
         {
-            return request.Sync(AddBulkRequest(loggingEvents, refresh)).Item1;
+            return _request.Sync(AddBulkRequest(loggingEvents, refresh)).Item1;
         }
 
         public Task<HttpStatusCode> AddBulkAsync(IEnumerable<LoggingEvent> loggingEvents, bool refresh = false)
         {
-            return request.Async(AddBulkRequest(loggingEvents, refresh))
-                .ContinueWith(t => t.Result.Item1);
+            return _request.Async(AddBulkRequest(loggingEvents, refresh))
+                .ContinueWith(t => { t.PropagateExceptions(); return t.Result.Item1; });
         }
 
         public void Refresh()
         {
-            request.Sync(UrlToIndex(settings, "_refresh"), "POST", null);
+            _request.Sync(UrlToIndex(settings, "_refresh"), "POST", null);
         }
     }
-    public static class Extensions
+
+    public static class AggregateExceptionExtensions
+    {
+        public static IEnumerable<Exception> UnWrapInnerExceptions(this AggregateException exception)
+        {
+            var exception2 = exception;
+            while ((exception2 = exception2.InnerException as AggregateException) != null)
+            {
+                exception = exception2;
+            }
+            return exception.InnerExceptions;
+        }
+    }
+
+    internal static class Extensions
     {
         public static T Tap<T>(this T that, Action<T> tapaction)
         {
@@ -613,6 +639,37 @@ namespace ElasticElmah.Appender
                 tapaction(that);
             return that;
         }
+        public static void PropagateExceptions(this Task task)
+        {
+            if (task == null)
+                throw new ArgumentNullException("task");
+            if (!task.IsCompleted)
+                throw new InvalidOperationException("The task has not completed yet.");
+
+            if (task.IsFaulted)
+                task.Wait();
+        }
     }
 
+    [Serializable]
+    public class IndexMissingException : Exception
+    {
+        public IndexMissingException()
+        {
+        }
+
+        public IndexMissingException(string message) : base(message)
+        {
+        }
+
+        public IndexMissingException(string message, Exception inner) : base(message, inner)
+        {
+        }
+
+        protected IndexMissingException(
+            SerializationInfo info,
+            StreamingContext context) : base(info, context)
+        {
+        }
+    }
 }

@@ -61,6 +61,7 @@
     <Compile Include="AppenderOnWrongHostTests.cs" />
     <Compile Include="AppenderTests.cs" />
     <Compile Include="MissingIndexTests.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="Presentation\TestData.cs" />
     <Compile Include="Presentation\ColorizationTests.cs" />
     <Compile Include="Presentation\ParseStackTraceTests.cs" />

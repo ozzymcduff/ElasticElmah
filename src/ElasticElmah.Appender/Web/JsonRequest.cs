@@ -42,7 +42,7 @@ namespace ElasticElmah.Appender.Web
             }
         }
 
-        private static RequestException GetRequestException(WebException ex) 
+        private static Exception GetRequestException(WebException ex) 
         {
             if (ex.Response != null)
             {
@@ -51,6 +51,10 @@ namespace ElasticElmah.Appender.Web
                 {
                     var c = reader.ReadToEnd().Replace("\\n","\n").Replace("\\r","\r");
                     var resp = ((HttpWebResponse)ex.Response);
+                    if (c.Contains("IndexMissingException"))
+                    {
+                        return new IndexMissingException();
+                    }
                     return new RequestException(resp.StatusCode, c);
                 }
             }
