@@ -13,11 +13,66 @@ using ElasticElmah.Appender.Search;
 
 namespace ElasticElmah.Appender.Tests
 {
+    public class Assertions
+    {
+        protected ElasticSearchRepository _appender;
+        protected static void ExpectedPagingResult(LogSearchResult result)
+        {
+            Assert.AreEqual(1, result.Total);
+            Assert.AreEqual("msg", result.Hits.First().Data.Properties["prop"]);
+            Assert.That(result.Hits.Single().Data.Message, Is.EqualTo("Message"));
+        }
+        protected void ExpectOrderedResultASync(DateTime now)
+        {
+            ExpectedOrderedResult(_appender.GetPagedAsync(0, 2).Result, now);
+        }
+        protected void ExpectOrderedResultSync(DateTime now)
+        {
+            ExpectedOrderedResult(_appender.GetPaged(0, 2), now);
+        }
 
-    public abstract class RepositoryTests
+        protected void ExpectOrderedResultASync(ElasticSearchRepository.SearchTerm search, DateTime now)
+        {
+            ExpectedOrderedResult(_appender.GetPagedAsync(search, 0, 2).Result, now);
+        }
+        protected void ExpectOrderedResultSync(ElasticSearchRepository.SearchTerm search, DateTime now)
+        {
+            ExpectedOrderedResult(_appender.GetPaged(search, 0, 2), now);
+        }
+        protected static void ExpectedOrderedResult(LogSearchResult result, DateTime now)
+        {
+            Assert.AreEqual(5, result.Total);
+            Assert.That(result.Hits.Select(l => l.Data.TimeStamp).ToArray(),
+                Is.EquivalentTo(new[]{ 
+                    now.AddDays(4), now.AddDays(3)
+                }));
+        }
+        protected static void ExpectedEmptyResult(LogSearchResult result)
+        {
+            Assert.AreEqual(0, result.Total);
+        }
+
+        protected void ExpectEmptyResultASync(ElasticSearchRepository.SearchTerm search)
+        {
+            ExpectedEmptyResult(_appender.GetPagedAsync(search, 0, 2).Result);
+        }
+        protected void ExpectEmptyResultSync(ElasticSearchRepository.SearchTerm search)
+        {
+            ExpectedEmptyResult(_appender.GetPaged(search, 0, 2));
+        }
+        protected void ExpectEmptyResultASync()
+        {
+            ExpectedEmptyResult(_appender.GetPagedAsync(0, 2).Result);
+        }
+        protected void ExpectEmptyResultSync()
+        {
+            ExpectedEmptyResult(_appender.GetPaged(0, 2));
+        }
+    }
+
+    public abstract class RepositoryTests:Assertions
     {
         protected static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-        protected ElasticSearchRepository _appender;
         protected static DateTime now = DateTime.Now;
 
         [Test]
@@ -92,12 +147,6 @@ namespace ElasticElmah.Appender.Tests
             _appender.GetPagedAsync(0, 10).Result.Tap(ExpectedPagingResult);
         }
 
-        protected static void ExpectedPagingResult(LogSearchResult result)
-        {
-            Assert.AreEqual(1, result.Total);
-            Assert.AreEqual("msg", result.Hits.First().Data.Properties["prop"]);
-            Assert.That(result.Hits.Single().Data.Message, Is.EqualTo("Message"));
-        }
 
         [Test]
         public virtual void Can_log_web_properties()
@@ -157,8 +206,8 @@ namespace ElasticElmah.Appender.Tests
 
             _appender.Refresh();
 
-            ExpectOrderedResultASync();
-            ExpectOrderedResultSync();
+            ExpectOrderedResultASync(now);
+            ExpectOrderedResultSync(now);
         }
 
         [Test]
@@ -187,29 +236,12 @@ namespace ElasticElmah.Appender.Tests
             _appender.Refresh();
             //_appender.Flush();
 
-            ExpectOrderedResultASync();
-            ExpectOrderedResultSync();
+            ExpectOrderedResultASync(now);
+            ExpectOrderedResultSync(now);
             ExpectOrderedFacetResultASync();
             ExpectOrderedHistogramResultASync();
         }
 
-        protected void ExpectOrderedResultASync()
-        {
-            ExpectedOrderedResult(_appender.GetPagedAsync(0, 2).Result);
-        }
-        protected void ExpectOrderedResultSync()
-        {
-            ExpectedOrderedResult(_appender.GetPaged(0, 2));
-        }
-
-        protected void ExpectOrderedResultASync(ElasticSearchRepository.SearchTerm search)
-        {
-            ExpectedOrderedResult(_appender.GetPagedAsync(search, 0, 2).Result);
-        }
-        protected void ExpectOrderedResultSync(ElasticSearchRepository.SearchTerm search)
-        {
-            ExpectedOrderedResult(_appender.GetPaged(search, 0, 2));
-        }
         protected void ExpectOrderedFacetResultASync() 
         {
             ExpectedFacetResult(_appender.GetTimestampFacetAsync(null,now.AddDays(-1), now.AddDays(10), 0, 2).Result);
@@ -242,35 +274,6 @@ namespace ElasticElmah.Appender.Tests
         {
             return new DateTime(t.Year, t.Month, t.Day, 12, 0, 0, 0);
         }
-        protected static void ExpectedOrderedResult(LogSearchResult result)
-        {
-            Assert.AreEqual(5, result.Total);
-            Assert.That(result.Hits.Select(l => l.Data.TimeStamp).ToArray(),
-                Is.EquivalentTo(new[]{ 
-                    now.AddDays(4), now.AddDays(3)
-                }));
-        }
-        protected static void ExpectedEmptyResult(LogSearchResult result) 
-        {
-            Assert.AreEqual(0, result.Total);
-        }
-
-        protected void ExpectEmptyResultASync(ElasticSearchRepository.SearchTerm search)
-        {
-            ExpectedEmptyResult(_appender.GetPagedAsync(search, 0, 2).Result);
-        }
-        protected void ExpectEmptyResultSync(ElasticSearchRepository.SearchTerm search)
-        {
-            ExpectedEmptyResult(_appender.GetPaged(search, 0, 2));
-        }
-        protected void ExpectEmptyResultASync()
-        {
-            ExpectedEmptyResult(_appender.GetPagedAsync(0, 2).Result);
-        }
-        protected void ExpectEmptyResultSync()
-        {
-            ExpectedEmptyResult(_appender.GetPaged(0, 2));
-        }
         [Test]
         public virtual void Should_get_latest_with_property()
         {
@@ -297,8 +300,8 @@ namespace ElasticElmah.Appender.Tests
             _appender.Refresh();
             //_appender.Flush();
             var s = new ElasticSearchRepository.SearchTerm { PropertyName = "LoggingEvent.properties.prop", Value = "msg" };
-            ExpectOrderedResultASync(s);
-            ExpectOrderedResultSync(s);
+            ExpectOrderedResultASync(s, now);
+            ExpectOrderedResultSync(s, now);
             var s2 = new ElasticSearchRepository.SearchTerm { PropertyName = "LoggingEvent.properties.prop", Value = "msg2" };
             ExpectEmptyResultASync(s2);
             ExpectEmptyResultSync(s2);
@@ -330,8 +333,8 @@ namespace ElasticElmah.Appender.Tests
             _appender.Refresh();
             _appender.PutMapping();
             var s = new ElasticSearchRepository.SearchTerm { PropertyName = "LoggingEvent.properties.prop", Value = "msg" };
-            ExpectOrderedResultASync(s);
-            ExpectOrderedResultSync(s);
+            ExpectOrderedResultASync(s, now);
+            ExpectOrderedResultSync(s, now);
             var s2 = new ElasticSearchRepository.SearchTerm { PropertyName = "LoggingEvent.properties.prop", Value = "msg2" };
             ExpectEmptyResultASync(s2);
             ExpectEmptyResultSync(s2);
