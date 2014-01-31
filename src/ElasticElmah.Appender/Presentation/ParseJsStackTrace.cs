@@ -3,13 +3,13 @@ using System.Linq;
 
 namespace ElasticElmah.Appender.Presentation
 {
-    public class ParseStackTrace
+    public class ParseJsStackTrace
     {
         private readonly Token[] _tokens;
 
-        public ParseStackTrace(string stacktrace)
+        public ParseJsStackTrace(string stacktrace)
         {
-            _tokens = new LexStackTrace(stacktrace).Tap(t=>t.TokenizeLines()).Tokens.ToArray();
+            _tokens = new LexJsStackTrace(stacktrace).Tap(t => t.TokenizeLines()).Tokens.ToArray();
         }
         public event Action<Token> OnAccept;
         public event Action OnEnterLine;
@@ -20,7 +20,7 @@ namespace ElasticElmah.Appender.Presentation
         private void whilemax(Func<bool> action, int max)
         {
             int count = 0;
-            while (action() && count<max)
+            while (action() && count < max)
             {
                 count++;
             }
@@ -42,7 +42,7 @@ namespace ElasticElmah.Appender.Presentation
                     OnEnterStackFrame.TapNotNull(a => a());
                     if (Accept(Symbols.Type))
                     {
-                        Expect(Symbols.TypeMethodDelim);
+                        Accept(Symbols.TypeMethodDelim);
                         Expect(Symbols.Method);
                     }
                     else
@@ -94,9 +94,9 @@ namespace ElasticElmah.Appender.Presentation
         }
         public Token? PreviousToken
         {
-            get 
+            get
             {
-                if (_current - 1 >= 0) 
+                if (_current - 1 >= 0)
                 {
                     return _tokens[_current - 1];
                 }
@@ -119,7 +119,7 @@ namespace ElasticElmah.Appender.Presentation
 
         bool Accept(Symbols s)
         {
-            while (Sym==Symbols.Whitespace)
+            while (Sym == Symbols.Whitespace)
             {
                 OnWhiteSpace.TapNotNull(a => a(CurrentToken.Value.Value));
                 GetSym();
@@ -129,7 +129,7 @@ namespace ElasticElmah.Appender.Presentation
             {
                 if (CurrentToken.HasValue)
                 {
-                    OnAccept.TapNotNull(a => a(CurrentToken.Value)); 
+                    OnAccept.TapNotNull(a => a(CurrentToken.Value));
                 }
                 GetSym();
                 return true;
@@ -145,4 +145,3 @@ namespace ElasticElmah.Appender.Presentation
         }
     }
 }
-

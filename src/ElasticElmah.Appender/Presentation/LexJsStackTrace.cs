@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace ElasticElmah.Appender.Presentation
 {
-    public class LexStackTrace
+    public class LexJsStackTrace
     {
         readonly List<Token> _tokens = new List<Token>();
         public IEnumerable<Token> Tokens
@@ -17,7 +17,7 @@ namespace ElasticElmah.Appender.Presentation
         }
         int _position;
         readonly string _str;
-        public LexStackTrace(string str)
+        public LexJsStackTrace(string str)
         {
             _str = str;
         }
@@ -148,7 +148,7 @@ namespace ElasticElmah.Appender.Presentation
         }
 
         readonly Regex _word = new Regex(@"^(?<word>\w*)$");
-        readonly Regex _delimMethod = new Regex(@"(?<tdelim>\.)(?<method>\.?[^\.]*)$");
+        readonly Regex _delimMethod = new Regex(@"(?<tdelim>\.)?(?<method>\.?[^\.]*)$");
         void TokenizeTypeAndMethod(string str, int index, int length)
         {
             var mm = _word.Match(str, index, length);
@@ -169,13 +169,16 @@ namespace ElasticElmah.Appender.Presentation
             }
 
             AddStr(Symbols.Type, index, length - m.Length);
-            Add(Symbols.TypeMethodDelim, m.Groups["tdelim"]);
+            if (m.Groups["tdelim"].Success)
+            {
+                Add(Symbols.TypeMethodDelim, m.Groups["tdelim"]);
+            }
             Add(Symbols.Method, m.Groups["method"]);
         }
 
         public static IEnumerable<Token> Tokenize(string str)
         {
-            var transformer = new LexStackTrace(str);
+            var transformer = new LexJsStackTrace(str);
             transformer.TokenizeLines();
             return transformer._tokens
                 .Where(t => t.Type != Symbols.Whitespace)

@@ -48,8 +48,11 @@
     <Compile Include="ElasticSearchRepository.cs" />
     <Compile Include="ElasticSearchWebAppender.cs" />
     <Compile Include="IJsonSerializer.cs" />
+    <Compile Include="Presentation\ColorizeJsStackTrace.cs" />
     <Compile Include="Presentation\ColorizeStackTrace.cs" />
     <Compile Include="Presentation\FormatDictionary.cs" />
+    <Compile Include="Presentation\LexJsStackTrace.cs" />
+    <Compile Include="Presentation\ParseJsStackTrace.cs" />
     <Compile Include="Presentation\ParseStackTrace.cs" />
     <Compile Include="Presentation\Symbols.cs" />
     <Compile Include="Presentation\Token.cs" />
