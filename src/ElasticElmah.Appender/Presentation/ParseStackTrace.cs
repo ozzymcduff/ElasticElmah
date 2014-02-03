@@ -42,7 +42,7 @@ namespace ElasticElmah.Appender.Presentation
                     OnEnterStackFrame.TapNotNull(a => a());
                     if (Accept(Symbols.Type))
                     {
-                        Expect(Symbols.TypeMethodDelim);
+                        Accept(Symbols.TypeMethodDelim);
                         Expect(Symbols.Method);
                     }
                     else

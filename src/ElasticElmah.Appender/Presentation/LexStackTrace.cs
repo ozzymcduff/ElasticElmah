@@ -148,7 +148,7 @@ namespace ElasticElmah.Appender.Presentation
         }
 
         readonly Regex _word = new Regex(@"^(?<word>\w*)$");
-        readonly Regex _delimMethod = new Regex(@"(?<tdelim>\.)(?<method>\.?[^\.]*)$");
+        readonly Regex _delimMethod = new Regex(@"(?<tdelim>\.)?(?<method>\.?[^\.]*)$");
         void TokenizeTypeAndMethod(string str, int index, int length)
         {
             var mm = _word.Match(str, index, length);
@@ -169,7 +169,10 @@ namespace ElasticElmah.Appender.Presentation
             }
 
             AddStr(Symbols.Type, index, length - m.Length);
+            if (m.Groups["tdelim"].Success)
+            {
             Add(Symbols.TypeMethodDelim, m.Groups["tdelim"]);
+            }
             Add(Symbols.Method, m.Groups["method"]);
         }
 

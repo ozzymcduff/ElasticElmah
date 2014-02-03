@@ -9,7 +9,7 @@ namespace ElasticElmah.Appender.Tests.Presentation
         [Test]
         public void Test() 
         {
-            var html =new ColorizeJsStackTrace(TestData.JsException).Html();
+            var html =new ColorizeStackTrace(TestData.JsException).Html();
             Assert.That(html, Is.StringContaining("/234234/Person/molgan"));
             Assert.That(html, Is.StringContaining("toModel"));
             Assert.That(html, Is.StringContaining("_afterInitialize"));
