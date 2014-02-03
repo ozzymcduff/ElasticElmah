@@ -18,8 +18,8 @@ namespace ElasticElmah.Appender.Tests
         public virtual void Init()
         {
             var fiddler = true;
-            var _index = Guid.NewGuid();
-            var conn = "Server=" + (fiddler ? Environment.MachineName : "localhost") + ";Index=" + _index + ";Port=9200";
+            var index = Guid.NewGuid();
+            var conn = "Server=" + (fiddler ? Environment.MachineName : "localhost") + ";Index=" + index + ";Port=9200";
             _appender = new ElasticSearchAppender() { ConnectionString = conn };
             _repo = new ElasticSearchRepository(conn);
         }
@@ -31,7 +31,7 @@ namespace ElasticElmah.Appender.Tests
         }
 
         [Test]
-        public virtual void Test() 
+        public virtual void Test()
         {
             _appender.Async = true;// not needed
             _appender.AppendAsync(new LoggingEvent(GetType(), _log.Logger.Repository, TestData())).Wait();
@@ -44,7 +44,13 @@ namespace ElasticElmah.Appender.Tests
         public virtual void Test_generated_from_logging_event_data()
         {
             _appender.Async = true;// not needed
-            _appender.AppendAsync(new LoggingEvent(new LoggingEventData() { Message="message", Level=Level.Error, LocationInfo=new LocationInfo("?","?","http://localhost:1341243/dsfaf","21")})).Wait();
+            _appender.AppendAsync(new LoggingEvent(
+                new LoggingEventData
+                {
+                    Message = "message",
+                    Level = Level.Error,
+                    LocationInfo = new LocationInfo("?", "?", "http://localhost:1341243/dsfaf", "21")
+                })).Wait();
             _repo.Refresh();
             var paged = _repo.GetPaged(0, 10);
             Assert.That(paged.Total, Is.EqualTo(1));
@@ -57,7 +63,8 @@ namespace ElasticElmah.Appender.Tests
             var tasks = new List<Task>();
             for (int i = 0; i < 5; i++)
             {
-                tasks.Add(_appender.AppendAsync(new LoggingEvent(GetType(), _log.Logger.Repository, TestData())));
+                tasks.Add(_appender.AppendAsync(
+                    new LoggingEvent(GetType(), _log.Logger.Repository, TestData())));
             }
             Task.WaitAll(tasks.ToArray());
             _repo.Refresh();
@@ -98,7 +105,5 @@ namespace ElasticElmah.Appender.Tests
                 })
             };
         }
-
     }
-
 }
