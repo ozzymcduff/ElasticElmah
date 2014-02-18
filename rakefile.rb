@@ -59,19 +59,18 @@ exec :install_packages do |cmd|
 end
 
 namespace :mono do
-  dir = File.dirname(__FILE__)
   desc "build isop on mono"
   xbuild :build do |msb|
     msb.properties :configuration => :Debug
     msb.targets :Clean, :Rebuild
     msb.verbosity = 'quiet'
-    msb.solution =File.join(dir,"src", "ElasticElmah.sln")
+    msb.solution =File.join('.',"src", "ElasticElmah.sln")
   end
 
   desc "Install missing NuGet packages."
   task :install_packages do |cmd|
     FileList["src/**/packages.config"].each do |filepath|
-      sh "mono ./src/.nuget/NuGet.exe i #{filepath} -o ./src/packages"
+      sh "mono --runtime=v4.0 ./src/.nuget/NuGet.exe i #{filepath} -o ./src/packages"
     end
   end
 

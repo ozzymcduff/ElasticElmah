@@ -133,3 +133,7 @@ tmp
 .yardoc
 _yardoc
 doc/
+
+# linuxy stuff
+*.swp
+

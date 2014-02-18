@@ -1,13 +1,15 @@
 PATH
   remote: .
   specs:
-    elasticelmah (0.0.1)
+    elasticelmah (0.0.3)
       elasticsearch
       log4r
 
 GEM
   remote: http://rubygems.org/
   specs:
+    albacore (0.3.6)
+      rubyzip (< 1.0.0)
     elasticsearch (1.0.0)
       elasticsearch-api (= 1.0.0)
       elasticsearch-transport (= 1.0.0)
@@ -22,11 +24,14 @@ GEM
     multi_json (1.8.4)
     multipart-post (2.0.0)
     rake (10.1.1)
+    rubyzip (0.9.9)
 
 PLATFORMS
+  ruby
   x86-mingw32
 
 DEPENDENCIES
+  albacore
   bundler
   elasticelmah!
   rake
