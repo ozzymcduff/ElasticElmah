@@ -45,7 +45,7 @@ module ElasticElmah
             return {
                 loggerName:l.name,
                 level: Log4r::LNAMES[l.level],
-                message: l.data != nil && l.data.respond_to?(:message) ? l.data.message : l.data,
+                message: get_message_of(l),
                 threadName:"",
                 timeStamp:time_stamp,
                 locationInfo:{
@@ -56,7 +56,7 @@ module ElasticElmah
                 },
                 userName:"",
                 properties:{},
-                exceptionString: l.tracer!=nil ? l.tracer.join("\n") : "",
+                exceptionString: get_exception_string_of(l),
                 domain:"",
                 identity:""
             }
@@ -65,6 +65,27 @@ module ElasticElmah
         #######
         private
         #######
+        def get_message_of(l)
+            if l.data != nil && l.data.respond_to?(:message)
+                return l.data.message.to_s 
+            else 
+                return l.data.to_s
+            end
+        end
+
+        def get_exception_string_of(l)
+            if l.tracer!=nil
+                return l.tracer.join("\n")
+            end
+            if l.data!=nil && l.data.respond_to?(:backtrace)
+                backtrace = l.data.backtrace
+                if backtrace != nil
+                    return backtrace.join("\n")
+                end
+            end
+            return ""
+        end
+
         def create_index
             @client.indices.create(index: @index, body: {
                         settings: {

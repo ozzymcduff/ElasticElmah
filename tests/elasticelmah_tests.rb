@@ -49,16 +49,19 @@ class TestElasticElmahOutputterForReal < Test::Unit::TestCase
     end
 
     def test_generated_from_logging_event_data
+        error = nil
         begin
             raise 'some_error'
         rescue Exception => e
             @logger.error(e)
+            error = e
         end
         @client.indices.flush(index: @index )
         result = @client.search index: @index
         assert_equal 1, result["hits"]["hits"].length
         hits = result["hits"]["hits"]
         assert_equal 'some_error', hits[0]["_source"]["message"]
+        assert_equal error.backtrace.join("\n"), hits[0]["_source"]["exceptionString"]
     end
 end
 
