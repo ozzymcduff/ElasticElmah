@@ -78,3 +78,18 @@ namespace :mono do
 end
 
 
+namespace :ruby do
+  require 'bundler/gem_helper'
+
+  Bundler::GemHelper.install_tasks({:dir=>File.dirname(__FILE__),:name=>'elasticelmah'})
+
+  require 'rake/testtask'
+  desc "test ruby version"
+  Rake::TestTask.new(:test) do |t|
+    dir = File.join(File.dirname(__FILE__),'tests')
+      t.libs << "test"
+      t.test_files = FileList[File.join(dir,'*_test*.rb')]
+      t.verbose = true
+  end
+
+end

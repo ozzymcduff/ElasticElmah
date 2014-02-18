@@ -1,0 +1,32 @@
+PATH
+  remote: .
+  specs:
+    elasticelmah (0.0.1)
+      elasticsearch
+      log4r
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    elasticsearch (1.0.0)
+      elasticsearch-api (= 1.0.0)
+      elasticsearch-transport (= 1.0.0)
+    elasticsearch-api (1.0.0)
+      multi_json
+    elasticsearch-transport (1.0.0)
+      faraday
+      multi_json
+    faraday (0.9.0)
+      multipart-post (>= 1.2, < 3)
+    log4r (1.1.10)
+    multi_json (1.8.4)
+    multipart-post (2.0.0)
+    rake (10.1.1)
+
+PLATFORMS
+  x86-mingw32
+
+DEPENDENCIES
+  bundler
+  elasticelmah!
+  rake
