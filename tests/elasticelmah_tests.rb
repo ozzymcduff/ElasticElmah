@@ -47,6 +47,19 @@ class TestElasticElmahOutputterForReal < Test::Unit::TestCase
         hits = result["hits"]["hits"]
         assert_equal 'some_error', hits[0]["_source"]["message"]
     end
+
+    def test_generated_from_logging_event_data
+        begin
+            raise 'some_error'
+        rescue Exception => e
+            @logger.error(e)
+        end
+        @client.indices.flush(index: @index )
+        result = @client.search index: @index
+        assert_equal 1, result["hits"]["hits"].length
+        hits = result["hits"]["hits"]
+        assert_equal 'some_error', hits[0]["_source"]["message"]
+    end
 end
 
 
@@ -73,7 +86,7 @@ class TestElasticElmahOutputter < Test::Unit::TestCase
 :exceptionString=>"",
 :domain=>"",
 :identity=>""}],
-            @outp.written.map do |written| @outp.serialize(written) end)
+            @outp.written.map do |written| @outp.serialize_logevent_for_elastic(written) end)
     end
 end
 
@@ -96,7 +109,7 @@ class TestElasticElmahSerializer < Test::Unit::TestCase
         tracer = caller
         data = Exception.new("Message")
         l = Log4r::LogEvent.new(Log4r::INFO, logger, tracer, data)
-        s =  @outp.serialize(l)
+        s =  @outp.serialize_logevent_for_elastic(l)
         assert_equal("Message",s[:message])
         assert_equal(caller.join("\n"),s[:exceptionString])
     end
@@ -124,6 +137,6 @@ class TestElasticElmahSerializer < Test::Unit::TestCase
         tracer = nil
         data = Exception.new("Message")
         l = Log4r::LogEvent.new(Log4r::INFO, logger, tracer, data)
-        assert_equal(expected, @outp.serialize(l))
+        assert_equal(expected, @outp.serialize_logevent_for_elastic(l))
     end
 end

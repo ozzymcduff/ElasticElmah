@@ -33,7 +33,7 @@ module ElasticElmah
             Logger.log_internal {"Outputter '#{@name}' closed and set to OFF"}
         end
 
-        def serialize(l)
+        def serialize_logevent_for_elastic(l)
                     #    attr_reader :level, :tracer, :data, :name, :fullname
       # [level]    The integer level of the log event. Use LNAMES[level]
       #            to get the actual level name.
@@ -125,7 +125,7 @@ module ElasticElmah
                     create_index
                 end
             end
-            @client.index  index: @index, type: 'LoggingEvent', body: serialize(logevent)
+            @client.index  index: @index, type: 'LoggingEvent', body: serialize_logevent_for_elastic(logevent)
         end
     end
 end
