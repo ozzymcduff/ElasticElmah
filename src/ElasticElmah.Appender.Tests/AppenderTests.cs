@@ -19,7 +19,7 @@ namespace ElasticElmah.Appender.Tests
         {
             var fiddler = true;
             var index = Guid.NewGuid();
-            var conn = "Server=" + (fiddler ? Environment.MachineName : "localhost") + ";Index=" + index + ";Port=9200";
+            var conn = "Server=" + (fiddler ? Environment.MachineName : "localhost") + ";Index=" + index + ";Port=" + Global.Port;
             _appender = new ElasticSearchAppender() { ConnectionString = conn };
             _repo = new ElasticSearchRepository(conn);
         }

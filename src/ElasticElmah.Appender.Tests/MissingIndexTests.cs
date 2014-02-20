@@ -11,7 +11,7 @@ namespace ElasticElmah.Appender.Tests
         {
             var fiddler = true;
             var _index = Guid.NewGuid();
-            var conn = "Server=" + (fiddler ? Environment.MachineName : "localhost") + ";Index=" + _index + ";Port=9200";
+            var conn = "Server=" + (fiddler ? Environment.MachineName : "localhost") + ";Index=" + _index + ";Port="+Global.Port;
             _appender = new ElasticSearchRepository(conn,
                 new Web.JsonRequest(),
                 new DefaultJsonSerializer());
