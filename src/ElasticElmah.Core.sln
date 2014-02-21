@@ -1,5 +1,6 @@
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2010
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElasticElmah.Appender", "ElasticElmah.Appender\ElasticElmah.Appender.csproj", "{C9EA9975-0609-4330-A69F-B8C608A46E28}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElasticElmah.Appender.Tests", "ElasticElmah.Appender.Tests\ElasticElmah.Appender.Tests.csproj", "{4F8C1DA9-B511-44E8-AAB8-47218A7ADFEB}"
@@ -26,42 +27,59 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Debug|.NET.ActiveCfg = Debug|Any CPU
-		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Release|.NET.ActiveCfg = Release|Any CPU
-		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Release|x86.ActiveCfg = Release|Any CPU
 		{4F8C1DA9-B511-44E8-AAB8-47218A7ADFEB}.Debug|.NET.ActiveCfg = Debug|Any CPU
+		{4F8C1DA9-B511-44E8-AAB8-47218A7ADFEB}.Debug|.NET.Build.0 = Debug|Any CPU
 		{4F8C1DA9-B511-44E8-AAB8-47218A7ADFEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4F8C1DA9-B511-44E8-AAB8-47218A7ADFEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4F8C1DA9-B511-44E8-AAB8-47218A7ADFEB}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
 		{4F8C1DA9-B511-44E8-AAB8-47218A7ADFEB}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
 		{4F8C1DA9-B511-44E8-AAB8-47218A7ADFEB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4F8C1DA9-B511-44E8-AAB8-47218A7ADFEB}.Debug|x86.Build.0 = Debug|Any CPU
 		{4F8C1DA9-B511-44E8-AAB8-47218A7ADFEB}.Release|.NET.ActiveCfg = Release|Any CPU
+		{4F8C1DA9-B511-44E8-AAB8-47218A7ADFEB}.Release|.NET.Build.0 = Release|Any CPU
 		{4F8C1DA9-B511-44E8-AAB8-47218A7ADFEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4F8C1DA9-B511-44E8-AAB8-47218A7ADFEB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4F8C1DA9-B511-44E8-AAB8-47218A7ADFEB}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{4F8C1DA9-B511-44E8-AAB8-47218A7ADFEB}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{4F8C1DA9-B511-44E8-AAB8-47218A7ADFEB}.Release|x86.ActiveCfg = Release|Any CPU
+		{4F8C1DA9-B511-44E8-AAB8-47218A7ADFEB}.Release|x86.Build.0 = Release|Any CPU
 		{64D64941-C9B6-4ABC-AEB7-4EBBFA0B68D7}.Debug|.NET.ActiveCfg = Debug|x86
+		{64D64941-C9B6-4ABC-AEB7-4EBBFA0B68D7}.Debug|.NET.Build.0 = Debug|x86
 		{64D64941-C9B6-4ABC-AEB7-4EBBFA0B68D7}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{64D64941-C9B6-4ABC-AEB7-4EBBFA0B68D7}.Debug|Any CPU.Build.0 = Debug|x86
 		{64D64941-C9B6-4ABC-AEB7-4EBBFA0B68D7}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
 		{64D64941-C9B6-4ABC-AEB7-4EBBFA0B68D7}.Debug|Mixed Platforms.Build.0 = Debug|x86
 		{64D64941-C9B6-4ABC-AEB7-4EBBFA0B68D7}.Debug|x86.ActiveCfg = Debug|x86
 		{64D64941-C9B6-4ABC-AEB7-4EBBFA0B68D7}.Debug|x86.Build.0 = Debug|x86
 		{64D64941-C9B6-4ABC-AEB7-4EBBFA0B68D7}.Release|.NET.ActiveCfg = Release|x86
+		{64D64941-C9B6-4ABC-AEB7-4EBBFA0B68D7}.Release|.NET.Build.0 = Release|x86
 		{64D64941-C9B6-4ABC-AEB7-4EBBFA0B68D7}.Release|Any CPU.ActiveCfg = Release|x86
+		{64D64941-C9B6-4ABC-AEB7-4EBBFA0B68D7}.Release|Any CPU.Build.0 = Release|x86
 		{64D64941-C9B6-4ABC-AEB7-4EBBFA0B68D7}.Release|Mixed Platforms.ActiveCfg = Release|x86
 		{64D64941-C9B6-4ABC-AEB7-4EBBFA0B68D7}.Release|Mixed Platforms.Build.0 = Release|x86
 		{64D64941-C9B6-4ABC-AEB7-4EBBFA0B68D7}.Release|x86.ActiveCfg = Release|x86
 		{64D64941-C9B6-4ABC-AEB7-4EBBFA0B68D7}.Release|x86.Build.0 = Release|x86
+		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Debug|.NET.ActiveCfg = Debug|Any CPU
+		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Debug|.NET.Build.0 = Debug|Any CPU
+		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Debug|x86.Build.0 = Debug|Any CPU
+		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Release|.NET.ActiveCfg = Release|Any CPU
+		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Release|.NET.Build.0 = Release|Any CPU
+		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Release|x86.ActiveCfg = Release|Any CPU
+		{C9EA9975-0609-4330-A69F-B8C608A46E28}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = ElasticElmah.Appender\ElasticElmah.Appender.csproj
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
