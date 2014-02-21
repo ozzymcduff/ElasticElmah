@@ -68,7 +68,7 @@ namespace :mono do
       :NuGetExePath => File.join(nuget_tools_path, 'NuGet.exe'),
       :PackagesDir => File.join(solution_dir, 'packages')
     msb.targets :Clean, :Rebuild
-    msb.verbosity = 'quiet'
+    #msb.verbosity = 'quiet'
     msb.solution =File.join('.',"src", "ElasticElmah.Core.sln")
   end
 
