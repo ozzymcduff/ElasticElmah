@@ -23,7 +23,8 @@ namespace ElasticElmah.Appender
             _request = request ?? new JsonRequest();
             _serializer = serializer ?? new DefaultJsonSerializer();
         }
-
+#if ASYNC
+		
         /// <summary>
         /// async request to create index
         /// </summary>
@@ -32,7 +33,7 @@ namespace ElasticElmah.Appender
             return IndexExistsAsync()
                 .ContinueWith(t => { t.PropagateExceptions(); return !t.Result ? CreateIndexAsync() : PutMappingAsync(); });
         }
-
+#endif
         public void CreateIndexOrRefreshMappings()
         {
             var exists = IndexExists();
@@ -44,7 +45,7 @@ namespace ElasticElmah.Appender
                 PutMapping();
             }
         }
-
+#if ASYNC
         private Task<bool> IndexExistsAsync()
         {
             return _request.Async(IndexExistsRequest()).ContinueWith(t =>
@@ -59,7 +60,7 @@ namespace ElasticElmah.Appender
                 return (t.Result.Item1 == HttpStatusCode.OK);
             });
         }
-
+#endif
         private RequestInfo IndexExistsRequest()
         {
             return new RequestInfo(UrlToIndex(settings, ""), "HEAD", null);
@@ -81,12 +82,13 @@ namespace ElasticElmah.Appender
 
         private readonly string _index;
         private IDictionary<string, string> settings;
-
+#if ASYNC
         public Task PutMappingAsync()
         {
             var req = PutMappingRequestInfo();
             return _request.Async(req);
         }
+#endif
         public void PutMapping()
         {
             _request.Sync(PutMappingRequestInfo());
@@ -96,13 +98,13 @@ namespace ElasticElmah.Appender
         {
             _request.Sync(CreateIndexRequest());
         }
-
+#if ASYNC
         public Task CreateIndexAsync()
         {
             var req = CreateIndexRequest();
             return _request.Async(req);
         }
-
+#endif
         private RequestInfo CreateIndexRequest()
         {
             return new RequestInfo(UrlToIndex(settings, ""), "POST",
@@ -169,12 +171,12 @@ namespace ElasticElmah.Appender
       }
     }";
         }
-
+#if ASYNC
         public Task DeleteIndexAsync()
         {
             return _request.Async(new RequestInfo(UrlToIndex(settings, ""), "DELETE", null));
         }
-
+#endif
         public void DeleteIndex()
         {
             _request.Sync(UrlToIndex(settings, ""), "DELETE", null);
@@ -239,11 +241,13 @@ namespace ElasticElmah.Appender
             var res = _request.Sync(GetTimestampHistogramRequest(query, @from, @to, pageIndex, pageSize));
             return GetLogSearchHistogramResultResult(res.Item1, res.Item2);
         }
+#if ASYNC
         public Task<LogSearchHistogramResult> GetTimestampHistogramAsync(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
         {
             return _request.Async(GetTimestampHistogramRequest(query, @from, @to, pageIndex, pageSize))
                 .ContinueWith(res => { res.PropagateExceptions(); return GetLogSearchHistogramResultResult(res.Result.Item1, res.Result.Item2); });
         }
+#endif
 
         private RequestInfo GetTimestampHistogramRequest(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
         {
@@ -296,12 +300,13 @@ namespace ElasticElmah.Appender
             var res = _request.Sync(GetTimestampFacetsRequest(query, @from, @to, pageIndex, pageSize));
             return GetFacetResult(res.Item1, res.Item2);
         }
+#if ASYNC
         public Task<LogSearchFacetResult> GetTimestampFacetAsync(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
         {
             return _request.Async(GetTimestampFacetsRequest(query, @from, @to, pageIndex, pageSize))
                 .ContinueWith(res => { res.PropagateExceptions(); return GetFacetResult(res.Result.Item1, res.Result.Item2); });
         }
-
+#endif
         private RequestInfo GetTimestampFacetsRequest(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
         {
             if (string.IsNullOrWhiteSpace(query))
@@ -341,11 +346,13 @@ namespace ElasticElmah.Appender
             var res = _request.Sync(GetTimestampRangeRequest(query, @from, @to, pageIndex, pageSize));
             return GetPagedResult(res.Item1, res.Item2);
         }
+#if ASYNC
         public Task<LogSearchResult> GetTimestampRangeAsync(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
         {
             return _request.Async(GetTimestampRangeRequest(query, @from, @to, pageIndex, pageSize))
                 .ContinueWith(res => { res.PropagateExceptions(); return GetPagedResult(res.Result.Item1, res.Result.Item2); });
         }
+#endif
         private RequestInfo GetTimestampRangeRequest(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
         {
             if (string.IsNullOrWhiteSpace(query))
@@ -400,6 +407,7 @@ namespace ElasticElmah.Appender
                 throw;
             }
         }
+#if ASYNC
         public Task<LogSearchResult> GetPagedAsync(int pageIndex, int pageSize)
         {
             return _request.Async(GetPagedRequest(pageIndex, pageSize))
@@ -409,6 +417,7 @@ namespace ElasticElmah.Appender
                                       return GetPagedResult(res.Result.Item1, res.Result.Item2);
                                   });
         }
+#endif
         private LogSearchResult GetPagedResult(HttpStatusCode c, string s)
         {
             var res = _serializer.Deserialize<SearchResponse>(s);
@@ -438,12 +447,13 @@ namespace ElasticElmah.Appender
             var res = _request.Sync(GetPagedRequest(search, pageIndex, pageSize));
             return GetPagedResult(res.Item1, res.Item2);
         }
+#if ASYNC
         public Task<LogSearchResult> GetPagedAsync(SearchTerm search, int pageIndex, int pageSize)
         {
             return _request.Async(GetPagedRequest(search, pageIndex, pageSize))
                 .ContinueWith(res => { res.PropagateExceptions(); return GetPagedResult(res.Result.Item1, res.Result.Item2); });
         }
-
+#endif
         public class SearchTerm
         {
             public string PropertyName { get; set; }
@@ -498,13 +508,13 @@ namespace ElasticElmah.Appender
         {
             return GetGetResponse(_request.Sync(GetRequest(id)).Item2);
         }
-
+#if ASYNC
         public Task<LogWithId> GetAsync(string id)
         {
             return _request.Async(GetRequest(id))
                 .ContinueWith(resp => { resp.PropagateExceptions(); return GetGetResponse(resp.Result.Item2); });
         }
-
+#endif
         private static IDictionary<string, string> BuildElsticSearchConnection(string connectionString)
         {
             var lookup = connectionString
@@ -534,11 +544,12 @@ namespace ElasticElmah.Appender
             var url = new Uri(ServerAndPort(lookup) + "/" + lookup["Index"] + "/" + t);
             return url;
         }
-
+#if ASYNC
         public void AddWithoutReturn(LoggingEvent loggingEvent)
         {
             _request.Async(AddRequest(loggingEvent));
         }
+#endif
         /// <summary>
         /// 
         /// </summary>
@@ -563,6 +574,7 @@ namespace ElasticElmah.Appender
             return new RequestInfo(UrlToIndex(settings, "LoggingEvent/"), "POST",
                 _serializer.Serialize(Map.To(loggingEvent)));
         }
+#if ASYNC
         /// <summary>
         /// 
         /// </summary>
@@ -574,6 +586,7 @@ namespace ElasticElmah.Appender
             return _request.Async(AddRequest(loggingEvent))
                 .ContinueWith(t => { t.PropagateExceptions(); return _serializer.Deserialize<AddResponse>(t.Result.Item2)._id; });
         }
+#endif
         class Index
         {
             public IndexOp index { get; set; }
@@ -597,13 +610,13 @@ namespace ElasticElmah.Appender
         {
             return _request.Sync(AddBulkRequest(loggingEvents, refresh)).Item1;
         }
-
+#if ASYNC
         public Task<HttpStatusCode> AddBulkAsync(IEnumerable<LoggingEvent> loggingEvents, bool refresh = false)
         {
             return _request.Async(AddBulkRequest(loggingEvents, refresh))
                 .ContinueWith(t => { t.PropagateExceptions(); return t.Result.Item1; });
         }
-
+#endif
         public void Refresh()
         {
             _request.Sync(UrlToIndex(settings, "_refresh"), "POST", null);

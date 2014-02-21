@@ -21,7 +21,7 @@ namespace ElasticElmah.Appender.Tests
         [TearDown]
         public void Cleanup()
         {
-            _appender.DeleteIndexAsync();
+            _appender.DeleteIndex();
         }
     }
 }

@@ -10,6 +10,7 @@ namespace ElasticElmah.Appender.Web
         {
             return that.Sync(info.Url, info.Method, info.Body);
         }
+#if ASYNC
         public static Task<Tuple<HttpStatusCode, string>> Async(this IJSonRequest that, RequestInfo info)
         {
             return that.Async(info.Url, info.Method, info.Body);
@@ -20,5 +21,6 @@ namespace ElasticElmah.Appender.Web
             iar.AsyncWaitHandle.WaitOne();
             return that.Item2(iar);
         }
+#endif
     }
 }

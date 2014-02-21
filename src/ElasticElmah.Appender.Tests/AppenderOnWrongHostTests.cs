@@ -25,7 +25,7 @@ namespace ElasticElmah.Appender.Tests
         {
             //_repo.DeleteIndexAsync();
         }
-
+#if ASYNC
         [Test, Ignore("throws in different ways depending on proxy or not")]
         public virtual void Should_throw_exception_on_wait()
         {
@@ -45,7 +45,6 @@ namespace ElasticElmah.Appender.Tests
                         })).Wait(100);
             });
         }
-
         [Test,Ignore("throws in different ways depending on proxy or not")]
         public virtual void Should_throw()
         {
@@ -64,6 +63,6 @@ namespace ElasticElmah.Appender.Tests
                     TaskContinuationOptions.OnlyOnFaulted).Wait();
             Assert.That(faulted);
         }
-
+#endif
     }
 }

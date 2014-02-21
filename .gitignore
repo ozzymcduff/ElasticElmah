@@ -13,6 +13,7 @@ TestResults
 *.user
 *.sln.docstates
 *.bak
+*.userprefs
 
 # Build results
 [Dd]ebug/

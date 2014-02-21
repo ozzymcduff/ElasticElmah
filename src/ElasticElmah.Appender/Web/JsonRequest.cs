@@ -63,7 +63,7 @@ namespace ElasticElmah.Appender.Web
                 return new RequestException(HttpStatusCode.InternalServerError, ex.Message);
             }
         }
-
+#if ASYNC
         public Task<Tuple<HttpStatusCode, string>> Async(Uri uri, string method, string bytes)
         {
             var request = (HttpWebRequest)WebRequest.Create(uri).Tap(r =>
@@ -74,6 +74,7 @@ namespace ElasticElmah.Appender.Web
                 request.BeginGetResponse(null, null),
                 (iar) => Response(request, iar));
         }
+#endif
 
         private static Tuple<HttpStatusCode, string> Response(HttpWebRequest request, IAsyncResult iar)
         {

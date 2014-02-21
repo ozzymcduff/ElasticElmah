@@ -96,9 +96,10 @@ cat yourlogfile.xml | LogTail.exe
             foreach (var index in indexes)
             {
                 var repo = new ElasticSearchRepository("Server=localhost;Index=" + index + ";Port=9200");
-                try
+#if ASYNC
+				try
                 {
-                    repo.GetPagedAsync(0, lines).ContinueWith(t =>
+					repo.GetPagedAsync(0, lines).ContinueWith(t =>
                     {
                         if (t.IsFaulted)
                         {
@@ -121,6 +122,15 @@ cat yourlogfile.xml | LogTail.exe
                         throw;
                     }
                 }
+#else
+				repo.GetPaged(0, lines).Tap(t =>
+				                                          {
+					foreach (var item in t.Hits.Select(e => e.Data))
+					{
+						showentry(item);
+					}
+				});
+#endif
             }
         }
     }

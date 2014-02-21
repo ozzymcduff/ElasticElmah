@@ -26,7 +26,7 @@ namespace ElasticElmah.Appender.Tests
         {
             Assert.Throws<IndexMissingException>(() => _appender.GetPaged(0, 2));
         }
-
+#if ASYNC
         protected void ExpectMissingIndexResultASync()
         {
             try
@@ -38,20 +38,30 @@ namespace ElasticElmah.Appender.Tests
                 Assert.That(exception.UnWrapInnerExceptions().Any(ex => ex is IndexMissingException));
             }
         }
-
         protected void ExpectOrderedResultASync(DateTime now)
         {
             ExpectedOrderedResult(_appender.GetPagedAsync(0, 2).Result, now);
         }
+
+		protected void ExpectOrderedResultASync(ElasticSearchRepository.SearchTerm search, DateTime now)
+		{
+			ExpectedOrderedResult(_appender.GetPagedAsync(search, 0, 2).Result, now);
+		}
+		protected void ExpectEmptyResultASync(ElasticSearchRepository.SearchTerm search)
+		{
+			ExpectedEmptyResult(_appender.GetPagedAsync(search, 0, 2).Result);
+		}
+		protected void ExpectEmptyResultASync()
+		{
+			ExpectedEmptyResult(_appender.GetPagedAsync(0, 2).Result);
+		}
+
+#endif
         protected void ExpectOrderedResultSync(DateTime now)
         {
             ExpectedOrderedResult(_appender.GetPaged(0, 2), now);
         }
 
-        protected void ExpectOrderedResultASync(ElasticSearchRepository.SearchTerm search, DateTime now)
-        {
-            ExpectedOrderedResult(_appender.GetPagedAsync(search, 0, 2).Result, now);
-        }
         protected void ExpectOrderedResultSync(ElasticSearchRepository.SearchTerm search, DateTime now)
         {
             ExpectedOrderedResult(_appender.GetPaged(search, 0, 2), now);
@@ -69,17 +79,9 @@ namespace ElasticElmah.Appender.Tests
             Assert.AreEqual(0, result.Total);
         }
 
-        protected void ExpectEmptyResultASync(ElasticSearchRepository.SearchTerm search)
-        {
-            ExpectedEmptyResult(_appender.GetPagedAsync(search, 0, 2).Result);
-        }
         protected void ExpectEmptyResultSync(ElasticSearchRepository.SearchTerm search)
         {
             ExpectedEmptyResult(_appender.GetPaged(search, 0, 2));
-        }
-        protected void ExpectEmptyResultASync()
-        {
-            ExpectedEmptyResult(_appender.GetPagedAsync(0, 2).Result);
         }
         protected void ExpectEmptyResultSync()
         {
@@ -98,7 +100,9 @@ namespace ElasticElmah.Appender.Tests
             _appender.Refresh();
             System.Threading.Thread.Sleep(50);
             ExpectEmptyResultSync();
+#if ASYNC
             ExpectEmptyResultASync();
+#endif
         }
 
         [Test]
@@ -133,16 +137,15 @@ namespace ElasticElmah.Appender.Tests
 
             Can_read_property_when_get(id);
 
-            _appender.GetTimestampRangeAsync(null,
+            _appender.GetTimestampRange(null,
                 now.AddMilliseconds(-1),
-                now.AddMilliseconds(1), 0, 10).Result.Tap(ExpectedPagingResult);
+                now.AddMilliseconds(1), 0, 10).Tap(ExpectedPagingResult);
 
         }
 
         protected void Can_read_property_when_get(string id)
         {
-            var errt = _appender.GetAsync(id);
-            var err = errt.Result;
+            var err = _appender.Get(id);
             Assert.AreEqual("msg", err.Data.Properties["prop"]);
             var str = FormatDictionary.ToTable(err.Data.Properties);
             Assert.That(str, Is.StringContaining("key1"));
@@ -160,8 +163,10 @@ namespace ElasticElmah.Appender.Tests
 
         protected void Can_read_property_when_paging()
         {
-            ExpectedPagingResult(_appender.GetPagedAsync(0, 10).Result);
-            _appender.GetPagedAsync(0, 10).Result.Tap(ExpectedPagingResult);
+            ExpectedPagingResult(_appender.GetPaged(0, 10));
+#if ASYNC
+			_appender.GetPagedAsync(0, 10).Result.Tap(ExpectedPagingResult);
+#endif
         }
 
 
@@ -222,9 +227,10 @@ namespace ElasticElmah.Appender.Tests
                     })).ToArray(), true);
 
             _appender.Refresh();
-
+#if ASYNC
             ExpectOrderedResultASync(now);
-            ExpectOrderedResultSync(now);
+#endif
+			ExpectOrderedResultSync(now);
         }
 
         [Test]
@@ -252,13 +258,20 @@ namespace ElasticElmah.Appender.Tests
             }
             _appender.Refresh();
             //_appender.Flush();
-
+#if ASYNC
             ExpectOrderedResultASync(now);
-            ExpectOrderedResultSync(now);
+#endif
+			ExpectOrderedResultSync(now);
+
+			ExpectOrderedFacetResult();
+			ExpectOrderedHistogramResult();
+
+#if ASYNC
             ExpectOrderedFacetResultASync();
             ExpectOrderedHistogramResultASync();
-        }
-
+#endif
+		}
+#if ASYNC
         protected void ExpectOrderedFacetResultASync() 
         {
             ExpectedFacetResult(_appender.GetTimestampFacetAsync(null,now.AddDays(-1), now.AddDays(10), 0, 2).Result);
@@ -267,7 +280,16 @@ namespace ElasticElmah.Appender.Tests
         {
             ExpectedHistogramResult(_appender.GetTimestampHistogramAsync(null, now.AddDays(-1), now.AddDays(10), 0, 2).Result);
         }
-        protected static void ExpectedFacetResult(LogSearchFacetResult result) 
+#endif
+		protected void ExpectOrderedFacetResult() 
+		{
+			ExpectedFacetResult(_appender.GetTimestampFacet(null,now.AddDays(-1), now.AddDays(10), 0, 2));
+		}
+		protected void ExpectOrderedHistogramResult() 
+		{
+			ExpectedHistogramResult(_appender.GetTimestampHistogram(null, now.AddDays(-1), now.AddDays(10), 0, 2));
+		}
+		protected static void ExpectedFacetResult(LogSearchFacetResult result) 
         {
             Assert.AreEqual(5, result.Count);
             //Assert.That(result.Hits.Select(l => l.Data.TimeStamp).ToArray(),
@@ -317,10 +339,14 @@ namespace ElasticElmah.Appender.Tests
             _appender.Refresh();
             //_appender.Flush();
             var s = new ElasticSearchRepository.SearchTerm { PropertyName = "LoggingEvent.properties.prop", Value = "msg" };
-            ExpectOrderedResultASync(s, now);
-            ExpectOrderedResultSync(s, now);
+#if ASYNC
+			ExpectOrderedResultASync(s, now);
+#endif
+			ExpectOrderedResultSync(s, now);
             var s2 = new ElasticSearchRepository.SearchTerm { PropertyName = "LoggingEvent.properties.prop", Value = "msg2" };
-            ExpectEmptyResultASync(s2);
+#if ASYNC
+			ExpectEmptyResultASync(s2);
+#endif
             ExpectEmptyResultSync(s2);
         }
 
@@ -350,10 +376,14 @@ namespace ElasticElmah.Appender.Tests
             _appender.Refresh();
             _appender.PutMapping();
             var s = new ElasticSearchRepository.SearchTerm { PropertyName = "LoggingEvent.properties.prop", Value = "msg" };
-            ExpectOrderedResultASync(s, now);
-            ExpectOrderedResultSync(s, now);
+#if ASYNC
+			ExpectOrderedResultASync(s, now);
+#endif
+			ExpectOrderedResultSync(s, now);
             var s2 = new ElasticSearchRepository.SearchTerm { PropertyName = "LoggingEvent.properties.prop", Value = "msg2" };
-            ExpectEmptyResultASync(s2);
+#if ASYNC
+			ExpectEmptyResultASync(s2);
+#endif
             ExpectEmptyResultSync(s2);
         }
     }

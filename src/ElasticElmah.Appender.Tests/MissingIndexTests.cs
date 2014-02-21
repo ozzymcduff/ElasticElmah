@@ -27,7 +27,9 @@ namespace ElasticElmah.Appender.Tests
         public void Should_give_missing_index_result_when_no_index()
         {
             ExpectMissingIndexResultSync();
+#if ASYNC
             ExpectMissingIndexResultASync();
-        }
+#endif
+		}
     }
 }

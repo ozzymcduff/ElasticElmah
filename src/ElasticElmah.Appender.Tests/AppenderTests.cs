@@ -27,14 +27,13 @@ namespace ElasticElmah.Appender.Tests
         [TearDown]
         public virtual void Cleanup()
         {
-            _repo.DeleteIndexAsync();
+            _repo.DeleteIndex();
         }
 
         [Test]
         public virtual void Test()
         {
-            _appender.Async = true;// not needed
-            _appender.AppendAsync(new LoggingEvent(GetType(), _log.Logger.Repository, TestData())).Wait();
+            _appender.DoAppend(new LoggingEvent(GetType(), _log.Logger.Repository, TestData()));
             _repo.Refresh();
             var paged = _repo.GetPaged(0, 10);
             Assert.That(paged.Total, Is.EqualTo(1));
@@ -43,14 +42,13 @@ namespace ElasticElmah.Appender.Tests
         [Test]
         public virtual void Test_generated_from_logging_event_data()
         {
-            _appender.Async = true;// not needed
-            _appender.AppendAsync(new LoggingEvent(
+            _appender.DoAppend(new LoggingEvent(
                 new LoggingEventData
                 {
                     Message = "message",
                     Level = Level.Error,
                     LocationInfo = new LocationInfo("?", "?", "http://localhost:1341243/dsfaf", "21")
-                })).Wait();
+                }));
             _repo.Refresh();
             var paged = _repo.GetPaged(0, 10);
             Assert.That(paged.Total, Is.EqualTo(1));
@@ -59,14 +57,12 @@ namespace ElasticElmah.Appender.Tests
         [Test]
         public virtual void Several_logs()
         {
-            _appender.Async = true;// not needed
-            var tasks = new List<Task>();
+            _appender.Async = false;
             for (int i = 0; i < 5; i++)
             {
-                tasks.Add(_appender.AppendAsync(
-                    new LoggingEvent(GetType(), _log.Logger.Repository, TestData())));
+                _appender.DoAppend(
+                    new LoggingEvent(GetType(), _log.Logger.Repository, TestData()));
             }
-            Task.WaitAll(tasks.ToArray());
             _repo.Refresh();
             var paged = _repo.GetPaged(0, 10);
             Assert.That(paged.Total, Is.EqualTo(5));
@@ -81,7 +77,7 @@ namespace ElasticElmah.Appender.Tests
             var paged = _repo.GetPaged(0, 10);
             Assert.That(paged.Total, Is.EqualTo(1));
         }
-
+#if ASYNC
         [Test]
         public virtual void Using_doappend_async()
         {
@@ -91,6 +87,7 @@ namespace ElasticElmah.Appender.Tests
             var paged = _repo.GetPaged(0, 10);
             Assert.That(paged.Total, Is.EqualTo(1));
         }
+#endif
 
         private static LoggingEventData TestData()
         {

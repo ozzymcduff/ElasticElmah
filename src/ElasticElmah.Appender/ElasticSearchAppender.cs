@@ -37,8 +37,12 @@ namespace ElasticElmah.Appender
         {
             if (Async)
             {
+#if ASYNC
                 ObserveExceptions(AppendAsync(loggingEvent));
-            }
+#else
+				throw new System.NotImplementedException("Compiled without ASYNC");
+#endif  
+			}
             else
             {
                 AppendSync(loggingEvent);
@@ -53,7 +57,7 @@ namespace ElasticElmah.Appender
             }
             Repo.Add(loggingEvent);
         }
-
+#if ASYNC
         public Task AppendAsync(LoggingEvent loggingEvent)
         {
             if (!init)
@@ -69,6 +73,7 @@ namespace ElasticElmah.Appender
                     }));
             }
         }
+
         private Task ObserveExceptions(Task t) 
         {
             return t.ContinueWith(task =>
@@ -79,5 +84,6 @@ namespace ElasticElmah.Appender
                 }
             });
         }
+#endif
     }
 }
