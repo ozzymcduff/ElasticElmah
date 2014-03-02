@@ -17,6 +17,13 @@
     at loadItems (http://localhost/bundled_app.js/?ticks=560660:16497:28)
     at Object.success (http://localhost/bundled_app.js/?ticks=560660:16538:17)
     at Object.lo.execIfFunc (http://localhost/lib_bundle.js/?ticks=560660:1576:14)";
+
+        public static string JsException2 = @" .load/<@http://localhost/bundled_app.js?ticks=63529:9
+some_method/this.get/<.error@http://localhost/bundled_app.js?ticks=63529:3
+x.Callbacks/l@https://cdnjs.cloudflare.com/ajax/libs/jquery/4.1.7/jquery.min.js:4
+x.Callbacks/c.fireWith@https://cdnjs.cloudflare.com/ajax/libs/jquery/4.1.7/jquery.min.js:4
+k@https://cdnjs.cloudflare.com/ajax/libs/jquery/4.1.7/jquery.min.js:6
+.send/t/<@https://cdnjs.cloudflare.com/ajax/libs/jquery/4.1.7/jquery.min.js:6";
     }
 
 }

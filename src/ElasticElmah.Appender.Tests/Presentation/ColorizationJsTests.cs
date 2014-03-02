@@ -14,5 +14,13 @@ namespace ElasticElmah.Appender.Tests.Presentation
             Assert.That(html, Is.StringContaining("toModel"));
             Assert.That(html, Is.StringContaining("_afterInitialize"));
         }
+        [Test]
+        public void Test2()
+        {
+            var html = new ColorizeStackTrace(TestData.JsException2).Html();
+            Assert.That(html, Is.StringContaining("some_method"));
+            Assert.That(html, Is.StringContaining("Callbacks"));
+        }
+
     }
 }
