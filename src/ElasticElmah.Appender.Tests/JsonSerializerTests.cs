@@ -1,4 +1,5 @@
-﻿using ElasticElmah.Appender.Storage;
+﻿using System.Globalization;
+using ElasticElmah.Appender.Storage;
 using log4net.Core;
 using NUnit.Framework;
 using System;
@@ -8,24 +9,43 @@ namespace ElasticElmah.Appender.Tests
     [TestFixture]
     public class JsonSerializerTests
     {
-        private object expected = new {
-    loggerName=(string)null,
-    level="ALERT",
-    message="Message",
-    threadName="",
-    timeStamp="0001-01-01T00:06:13.5928559+00:00",
-    locationInfo=new{
-        className="?",
-        fileName="?",
-        lineNumber="?",
-        methodName="?"
-    },
-    userName="",
-    properties=new{prop="msg"},
-    exceptionString="",
-    domain="",
-    identity=""
-};
+        private object expected = new
+        {
+            loggerName = (string)null,
+            level = "ALERT",
+            message = "Message",
+            threadName = "",
+            timeStamp = Map.To(new DateTime(0xdeadbeef, DateTimeKind.Utc)),
+            locationInfo = new
+            {
+                className = "?",
+                fileName = "?",
+                lineNumber = "?",
+                methodName = "?"
+            },
+            userName = "",
+            properties = new { prop = "msg" },
+            exceptionString = "",
+            domain = "",
+            identity = ""
+        };
+
+        [Test]
+        public void Can_serialize_time()
+        {
+            var dateTime = DateTime("0001-01-01T00:06:13.5928559+00:00");
+            Assert.That(Map.To(dateTime), Is.StringStarting("0001-01-01T00:06:13.5928559+"));
+        }
+
+        private static DateTime DateTime(string t00)
+        {
+            DateTimeOffset localDate;
+            if (!DateTimeOffset.TryParseExact(t00, "yyyy-MM-ddTHH:mm:ss.fffffffzzz",
+                CultureInfo.InvariantCulture, DateTimeStyles.None, out localDate))
+                throw new Exception("!");
+            return localDate.UtcDateTime;
+        }
+
         [Test]
         public void WillSerializeOk()
         {
@@ -36,7 +56,7 @@ namespace ElasticElmah.Appender.Tests
                         UserName = "",
                         ThreadName = "",
                         Domain = "",
-                        TimeStamp = new DateTime(0xdeadbeef),
+                        TimeStamp = new DateTime(0xdeadbeef, DateTimeKind.Utc),
                         Properties = new log4net.Util.PropertiesDictionary().Tap(d =>
                         {
                             d["prop"] = "msg";

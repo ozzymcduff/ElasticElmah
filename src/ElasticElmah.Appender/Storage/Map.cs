@@ -34,6 +34,12 @@ namespace ElasticElmah.Appender.Storage
             return d;
         }
 
+        public static string To(DateTime datetime)
+        {
+            //: 2013-05-14T20:41:01.2255267+02:00
+            return datetime.ToString("yyyy-MM-ddTHH:mm:ss.fffffffzzz");
+        }
+
         public static LogEvent To(LoggingEvent l)
         {
             var d = new LogEvent
@@ -42,7 +48,7 @@ namespace ElasticElmah.Appender.Storage
                             level = l.Level!=null ? l.Level.Name : string.Empty,
                             message = l.RenderedMessage,
                             threadName = l.ThreadName,
-                            timeStamp = l.TimeStamp.ToString("yyyy-MM-ddTHH:mm:ss.fffffffzzz"),//timeStamp: 2013-05-14T20:41:01.2255267+02:00
+                            timeStamp = To(l.TimeStamp),
                             userName = l.UserName,
                             exceptionString = l.GetExceptionString(),
                             domain = l.Domain,

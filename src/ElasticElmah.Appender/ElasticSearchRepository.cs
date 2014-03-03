@@ -292,7 +292,7 @@ namespace ElasticElmah.Appender
 
         public static string FormatTime(DateTime time) 
         {
-            return time.ToString("yyyy-MM-ddTHH:mm:ss.fffffffzzz");
+            return Map.To(time);
         }
 
         public LogSearchFacetResult GetTimestampFacet(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
