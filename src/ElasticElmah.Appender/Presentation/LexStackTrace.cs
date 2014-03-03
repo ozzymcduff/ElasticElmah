@@ -101,7 +101,9 @@ namespace ElasticElmah.Appender.Presentation
             }
         }
 
-        readonly Regex _param = new Regex(@"(?:\s*)(?<type>\S*)(?:\s*)(?<var>\S*)(?:\s*)");
+        readonly Regex _param = new Regex(@"(?:\s*)
+            (?<type>\S*)(?:\s*)
+            (?<var>\S*)(?:\s*)",RegexOptions.IgnorePatternWhitespace);
 
         private void TokenizeParam(int index, int length)
         {
@@ -127,14 +129,18 @@ namespace ElasticElmah.Appender.Presentation
             }
         }
 
-        readonly Regex _inFileLine = new Regex(@"^(\s*)(?<in>in)(\s)(?<file>\w?\:?[^:]*)(?<delim>\:)(?<line>line)(\s)(?<linenum>\d*)$");
+        readonly Regex _inFileLine = new Regex(@"(?:\s*)
+            (?<in>in)(?:\s*)
+                (?<file>\w?\:?[^\:]*)(?<delim>\:)(?:\s*)
+            (?<line>line)(?:\s*)
+                (?<linenum>\d*)",RegexOptions.IgnorePatternWhitespace);
 
         void TryTokenizeIn(int index, int length)
         {
             if (string.IsNullOrEmpty(_str.Substring(index, length)))
             {
                 return;
-            }
+            }//_str.Substring(index,length));//, 
             var m = _inFileLine.Match(_str, index, length);
             if (m.Success)
             {
