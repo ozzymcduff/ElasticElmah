@@ -166,5 +166,15 @@ new{ t= Symbols.Unrecognized, s="<---",p=166}
                 LexStackTrace.Tokenize(line);
             }
         }
+
+        [Test,Ignore("Not implemented")]
+        public virtual void Lex_js_expcetion()
+        {
+            var lines = LexStackTrace.Tokenize(TestData.JsException);
+            var tokenized = new[]{
+new{ t= Symbols.At, s= "at",p=1 },
+            }.Select(t => new Token(t.t, t.s, t.p));
+            Assert.That(lines, Is.EquivalentTo(tokenized));
+        }
     }
 }

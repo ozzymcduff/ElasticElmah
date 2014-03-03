@@ -43,7 +43,7 @@ namespace ElasticElmah.Appender.Presentation
                 {
                     if (!_whitespaces.Contains(str[i]))
                     {
-                        throw new Exception(string.Format("Not whitespace char '{0}', at '{1}'", str[i], str.Substring(i)));
+                        throw new Exception(string.Format("Expected whitespace char instead saw '{0}', at '{1}'", str[i], str.Substring(i)));
                     }
                 }
                 _tokens.Add(new Token(Symbols.Whitespace, str.Substring(_position, index - _position), _position));
@@ -62,7 +62,7 @@ namespace ElasticElmah.Appender.Presentation
             (?<at>at)(\s+)
             (?<typenmethod>[^\(]+)
                 (?<left>\()
-                    (?<params>[^\(]*)
+                    (?<params>[^\)]*)
                 (?<right>\))
             (?<rest>.*)$",RegexOptions.IgnorePatternWhitespace);
 
@@ -76,7 +76,7 @@ namespace ElasticElmah.Appender.Presentation
                 Add(Symbols.LeftParanthesis, m.Groups["left"]);
                 if (!string.IsNullOrEmpty(m.Groups["params"].Value))
                 {
-                    TokenizeParams(m.Groups["params"].Index, m.Groups["params"].Length);
+                    TokenizeParamsOrFileLine(m.Groups["params"].Index, m.Groups["params"].Length);
                 }
                 Add(Symbols.RightParanthesis, m.Groups["right"]);
                 TryTokenizeIn(m.Groups["rest"].Index, m.Groups["rest"].Length);
@@ -86,6 +86,41 @@ namespace ElasticElmah.Appender.Presentation
             {
                 return false;
             }
+        }
+        void TokenizeParamsOrFileLine(int index, int length)
+        {
+            if (_str.Substring(index,length).Contains('/'))
+            {
+                TryTokenizeInWebLine(index, length);
+                return;
+            }
+            TokenizeParams(index, length);            
+        }
+
+        readonly Regex _inWebFileLine = new Regex(@"(?:\s*)
+                (?<file>\w?\:?[^\:]*)
+                    (?<delim>\:)
+                        (?<linenum>\d*)
+                    (?:(?<delim2>\:)
+                        (?<column>\d*))?",RegexOptions.IgnorePatternWhitespace);
+        
+        void TryTokenizeInWebLine(int index, int length)
+        {
+            if (string.IsNullOrEmpty(_str.Substring(index, length)))
+            {
+                return;
+            } 
+            var m = _inWebFileLine.Match(_str, index, length);
+            if (m.Success)
+            {
+                Add(Symbols.File, m.Groups["file"]);
+                Add(Symbols.Colon, m.Groups["delim"]);
+                Add(Symbols.LineNumber, m.Groups["linenum"]);
+                Add(Symbols.Colon, m.Groups["linenum"]);
+                Add(Symbols.Column, m.Groups["column"]);
+                return;
+            }
+            AddStr(Symbols.Unrecognized, index, length);
         }
 
         void TokenizeParams(int index, int length)
@@ -140,13 +175,14 @@ namespace ElasticElmah.Appender.Presentation
                 (?<file>\w?\:?[^\:]*)(?<delim>\:)(?:\s*)
             (?<line>line)(?:\s*)
                 (?<linenum>\d*)",RegexOptions.IgnorePatternWhitespace);
+        
 
         void TryTokenizeIn(int index, int length)
         {
             if (string.IsNullOrEmpty(_str.Substring(index, length)))
             {
                 return;
-            }//_str.Substring(index,length));//, 
+            } 
             var m = _inFileLine.Match(_str, index, length);
             if (m.Success)
             {
@@ -155,15 +191,16 @@ namespace ElasticElmah.Appender.Presentation
                 Add(Symbols.Colon, m.Groups["delim"]);
                 Add(Symbols.Line, m.Groups["line"]);
                 Add(Symbols.LineNumber, m.Groups["linenum"]);
+                return;
             }
-            else
-            {
-                AddStr(Symbols.Unrecognized, index, length);
-            }
+            AddStr(Symbols.Unrecognized, index, length);
         }
 
         readonly Regex _word = new Regex(@"^(?<word>\w*)$");
-        readonly Regex _delimMethod = new Regex(@"(?<tdelim>\.)?(?<method>\.?[^\.]*)$");
+        readonly Regex _delimMethod = new Regex(@"
+            (?<tdelim>\.)? # optional delim
+            (?<method>\.?[^\.]*)
+            $",RegexOptions.IgnorePatternWhitespace);
         void TokenizeTypeAndMethod(string str, int index, int length)
         {
             var mm = _word.Match(str, index, length);
@@ -204,7 +241,7 @@ namespace ElasticElmah.Appender.Presentation
 
         public void TokenizeLines()
         {
-            var i = 0;//todo:regex instead
+            var i = 0;
             var chars = new[] { '\r', '\n' };
             for (int j = 0; j < _str.Length; j++)
             {

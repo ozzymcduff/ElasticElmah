@@ -18,5 +18,6 @@
         TypeMethodDelim,
         At,
         Whitespace,
+        Column
     }
 }
