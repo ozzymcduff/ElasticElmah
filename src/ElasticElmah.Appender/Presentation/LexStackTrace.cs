@@ -43,7 +43,7 @@ namespace ElasticElmah.Appender.Presentation
                 {
                     if (!_whitespaces.Contains(str[i]))
                     {
-                        throw new Exception(string.Format("'{0}'", str[i]));
+                        throw new Exception(string.Format("Not whitespace char '{0}', at '{1}'", str[i], str.Substring(i)));
                     }
                 }
                 _tokens.Add(new Token(Symbols.Whitespace, str.Substring(_position, index - _position), _position));
