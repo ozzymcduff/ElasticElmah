@@ -23,7 +23,6 @@ namespace ElasticElmah.Appender.Tests
         [TearDown]
         public virtual void Cleanup()
         {
-            //_repo.DeleteIndexAsync();
         }
 #if ASYNC
         [Test, Ignore("throws in different ways depending on proxy or not")]

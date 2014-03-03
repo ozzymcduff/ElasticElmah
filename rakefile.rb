@@ -70,13 +70,20 @@ namespace :mono do
   end
 
   desc "build isop on mono"
-  task :build => [:install_packages, :appender_tests]
+  task :build => [:install_packages, :appender_tests, :tail]
 
   xbuild :appender do |msb|
     msb.properties with_properties(configuration: :Debug)
     msb.targets :Clean, :Rebuild
     #msb.verbosity = 'quiet'
     msb.solution =File.join('.', "src", "ElasticElmah.Appender", "ElasticElmah.Appender.csproj")
+  end
+
+  xbuild :tail do |msb|
+    msb.properties with_properties(configuration: :Debug)
+    msb.targets :Clean, :Rebuild
+    #msb.verbosity = 'quiet'
+    msb.solution =File.join('.', "src", "ElasticElmah.Tail", "ElasticElmah.Tail.csproj")
   end
 
   xbuild :appender_tests => [:appender] do |msb|
