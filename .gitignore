@@ -139,3 +139,5 @@ doc/
 # linuxy stuff
 *.swp
 
+.vagrant
+.bundle
