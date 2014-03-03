@@ -58,7 +58,13 @@ namespace ElasticElmah.Appender.Presentation
             }
         }
 
-        readonly Regex _atTypeMethod = new Regex(@"^(\s*)(?<at>at)(\s+)(?<typenmethod>[^\(]+)(?<left>\()(?<params>[^\(]*)(?<right>\))(?<rest>.*)$");
+        readonly Regex _atTypeMethod = new Regex(@"^(\s*)
+            (?<at>at)(\s+)
+            (?<typenmethod>[^\(]+)
+                (?<left>\()
+                    (?<params>[^\(]*)
+                (?<right>\))
+            (?<rest>.*)$",RegexOptions.IgnorePatternWhitespace);
 
         bool TryTokenizeAtInLine(int index, int length)
         {
