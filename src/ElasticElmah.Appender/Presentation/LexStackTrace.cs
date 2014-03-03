@@ -108,7 +108,10 @@ namespace ElasticElmah.Appender.Presentation
             var m = _param.Match(_str, index, length);
             if (m.Success)
             {
-                Add(Symbols.Type, m.Groups["type"]);
+                if (m.Groups["type"].Value.Length > 0)
+                {
+                    Add(Symbols.Type, m.Groups["type"]);
+                }
                 if (m.Groups["var"].Value.Length > 0)
                 {
                     Add(Symbols.Var, m.Groups["var"]);
@@ -167,11 +170,13 @@ namespace ElasticElmah.Appender.Presentation
 
 ");
             }
-
-            AddStr(Symbols.Type, index, length - m.Length);
+            if (length - m.Length>0)
+            {
+                AddStr(Symbols.Type, index, length - m.Length);
+            }
             if (m.Groups["tdelim"].Success)
             {
-            Add(Symbols.TypeMethodDelim, m.Groups["tdelim"]);
+                Add(Symbols.TypeMethodDelim, m.Groups["tdelim"]);
             }
             Add(Symbols.Method, m.Groups["method"]);
         }
