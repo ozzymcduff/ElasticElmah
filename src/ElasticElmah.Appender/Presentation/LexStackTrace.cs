@@ -82,8 +82,6 @@ namespace ElasticElmah.Appender.Presentation
             }
         }
 
-        readonly Regex _param = new Regex(@"^(\s*)(?<type>[^ ]*)(\s*)(?<var>[^ ]*)(\s*)");
-
         void TokenizeParams(int index, int length)
         {
             var i = index;//todo:regex instead
@@ -102,6 +100,8 @@ namespace ElasticElmah.Appender.Presentation
                 TokenizeParam(i, index + length - i);
             }
         }
+
+        readonly Regex _param = new Regex(@"(?:\s*)(?<type>\S*)(?:\s*)(?<var>\S*)(?:\s*)");
 
         private void TokenizeParam(int index, int length)
         {

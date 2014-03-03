@@ -75,21 +75,21 @@ namespace :mono do
   xbuild :appender do |msb|
     msb.properties with_properties(configuration: :Debug)
     msb.targets :Clean, :Rebuild
-    #msb.verbosity = 'quiet'
+    msb.verbosity = 'quiet'
     msb.solution =File.join('.', "src", "ElasticElmah.Appender", "ElasticElmah.Appender.csproj")
   end
 
   xbuild :tail do |msb|
     msb.properties with_properties(configuration: :Debug)
     msb.targets :Clean, :Rebuild
-    #msb.verbosity = 'quiet'
+    msb.verbosity = 'quiet'
     msb.solution =File.join('.', "src", "ElasticElmah.Tail", "ElasticElmah.Tail.csproj")
   end
 
   xbuild :appender_tests => [:appender] do |msb|
     msb.properties with_properties(configuration: :Debug)
     msb.targets :Clean, :Rebuild
-    #msb.verbosity = 'quiet'
+    msb.verbosity = 'quiet'
     msb.solution =File.join('.', "src", "ElasticElmah.Appender.Tests", "ElasticElmah.Appender.Tests.csproj")
   end
 
@@ -101,7 +101,7 @@ namespace :mono do
   end
   
   desc "test with nunit"
-  task :test => :build do
+  task :test => :appender_tests do
     # does not work for some reason 
     command = "nunit-console4"
     assemblies = "ElasticElmah.Appender.Tests.dll"

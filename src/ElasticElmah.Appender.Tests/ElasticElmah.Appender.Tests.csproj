@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="AppenderOnWrongHostTests.cs" />
     <Compile Include="AppenderTests.cs" />
+    <Compile Include="Assertions.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="MissingIndexTests.cs" />
     <Compile Include="Extensions.cs" />

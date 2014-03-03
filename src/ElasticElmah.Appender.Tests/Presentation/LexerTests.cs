@@ -7,7 +7,7 @@ using ElasticElmah.Appender.Tests.Presentation;
 namespace ElasticElmah.Appender.Tests
 {
     [TestFixture]
-    public class StackTraceTransformerTests
+    public class LexerTests
     {
         private static void Write(IEnumerable<Token> res)
         {
