@@ -58,24 +58,48 @@ exec :install_packages do |cmd|
 end
 
 namespace :mono do
-  desc "build isop on mono"
-  xbuild :build do |msb|
-    solution_dir = File.join(File.dirname(__FILE__),'src')
-    nuget_tools_path = File.join(solution_dir, '.nuget')
-    msb.properties :configuration => :Debug, 
-      :SolutionDir => solution_dir,
+  def with_properties hash
+      solution_dir = File.join(File.dirname(__FILE__),'src')
+      nuget_tools_path = File.join(solution_dir, '.nuget')
+
+      to_add = {:SolutionDir => solution_dir,
       :NuGetToolsPath => nuget_tools_path,
       :NuGetExePath => File.join(nuget_tools_path, 'NuGet.exe'),
-      :PackagesDir => File.join(solution_dir, 'packages')
+      :PackagesDir => File.join(solution_dir, 'packages')}.merge(hash)
+      return to_add
+  end
+
+  desc "build isop on mono"
+  task :build => [:install_packages, :appender_tests]
+
+  xbuild :appender do |msb|
+    msb.properties with_properties(configuration: :Debug)
     msb.targets :Clean, :Rebuild
     #msb.verbosity = 'quiet'
-    msb.solution =File.join('.',"src", "ElasticElmah.Core.sln")
+    msb.solution =File.join('.', "src", "ElasticElmah.Appender", "ElasticElmah.Appender.csproj")
+  end
+
+  xbuild :appender_tests => [:appender] do |msb|
+    msb.properties with_properties(configuration: :Debug)
+    msb.targets :Clean, :Rebuild
+    #msb.verbosity = 'quiet'
+    msb.solution =File.join('.', "src", "ElasticElmah.Appender.Tests", "ElasticElmah.Appender.Tests.csproj")
   end
 
   desc "Install missing NuGet packages."
   task :install_packages do |cmd|
     FileList["src/**/packages.config"].each do |filepath|
-      sh "mono --runtime=v4.0.30319 ./src/.nuget/NuGet.exe i #{filepath} -o ./src/packages"
+      sh "mono --runtime=v4.0.30319 ./src/.nuget/NuGet.exe i #{filepath} -o ./src/packages -source http://www.nuget.org/api/v2/"
+    end
+  end
+  
+  desc "test with nunit"
+  task :test => :build do
+    # does not work for some reason 
+    command = "nunit-console4"
+    assemblies = "ElasticElmah.Appender.Tests.dll"
+    cd "src/ElasticElmah.Appender.Tests/bin/Debug" do
+      sh "#{command} #{assemblies}"
     end
   end
 
