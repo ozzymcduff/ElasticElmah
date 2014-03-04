@@ -179,7 +179,11 @@ namespace ElasticElmah.Appender
 #endif
         public void DeleteIndex()
         {
-            _request.Sync(UrlToIndex(settings, ""), "DELETE", null);
+            try
+            {
+                _request.Sync(UrlToIndex(settings, ""), "DELETE", null);
+            }
+            catch(IndexMissingException) { }
         }
 
         public class SearchResponse

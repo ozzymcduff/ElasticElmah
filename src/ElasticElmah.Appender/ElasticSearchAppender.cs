@@ -51,11 +51,12 @@ namespace ElasticElmah.Appender
 
         public void AppendSync(LoggingEvent loggingEvent)
         {
+            var repo = Repo; 
             if (init)
             {
-                Repo.CreateIndexOrRefreshMappings();
+                repo.CreateIndexOrRefreshMappings();
             }
-            Repo.Add(loggingEvent);
+            repo.Add(loggingEvent);
         }
 #if ASYNC
         public Task AppendAsync(LoggingEvent loggingEvent)
