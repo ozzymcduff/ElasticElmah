@@ -15,7 +15,19 @@ namespace ElasticElmah.Appender.Presentation
                 return _tokens;
             }
         }
-        int _position;
+
+        protected int Position
+        {
+            get { return _position; }
+            set
+            {
+                if (_position>value)
+                    throw new Exception(string.Format("Forward only! old position: {0}, trying to set: {1}", _position, value));
+                _position = value;
+            }
+        }
+
+        private int _position;
         readonly string _str;
         public LexStackTrace(string str)
         {
@@ -23,30 +35,36 @@ namespace ElasticElmah.Appender.Presentation
         }
         void AddStr(Symbols type, int index, int length)
         {
-            CheckForWhiteSpace(_str, index);
+            CheckForWhiteSpace(_str, index, type);
             _tokens.Add(new Token(type, _str.Substring(index, length), index));
-            _position = index + length;
+            Position = index + length;
         }
         void Add(Symbols type, Group value)
         {
-            CheckForWhiteSpace(_str, value.Index);
+            CheckForWhiteSpace(_str, value.Index, type);
             _tokens.Add(new Token(type, value.Value, value.Index));
-            _position = value.Index + value.Length;
+            Position = value.Index + value.Length;
         }
 
         readonly char[] _whitespaces = new[] { '\n', '\r', '\t', ' ' };
-        void CheckForWhiteSpace(string str, int index)
+        void CheckForWhiteSpace(string str, int index, Symbols type)
         {
-            if (_position < index)
+            if (Position < index)
             {
-                for (int i = _position + 1; i < index; i++)
+                for (int i = Position + 1; i < index; i++)
                 {
                     if (!_whitespaces.Contains(str[i]))
                     {
-                        throw new Exception(string.Format("Expected whitespace char instead saw '{0}', at '{1}'", str[i], str.Substring(i)));
+                        throw new Exception(string.Format(@"Expected whitespace char instead saw '{0}',
+at: '{1}'
+expected whitespaces on: 
+'{2}'
+Before the token
+{3}", 
+                            str[i], str.Substring(i,Math.Min(10,str.Length-i)),str.Substring(Position,index-Position),type));
                     }
                 }
-                _tokens.Add(new Token(Symbols.Whitespace, str.Substring(_position, index - _position), _position));
+                _tokens.Add(new Token(Symbols.Whitespace, str.Substring(Position, index - Position), Position));
             }
         }
 
@@ -82,10 +100,7 @@ namespace ElasticElmah.Appender.Presentation
                 TryTokenizeIn(m.Groups["rest"].Index, m.Groups["rest"].Length);
                 return true;
             }
-            else
-            {
-                return false;
-            }
+            return false;
         }
         void TokenizeParamsOrFileLine(int index, int length)
         {
@@ -98,7 +113,7 @@ namespace ElasticElmah.Appender.Presentation
         }
 
         readonly Regex _inWebFileLine = new Regex(@"(?:\s*)
-                (?<file>\w?\:?[^\:]*)
+                (?<file>\w+\:[^\:]*)
                     (?<delim>\:)
                         (?<linenum>\d*)
                     (?:(?<delim2>\:)
@@ -117,7 +132,7 @@ namespace ElasticElmah.Appender.Presentation
                 Add(Symbols.Colon, m.Groups["delim"]);
                 Add(Symbols.LineNumber, m.Groups["linenum"]);
                 Add(Symbols.Colon, m.Groups["linenum"]);
-                Add(Symbols.Column, m.Groups["column"]);
+                if (m.Groups["column"].Success) Add(Symbols.Column, m.Groups["column"]);
                 return;
             }
             AddStr(Symbols.Unrecognized, index, length);

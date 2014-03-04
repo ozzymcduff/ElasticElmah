@@ -52,6 +52,14 @@ namespace ElasticElmah.Appender.Presentation
                     Expect(Symbols.LeftParanthesis);
                     whilemax(() =>
                     {
+                        if (Accept(Symbols.File))
+                        {
+                            Expect(Symbols.Colon);
+                            Expect(Symbols.LineNumber);
+                            Expect(Symbols.Colon);
+                            Accept(Symbols.Column);
+                            return true;
+                        }
                         if (Accept(Symbols.Type))
                         {
                             if (Accept(Symbols.Var))
