@@ -5,8 +5,14 @@
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.box = "mono-3.2.8"
-  config.vm.box_url = "https://dl.dropboxusercontent.com/u/20581307/mono3.2.8.box"
+  config.vm.box = "precise64"
+
+  config.vm.box_url = "http://files.vagrantup.com/precise64.box"
+config.vm.provider "virtualbox" do |v|
+    v.customize ["modifyvm", :id, "--cpus", "2"]
+    v.customize ["modifyvm", :id, "--memory", "1024"]
+  end
+  
   config.vm.provision :shell, :path => "provisioning/install-rvm.sh",  :args => "stable"
   config.vm.provision :shell, :path => "provisioning/install-ruby.sh", :args => "2.1.0 puppet"
   
@@ -14,12 +20,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     puppet.manifests_path = "manifests"
     puppet.manifest_file  = "default.pp"
   end
-  
-  config.vm.provider "virtualbox" do |v|
-    v.customize ["modifyvm", :id, "--cpus", "2"]
-    v.customize ["modifyvm", :id, "--memory", "1024"]
+
+  config.vm.provision :puppet do |puppet|
+     puppet.manifests_path = "manifests"
+     puppet.manifest_file  = "mono.pp"
   end
   
-  config.vm.provision :shell, :path => "provisioning/setup.sh"
+  config.vm.provision :shell, :path => "provisioning/dev-setup.sh"
 
 end
