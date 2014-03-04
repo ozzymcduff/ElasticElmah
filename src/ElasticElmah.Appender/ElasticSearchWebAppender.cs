@@ -2,7 +2,6 @@
 using System.Security;
 using System.Web;
 using System.Linq;
-using log4net.Appender;
 using log4net.Core;
 using System.Collections.Generic;
 

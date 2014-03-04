@@ -1,25 +1,23 @@
 ﻿using log4net.Appender;
 using log4net.Core;
-using System.Threading.Tasks;
 
 namespace ElasticElmah.Appender
 {
     public class ElasticSearchAppender : AppenderSkeleton
     {
         private ElasticSearchRepository _repo;
-        private bool init = false;
-        public bool Async { get; set; }
+        private bool _init = false;
         public string ConnectionString { get; set; }
-        private static readonly object _lockObj = new object();
+        private static readonly object LockObj = new object();
         protected virtual ElasticSearchRepository Repo
         {
             get
             {
-                lock (_lockObj)
+                lock (LockObj)
                 {
                     if (_repo != null)
                     {
-                        init = true;
+                        _init = true;
                         return _repo;
                     }
                     _repo = new ElasticSearchRepository(ConnectionString);
@@ -35,56 +33,17 @@ namespace ElasticElmah.Appender
         /// <param name="loggingEvent"></param>
         protected override void Append(LoggingEvent loggingEvent)
         {
-            if (Async)
-            {
-#if ASYNC
-                ObserveExceptions(AppendAsync(loggingEvent));
-#else
-				throw new System.NotImplementedException("Compiled without ASYNC");
-#endif  
-			}
-            else
-            {
-                AppendSync(loggingEvent);
-            }
+            AppendSync(loggingEvent);
         }
 
         public void AppendSync(LoggingEvent loggingEvent)
         {
             var repo = Repo; 
-            if (init)
+            if (_init)
             {
                 repo.CreateIndexOrRefreshMappings();
             }
             repo.Add(loggingEvent);
         }
-#if ASYNC
-        public Task AppendAsync(LoggingEvent loggingEvent)
-        {
-            if (!init)
-            {
-                return ObserveExceptions(Repo.AddAsync(loggingEvent));
-            }
-            else
-            {
-                return ObserveExceptions(Repo.CreateIndexOrRefreshMappingsAsync()
-                    .ContinueWith(t =>
-                    {
-                        return Repo.AddAsync(loggingEvent);
-                    }));
-            }
-        }
-
-        private Task ObserveExceptions(Task t) 
-        {
-            return t.ContinueWith(task =>
-            {
-                if (task.Exception != null)
-                {
-                    ErrorHandler.Error("Unhandled", task.Exception);
-                }
-            });
-        }
-#endif
     }
 }

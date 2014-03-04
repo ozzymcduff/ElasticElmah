@@ -4,18 +4,18 @@ namespace ElasticElmah.Appender
 {
     public class DefaultJsonSerializer:IJsonSerializer
     {
-        private JavaScriptSerializer wrapped;
+        private readonly JavaScriptSerializer _wrapped;
         public DefaultJsonSerializer()
         {
-            wrapped = new JavaScriptSerializer();
+            _wrapped = new JavaScriptSerializer();
         }
         public T Deserialize<T>(string val) 
         {
-            return wrapped.Deserialize<T>(val);
+            return _wrapped.Deserialize<T>(val);
         }
         public string Serialize<T>(T obj) 
         {
-            return wrapped.Serialize(obj);
+            return _wrapped.Serialize(obj);
         }
     }
 }

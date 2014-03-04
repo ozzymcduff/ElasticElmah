@@ -3,8 +3,7 @@ using NUnit.Framework;
 using log4net.Core;
 using log4net;
 using System.Reflection;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+
 namespace ElasticElmah.Appender.Tests
 {
     [TestFixture]
@@ -58,7 +57,6 @@ namespace ElasticElmah.Appender.Tests
         [Test]
         public virtual void Several_logs()
         {
-            _appender.Async = false;
             for (int i = 0; i < 5; i++)
             {
                 _appender.DoAppend(
@@ -72,23 +70,11 @@ namespace ElasticElmah.Appender.Tests
         [Test]
         public virtual void Using_doappend()
         {
-            _appender.Async = false;
             _appender.DoAppend(new LoggingEvent(TestData()));
             _repo.Refresh();
             var paged = _repo.GetPaged(0, 10);
             Assert.That(paged.Total, Is.EqualTo(1));
         }
-#if ASYNC
-        [Test]
-        public virtual void Using_doappend_async()
-        {
-            _appender.Async = true;
-            _appender.DoAppend(new LoggingEvent(TestData()));
-            _repo.Refresh();
-            var paged = _repo.GetPaged(0, 10);
-            Assert.That(paged.Total, Is.EqualTo(1));
-        }
-#endif
 
         private static LoggingEventData TestData()
         {

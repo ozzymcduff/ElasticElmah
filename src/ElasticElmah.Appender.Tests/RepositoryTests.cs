@@ -24,9 +24,6 @@ namespace ElasticElmah.Appender.Tests
             _appender.Refresh();
             System.Threading.Thread.Sleep(50);
             ExpectEmptyResultSync();
-#if ASYNC
-            ExpectEmptyResultASync();
-#endif
         }
 
         [Test]
@@ -88,9 +85,6 @@ namespace ElasticElmah.Appender.Tests
         protected void Can_read_property_when_paging()
         {
             ExpectedPagingResult(_appender.GetPaged(0, 10));
-#if ASYNC
-			_appender.GetPagedAsync(0, 10).Result.Tap(ExpectedPagingResult);
-#endif
         }
 
 
@@ -155,9 +149,6 @@ namespace ElasticElmah.Appender.Tests
                     })).ToArray(), true);
 
             _appender.Refresh();
-#if ASYNC
-            ExpectOrderedResultASync(now);
-#endif
 			ExpectOrderedResultSync(now);
         }
 
@@ -186,36 +177,13 @@ namespace ElasticElmah.Appender.Tests
             }
             _appender.Refresh();
             //_appender.Flush();
-#if ASYNC
-            ExpectOrderedResultASync(now);
-#endif
 			ExpectOrderedResultSync(now);
 
 			ExpectOrderedFacetResult();
-			ExpectOrderedHistogramResult();
-
-#if ASYNC
-            ExpectOrderedFacetResultASync();
-            ExpectOrderedHistogramResultASync();
-#endif
 		}
-#if ASYNC
-        protected void ExpectOrderedFacetResultASync() 
-        {
-            ExpectedFacetResult(_appender.GetTimestampFacetAsync(null,now.AddDays(-1), now.AddDays(10), 0, 2).Result);
-        }
-        protected void ExpectOrderedHistogramResultASync() 
-        {
-            ExpectedHistogramResult(_appender.GetTimestampHistogramAsync(null, now.AddDays(-1), now.AddDays(10), 0, 2).Result);
-        }
-#endif
 		protected void ExpectOrderedFacetResult() 
 		{
 			ExpectedFacetResult(_appender.GetTimestampFacet(null,now.AddDays(-1), now.AddDays(10), 0, 2));
-		}
-		protected void ExpectOrderedHistogramResult() 
-		{
-			ExpectedHistogramResult(_appender.GetTimestampHistogram(null, now.AddDays(-1), now.AddDays(10), 0, 2));
 		}
 		protected static void ExpectedFacetResult(LogSearchFacetResult result) 
         {
@@ -225,18 +193,7 @@ namespace ElasticElmah.Appender.Tests
             //        now.AddDays(4), now.AddDays(3)
             //    }));
         }
-        protected static void ExpectedHistogramResult(LogSearchHistogramResult result) 
-        {
-            if (false)
-            Assert.That(result.Histogram.Select(l => new KeyValuePair<DateTime,int>( l.Time,l.Count)).ToArray(),
-                Is.EquivalentTo(new[]{ 
-                    new KeyValuePair<DateTime,int>(AtTwelve(now.AddDays(0)),1),
-                    new KeyValuePair<DateTime,int>(AtTwelve(now.AddDays(1)),1),
-                    new KeyValuePair<DateTime,int>(AtTwelve(now.AddDays(2)),1),
-                    new KeyValuePair<DateTime,int>(AtTwelve(now.AddDays(3)),1),
-                    new KeyValuePair<DateTime,int>(AtTwelve(now.AddDays(4)),1),
-                }));
-        }
+
         protected static DateTime AtTwelve(DateTime t) 
         {
             return new DateTime(t.Year, t.Month, t.Day, 12, 0, 0, 0);
@@ -267,14 +224,8 @@ namespace ElasticElmah.Appender.Tests
             _appender.Refresh();
             //_appender.Flush();
             var s = new ElasticSearchRepository.SearchTerm { PropertyName = "LoggingEvent.properties.prop", Value = "msg" };
-#if ASYNC
-			ExpectOrderedResultASync(s, now);
-#endif
 			ExpectOrderedResultSync(s, now);
             var s2 = new ElasticSearchRepository.SearchTerm { PropertyName = "LoggingEvent.properties.prop", Value = "msg2" };
-#if ASYNC
-			ExpectEmptyResultASync(s2);
-#endif
             ExpectEmptyResultSync(s2);
         }
 
@@ -304,14 +255,8 @@ namespace ElasticElmah.Appender.Tests
             _appender.Refresh();
             _appender.PutMapping();
             var s = new ElasticSearchRepository.SearchTerm { PropertyName = "LoggingEvent.properties.prop", Value = "msg" };
-#if ASYNC
-			ExpectOrderedResultASync(s, now);
-#endif
 			ExpectOrderedResultSync(s, now);
             var s2 = new ElasticSearchRepository.SearchTerm { PropertyName = "LoggingEvent.properties.prop", Value = "msg2" };
-#if ASYNC
-			ExpectEmptyResultASync(s2);
-#endif
             ExpectEmptyResultSync(s2);
         }
     }
