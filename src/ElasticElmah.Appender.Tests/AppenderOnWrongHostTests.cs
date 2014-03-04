@@ -1,4 +1,5 @@
 ﻿using System;
+using ElasticElmah.Appender.Web;
 using NUnit.Framework;
 using log4net.Core;
 using log4net;
@@ -17,7 +18,7 @@ namespace ElasticElmah.Appender.Tests
         {
             var _index = Guid.NewGuid();
             var conn = "Server=" + Guid.NewGuid() + ";Index=" + _index + ";Port=9200";
-            _appender = new ElasticSearchAppender() { ConnectionString = conn };
+            _appender = new ElasticSearchAppender { ConnectionString = conn };
         }
 
         [TearDown]
@@ -25,22 +26,20 @@ namespace ElasticElmah.Appender.Tests
         {
         }
 
-        [Test,Ignore("throws in different ways depending on proxy or not")]
+        [Test]
         public virtual void Should_throw()
         {
-            var faulted = false;
-            _appender.DoAppend(new LoggingEvent(GetType(), _log.Logger.Repository,
-                    new LoggingEventData
+            Assert.Throws<RequestException>(() => _appender.AppendSync(new LoggingEvent(GetType(), _log.Logger.Repository,
+                new LoggingEventData
+                {
+                    TimeStamp = DateTime.Now,
+                    Level = Level.Error,
+                    Message = "Message",
+                    Properties = new log4net.Util.PropertiesDictionary().Tap(d =>
                     {
-                        TimeStamp = DateTime.Now,
-                        Level = Level.Error,
-                        Message = "Message",
-                        Properties = new log4net.Util.PropertiesDictionary().Tap(d =>
-                        {
-                            d["prop"] = "msg";
-                        })
-                    })); 
-            Assert.That(faulted);
+                        d["prop"] = "msg";
+                    })
+                })));
         }
     }
 }
