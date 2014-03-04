@@ -103,7 +103,7 @@ namespace :mono do
   desc "test with nunit"
   task :test => :appender_tests do
     # does not work for some reason 
-    command = "nunit-console4"
+    command = "nunit-console"
     assemblies = "ElasticElmah.Appender.Tests.dll"
     cd "src/ElasticElmah.Appender.Tests/bin/Debug" do
       sh "#{command} #{assemblies}"
