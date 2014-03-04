@@ -1,14 +1,6 @@
 using System;
-using System.Net;
-using System.Reflection;
-using System.Web;
-using ElasticElmah.Appender.Presentation;
 using NUnit.Framework;
-using Subtext.TestLibrary;
-using log4net;
 using System.Linq;
-using log4net.Core;
-using System.Collections.Generic;
 using ElasticElmah.Appender.Search;
 
 namespace ElasticElmah.Appender.Tests

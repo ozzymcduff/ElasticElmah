@@ -9,7 +9,7 @@ namespace ElasticElmah.Appender.Tests
         [SetUp]
         public void Init()
         {
-            var fiddler = true;
+            var fiddler = Global.UseFiddler;
             var _index = Guid.NewGuid();
             var conn = "Server=" + (fiddler ? Environment.MachineName : "localhost") + ";Index=" + _index + ";Port="+Global.Port;
             _appender = new ElasticSearchRepository(conn,

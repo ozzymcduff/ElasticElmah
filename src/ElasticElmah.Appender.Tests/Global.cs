@@ -8,5 +8,6 @@ namespace ElasticElmah.Appender.Tests
     class Global
     {
         public static int Port = 9200;
+        public static bool UseFiddler = false;
     }
 }

@@ -17,7 +17,7 @@ namespace ElasticElmah.Appender.Tests
         [SetUp]
         public virtual void Init()
         {
-            var fiddler = true;
+            var fiddler = Global.UseFiddler;
             var index = Guid.NewGuid();
             var conn = "Server=" + (fiddler ? Environment.MachineName : "localhost") + ";Index=" + index + ";Port=" + Global.Port;
             _appender = new ElasticSearchAppender() { ConnectionString = conn };
