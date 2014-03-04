@@ -17,7 +17,6 @@ connectionstring: Right now a connection string looking like a database connecti
 
     <appender name="ElasticSearchAppender" type="ElasticElmah.Appender.ElasticSearchAppender, ElasticElmah.Appender">
       <connectionString value="Server=localhost;Index=log;Port=9200"/>
-      <async value="true"/>
     </appender>
 
 In order to read logs, you can use the class ElasticSearchRepository. There is a test site based on Elmah (ElasticElmahMVC).
