@@ -16,4 +16,4 @@ script:
   - bundle install 
   - rake mono:install_packages
   - rake mono:test
- 
+  - rake ruby:test
