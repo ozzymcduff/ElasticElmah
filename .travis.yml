@@ -1,20 +1,19 @@
-language: objective-c
+language: php
 
 env:
-  matrix:
-    - MONO_VERSION="3.2.7"
   global:
     - EnableNuGetPackageRestore=false
-
-install:
-  - wget "http://download.xamarin.com/MonoFrameworkMDK/Macx86/MonoFramework-MDK-${MONO_VERSION}.macos10.xamarin.x86.pkg"
-  - sudo installer -pkg "MonoFramework-MDK-${MONO_VERSION}.macos10.xamarin.x86.pkg" -target /
 
 services:
   - elasticsearch
 
 script: 
+  - sudo apt-get update                                # run update before installing anything
+  - sudo apt-get install python-software-properties -y
+  - sudo add-apt-repository ppa:v-kukol/mono-3.2 -y
+  - sudo apt-get update
+  - sudo apt-get install mono-devel nunit-console -y
   - bundle install 
   - rake mono:install_packages
-  - rake mono:build
-  - /Library/Frameworks/Mono.framework/Versions/${MONO_VERSION}/bin/nunit-console4 ./src/ElasticElmah.Appender.Tests/bin/Debug/ElasticElmah.Appender.Tests.dll
+  - rake mono:test
+ 
