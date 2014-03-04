@@ -95,15 +95,15 @@ namespace :mono do
 
   desc "Install missing NuGet packages."
   task :install_packages do |cmd|
-    FileList["src/**/packages.config"].each do |filepath|
+    package_paths = FileList["src/**/packages.config"]+["src/.nuget/packages.config"]
+    package_paths.each do |filepath|
       sh "mono --runtime=v4.0.30319 ./src/.nuget/NuGet.exe i #{filepath} -o ./src/packages -source http://www.nuget.org/api/v2/"
     end
   end
   
   desc "test with nunit"
   task :test => :appender_tests do
-    # does not work for some reason 
-    command = "nunit-console"
+    command = "mono --runtime=v4.0.30319 #{nunit_cmd()} "
     assemblies = "ElasticElmah.Appender.Tests.dll"
     cd "src/ElasticElmah.Appender.Tests/bin/Debug" do
       sh "#{command} #{assemblies}"
