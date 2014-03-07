@@ -102,11 +102,16 @@ namespace :mono do
   end
   
   desc "test with nunit"
-  task :test => :appender_tests do
+  task :test => :appender_tests do |n|
     command = "mono --runtime=v4.0.30319 #{nunit_cmd()} "
-    assemblies = "ElasticElmah.Appender.Tests.dll"
-    cd "src/ElasticElmah.Appender.Tests/bin/Debug" do
-      sh "#{command} #{assemblies}"
+    tlib = "ElasticElmah.Appender.Tests"
+    assemblies= "#{tlib}.dll"
+    cd "src/#{tlib}/bin/Debug" do
+      sh "#{command} #{assemblies}" do  |ok, res|
+        if !ok
+          abort 'Nunit failed!'
+        end
+      end
     end
   end
 
