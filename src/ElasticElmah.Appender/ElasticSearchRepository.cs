@@ -29,7 +29,8 @@ namespace ElasticElmah.Appender
             if (!exists)
             {
                 CreateIndex();
-            }else
+            }
+            else
             {
                 PutMapping();
             }
@@ -136,7 +137,7 @@ namespace ElasticElmah.Appender
             {
                 _request.Sync(UrlToIndex(_settings, ""), "DELETE", null);
             }
-            catch(IndexMissingException) { }
+            catch (IndexMissingException) { }
         }
 
         public class SearchResponse
@@ -150,7 +151,7 @@ namespace ElasticElmah.Appender
             public Dictionary<string, FacetResult> facets { get; set; }
         }
 
-        public class FacetResult 
+        public class FacetResult
         {
             public int? count { get; set; }
             public string _type { get; set; }// query, date_histogram
@@ -219,7 +220,7 @@ namespace ElasticElmah.Appender
                 ""filtered"": {
                   ""query"": {
                     ""query_string"": {
-                      ""query"": """ + query + @"""
+                      ""query"": " + Encode(query) + @"
                     }
                   },
                   ""filter"": {
@@ -240,7 +241,7 @@ namespace ElasticElmah.Appender
 }");
         }
 
-        public static string FormatTime(DateTime time) 
+        public static string FormatTime(DateTime time)
         {
             return Map.To(time);
         }
@@ -265,7 +266,7 @@ namespace ElasticElmah.Appender
             ""filtered"": {
               ""query"": {
                 ""query_string"": {
-                  ""query"": """ + query + @"""
+                  ""query"": " + Encode(query) + @"
                 }
               },
               ""filter"": {
@@ -288,7 +289,7 @@ namespace ElasticElmah.Appender
         public LogSearchResult GetTimestampRange(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
         {
             var res = _request.Sync(GetTimestampRangeRequest(query, @from, @to, pageIndex, pageSize));
-            return GetPagedResult(res.Item1, res.Item2);
+            return GetPagedResult(res.Item2);
         }
 
         private RequestInfo GetTimestampRangeRequest(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
@@ -302,13 +303,13 @@ namespace ElasticElmah.Appender
     ""filtered"": {
       ""query"": {
         ""query_string"": {
-          ""query"": """+query+@"""
+          ""query"": " + Encode(query) + @"
         }
       },
       ""filter"": {
         ""range"": {
           ""timeStamp"": {
-            ""from"": """ + FormatTime(@from)+ @""",
+            ""from"": """ + FormatTime(@from) + @""",
             ""to"": """ + FormatTime(@to) + @"""
           }
         }
@@ -328,13 +329,17 @@ namespace ElasticElmah.Appender
 }");
         }
 
-        
+        private string Encode(string query)
+        {
+            return _serializer.Serialize(query);
+        }
+
         public LogSearchResult GetPaged(int pageIndex, int pageSize)
         {
             try
             {
                 var res = _request.Sync(GetPagedRequest(pageIndex, pageSize));
-                return GetPagedResult(res.Item1, res.Item2);
+                return GetPagedResult(res.Item2);
             }
             catch (RequestException ex)
             {
@@ -346,13 +351,13 @@ namespace ElasticElmah.Appender
             }
         }
 
-        private LogSearchResult GetPagedResult(HttpStatusCode c, string s)
+        private LogSearchResult GetPagedResult(string s)
         {
             var res = _serializer.Deserialize<SearchResponse>(s);
             var parsed = new LogSearchResult(res.hits.hits.Select(h => new LogWithId(h._id, Map.To(h._source))), res.hits.total);
             return parsed;
         }
-        private LogSearchFacetResult GetFacetResult(HttpStatusCode c, string s) 
+        private LogSearchFacetResult GetFacetResult(HttpStatusCode c, string s)
         {
             var res = _serializer.Deserialize<SearchResponse>(s);
             var parsed = new LogSearchFacetResult();
@@ -363,17 +368,18 @@ namespace ElasticElmah.Appender
         {
             var res = _serializer.Deserialize<SearchResponse>(s);
             var parsed = new LogSearchHistogramResult();
-            parsed.Histogram = res.facets.Single().Value.entries.Select(e => 
-                new HistogramEntry { 
-                    Count=e.count, 
-                    Time=e.GetTime() 
+            parsed.Histogram = res.facets.Single().Value.entries.Select(e =>
+                new HistogramEntry
+                {
+                    Count = e.count,
+                    Time = e.GetTime()
                 }).ToArray();
             return parsed;
         }
         public LogSearchResult GetPaged(SearchTerm search, int pageIndex, int pageSize)
         {
             var res = _request.Sync(GetPagedRequest(search, pageIndex, pageSize));
-            return GetPagedResult(res.Item1, res.Item2);
+            return GetPagedResult(res.Item2);
         }
 
         public class SearchTerm
@@ -389,7 +395,7 @@ namespace ElasticElmah.Appender
     ""fields"" : [""_parent"",""_source""],
     ""query""  : {
         ""bool"": {
-            ""must"":[{""term"":{""" + search.PropertyName + @""":""" + search.Value + @"""}}],
+            ""must"":[{""term"":{" + Encode(search.PropertyName) + @":" + Encode(search.Value) + @"}}],
             ""must_not"": [],
             ""should"": [{""match_all"":{}}]
         }
@@ -508,19 +514,6 @@ namespace ElasticElmah.Appender
         }
     }
 
-    public static class AggregateExceptionExtensions
-    {
-        public static IEnumerable<Exception> UnWrapInnerExceptions(this AggregateException exception)
-        {
-            var exception2 = exception;
-            while ((exception2 = exception2.InnerException as AggregateException) != null)
-            {
-                exception = exception2;
-            }
-            return exception.InnerExceptions;
-        }
-    }
-
     internal static class Extensions
     {
         public static T Tap<T>(this T that, Action<T> tapaction)
@@ -553,17 +546,20 @@ namespace ElasticElmah.Appender
         {
         }
 
-        public IndexMissingException(string message) : base(message)
+        public IndexMissingException(string message)
+            : base(message)
         {
         }
 
-        public IndexMissingException(string message, Exception inner) : base(message, inner)
+        public IndexMissingException(string message, Exception inner)
+            : base(message, inner)
         {
         }
 
         protected IndexMissingException(
             SerializationInfo info,
-            StreamingContext context) : base(info, context)
+            StreamingContext context)
+            : base(info, context)
         {
         }
     }
