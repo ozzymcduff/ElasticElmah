@@ -13,19 +13,19 @@ config.vm.provider "virtualbox" do |v|
     v.customize ["modifyvm", :id, "--memory", "1024"]
   end
   
-  config.vm.provision :shell, :path => "provisioning/install-rvm.sh",  :args => "stable"
-  config.vm.provision :shell, :path => "provisioning/install-ruby.sh", :args => "2.1.0 puppet"
+  config.vm.provision :shell, :path => "vagrant/provisioning/install-rvm.sh",  :args => "stable"
+  config.vm.provision :shell, :path => "vagrant/provisioning/install-ruby.sh", :args => "2.1.0 puppet"
   
-  config.vm.provision :puppet, :module_path => "modules" do |puppet|
-    puppet.manifests_path = "manifests"
+  config.vm.provision :puppet, :module_path => "vagrant/modules" do |puppet|
+    puppet.manifests_path = "vagrant/manifests"
     puppet.manifest_file  = "default.pp"
   end
 
   config.vm.provision :puppet do |puppet|
-     puppet.manifests_path = "manifests"
+     puppet.manifests_path = "vagrant/manifests"
      puppet.manifest_file  = "mono.pp"
   end
   
-  config.vm.provision :shell, :path => "provisioning/dev-setup.sh"
+  config.vm.provision :shell, :path => "vagrant/provisioning/dev-setup.sh"
 
 end
