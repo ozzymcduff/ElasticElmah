@@ -11,7 +11,6 @@ Usage
 Register it as an appender in log4net.
 
 Parameters:
-async: The default is that it uses synchronous requests when logging. There might be issues when using asynchronous requests.
 connectionstring: Right now a connection string looking like a database connection string.
 
     <appender name="ElasticSearchAppender" type="ElasticElmah.Appender.ElasticSearchAppender, ElasticElmah.Appender">
