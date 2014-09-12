@@ -84,9 +84,7 @@ namespace ElasticElmah.Appender
         {
             return new RequestInfo(UrlToIndex(_settings, "LoggingEvent/_mapping"), "PUT",
 @"{
-  ""mappings"": {
     ""LoggingEvent"": " + LoggingEventMappings() + @"
-  }
 }");
         }
 

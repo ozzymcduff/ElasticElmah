@@ -30,7 +30,7 @@ class must-have {
     group => 'vagrant',
   } ->
   class { 'elasticsearch':
-    package_url => 'https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.0.0.deb',
+    package_url => 'https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.3.2.deb',
     config => {
       'cluster.name' => 'vagrant_elasticsearch',
       'node.name' => $::ipaddress,
