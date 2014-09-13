@@ -33,15 +33,22 @@ end
 task :default => ['build']
 
 def nunit_cmd()
-  return Dir.glob(File.join(File.dirname(__FILE__),"src","packages","NUnit.Runners.*","tools","nunit-console.exe")).first
+  cmds = Dir.glob(File.join(File.dirname(__FILE__),"src","packages","NUnit.Runners.*","tools","nunit-console.exe"))
+  if cmds.any?
+    if os != :windows
+      command = "mono --runtime=v4.0.30319 #{cmds.first}"
+    else
+      command = cmds.first
+    end
+  else
+    raise "Could not find nunit runner!"
+  end
+  return command
+  
 end
 
 def nunit_exec(dir, tlib)
-    if os == :windows
-      command = nunit_cmd()
-    else
-      command = "mono --runtime=v4.0.30319 #{nunit_cmd()}"
-    end
+    command = nunit_cmd()
     assemblies= "#{tlib}.dll"
     cd dir do
       sh "#{command} #{assemblies}" do  |ok, res|
@@ -112,9 +119,9 @@ end
 
 desc "Install missing NuGet packages."
 task :install_packages do
-  windows = os == :windows
+  package_paths = FileList["src/**/packages.config"]+["src/.nuget/packages.config"]
 
-  FileList["src/**/packages.config"].each do |filepath|
+  package_paths.each.each do |filepath|
     begin
       nuget_exec("i #{filepath} -o ./src/packages -source http://www.nuget.org/api/v2/")
     rescue
