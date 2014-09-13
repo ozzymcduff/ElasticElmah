@@ -7,14 +7,6 @@ namespace ElasticElmahMVC.Code
     {
         private static readonly object _contextKey = new object();
 
-
-        private HttpContextBase _context;
-
-        public Helper(HttpContextBase context)
-        {
-            _context = context;
-        }
-
         public static IErrorLog GetDefault(HttpContextBase context)
         {
             return GetDefaultImpl(context);
