@@ -178,13 +178,8 @@ namespace ElasticElmah.Appender.Tests
             _appender.Refresh();
             //_appender.Flush();
 			ExpectOrderedResultSync(now);
+		}
 
-			ExpectOrderedFacetResult();
-		}
-		protected void ExpectOrderedFacetResult() 
-		{
-			ExpectedFacetResult(_appender.GetTimestampFacet(null,now.AddDays(-1), now.AddDays(10), 0, 2));
-		}
 		protected static void ExpectedFacetResult(LogSearchFacetResult result) 
         {
             Assert.AreEqual(5, result.Count);

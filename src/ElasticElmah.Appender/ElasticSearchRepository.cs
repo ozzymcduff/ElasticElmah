@@ -192,96 +192,9 @@ namespace ElasticElmah.Appender
         }
 
 
-        public LogSearchHistogramResult GetTimestampHistogram(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
-        {
-            var res = _request.Sync(GetTimestampHistogramRequest(query, @from, @to, pageIndex, pageSize));
-            return GetLogSearchHistogramResultResult(res.Item1, res.Item2);
-        }
-
-        private RequestInfo GetTimestampHistogramRequest(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
-        {
-            if (string.IsNullOrWhiteSpace(query))
-                query = "*";
-            return new RequestInfo(UrlToIndex(_settings, "LoggingEvent/_search"), "POST",
-                  @"{
-    ""from"": " + pageIndex + @",
-    ""size"": " + pageSize + @",
-    ""facets"": {
-        ""facetchart"": {
-          ""date_histogram"": {
-            ""field"": ""timeStamp"",
-            ""interval"": ""5m""
-          },
-          ""facet_filter"": {
-            ""fquery"": {
-              ""query"": {
-                ""filtered"": {
-                  ""query"": {
-                    ""query_string"": {
-                      ""query"": " + Encode(query) + @"
-                    }
-                  },
-                  ""filter"": {
-                    ""range"": {
-                      ""timeStamp"": {
-                        ""from"": """ + FormatTime(@from) + @""",
-                        ""to"": """ + FormatTime(@to) + @"""
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-    ""version"":true
-}");
-        }
-
         public static string FormatTime(DateTime time)
         {
             return Map.To(time);
-        }
-
-        public LogSearchFacetResult GetTimestampFacet(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
-        {
-            var res = _request.Sync(GetTimestampFacetsRequest(query, @from, @to, pageIndex, pageSize));
-            return GetFacetResult(res.Item1, res.Item2);
-        }
-
-        private RequestInfo GetTimestampFacetsRequest(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
-        {
-            if (string.IsNullOrWhiteSpace(query))
-                query = "*";
-            return new RequestInfo(UrlToIndex(_settings, "LoggingEvent/_search"), "POST",
-                  @"{
-    ""from"": " + pageIndex + @",
-    ""size"": " + pageSize + @",
-      ""facets"": {
-        ""facetquery0"": {
-          ""query"": {
-            ""filtered"": {
-              ""query"": {
-                ""query_string"": {
-                  ""query"": " + Encode(query) + @"
-                }
-              },
-              ""filter"": {
-                ""range"": {
-                  ""timeStamp"": {
-                    ""from"": """ + FormatTime(@from) + @""",
-                    ""to"": """ + FormatTime(@to) + @"""
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-
-    ""version"":true
-}");
         }
 
         public LogSearchResult GetTimestampRange(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
