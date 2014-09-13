@@ -141,3 +141,5 @@ doc/
 
 .vagrant
 .bundle
+
+./modules
