@@ -65,6 +65,7 @@ end
 desc "build"
 build :build do |msb|
   msb.prop :configuration, :Debug
+  msb.prop :platform, "Mixed Platforms"
   if os != :windows
     with_mono_properties msb
   end
