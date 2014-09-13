@@ -33,10 +33,10 @@ namespace ElasticElmah.Appender
         /// <param name="loggingEvent"></param>
         protected override void Append(LoggingEvent loggingEvent)
         {
-            AppendSync(loggingEvent);
+            CreateIndexIfNeededAndAppend(loggingEvent);
         }
 
-        public void AppendSync(LoggingEvent loggingEvent)
+        public void CreateIndexIfNeededAndAppend(LoggingEvent loggingEvent)
         {
             var repo = Repo; 
             if (_init)

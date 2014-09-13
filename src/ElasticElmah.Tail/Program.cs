@@ -96,33 +96,7 @@ cat yourlogfile.xml | LogTail.exe
             foreach (var index in indexes)
             {
                 var repo = new ElasticSearchRepository("Server=localhost;Index=" + index + ";Port=9200");
-#if ASYNC
-				try
-                {
-					repo.GetPagedAsync(0, lines).ContinueWith(t =>
-                    {
-                        if (t.IsFaulted)
-                        {
-                            t.Wait();
-                        }
-                        foreach (var item in t.Result.Hits.Select(e => e.Data))
-                        {
-                            showentry(item);
-                        }
-                    }).Wait();
-                }
-                catch (AggregateException ex)
-                {
-                    if (ex.UnWrapInnerExceptions().Any(ex2 => ex2 is IndexMissingException))
-                    {
-                        showmissingindex(index);
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-#else
+
 				repo.GetPaged(0, lines).Tap(t =>
 				                                          {
 					foreach (var item in t.Hits.Select(e => e.Data))
@@ -130,7 +104,6 @@ cat yourlogfile.xml | LogTail.exe
 						showentry(item);
 					}
 				});
-#endif
             }
         }
     }

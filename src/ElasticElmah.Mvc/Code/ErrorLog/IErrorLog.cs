@@ -10,11 +10,11 @@ namespace ElasticElmah.Core.ErrorLog
         /// Retrieves a single application error from log given its 
         /// identifier, or null if it does not exist.
         /// </summary>
-        Task<LogWithId> GetErrorAsync(string id);
+        LogWithId GetError(string id);
         /// <summary>
         /// Retrieves a page of application errors from the log in 
         /// descending order of logged time.
         /// </summary>
-        Task<LogSearchResult> GetErrorsAsync(int pageIndex, int pageSize);
+        LogSearchResult GetErrors(int pageIndex, int pageSize);
     }
 }

@@ -15,7 +15,7 @@ namespace ElasticElmahMVC.Controllers
         {
             IErrorLog errorlog = Helper.GetDefault(HttpContext);
             ViewBag.ErrorLog = errorlog;
-            var error = errorlog.GetErrorAsync(id).Result;
+            var error = errorlog.GetError(id);
             return View(new ErrorDetailModel(error, new Environment(HttpContext)));
         }
     }

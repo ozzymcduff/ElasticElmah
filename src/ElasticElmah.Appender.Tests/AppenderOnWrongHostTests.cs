@@ -29,7 +29,7 @@ namespace ElasticElmah.Appender.Tests
         [Test]
         public virtual void Should_throw()
         {
-            Assert.Throws<RequestException>(() => _appender.AppendSync(new LoggingEvent(GetType(), _log.Logger.Repository,
+            Assert.Throws<RequestException>(() => _appender.CreateIndexIfNeededAndAppend(new LoggingEvent(GetType(), _log.Logger.Repository,
                 new LoggingEventData
                 {
                     TimeStamp = DateTime.Now,

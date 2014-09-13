@@ -32,7 +32,7 @@ namespace ElasticElmah.Appender.Tests
         [Test]
         public virtual void Test()
         {
-            _appender.DoAppend(new LoggingEvent(GetType(), _log.Logger.Repository, TestData()));
+            _appender.CreateIndexIfNeededAndAppend(new LoggingEvent(GetType(), _log.Logger.Repository, TestData()));
             _repo.Refresh();
             var paged = _repo.GetPaged(0, 10);
             Assert.That(paged.Total, Is.EqualTo(1));
@@ -41,7 +41,7 @@ namespace ElasticElmah.Appender.Tests
         [Test, Ignore("Does not work on mono3.2.3")]
         public virtual void Test_generated_from_logging_event_data()
         {
-            _appender.DoAppend(new LoggingEvent(
+            _appender.CreateIndexIfNeededAndAppend(new LoggingEvent(
                 new LoggingEventData
                 {
                     Message = "message",
@@ -59,7 +59,7 @@ namespace ElasticElmah.Appender.Tests
         {
             for (int i = 0; i < 5; i++)
             {
-                _appender.DoAppend(
+                _appender.CreateIndexIfNeededAndAppend(
                     new LoggingEvent(GetType(), _log.Logger.Repository, TestData()));
             }
             _repo.Refresh();

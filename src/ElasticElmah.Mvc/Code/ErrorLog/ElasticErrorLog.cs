@@ -32,27 +32,22 @@ namespace ElasticElmah.Core.ErrorLog
         /// Returns the specified error from the database, or null 
         /// if it does not exist.
         /// </summary>
-        public Task<LogWithId> GetErrorAsync(string id)
+        public LogWithId GetError(string id)
         {
-            var r = appender.GetAsync(id);
-            return r.ContinueWith(t => t.Result);
+            var r = appender.Get(id);
+            return r;
         }
 
         private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        public Task<LogSearchResult> GetErrorsAsync(int pageIndex, int pageSize)
+        public LogSearchResult GetErrors(int pageIndex, int pageSize)
         {
-            return appender.GetPagedAsync(pageIndex, pageSize).ContinueWith(res =>
-                {
-                    if (null!=res.Exception)
-                    {
-                        _log.Warn(res.Exception);
-                        return new LogSearchResult(new LogWithId[0], 0);
-                    }
-                    else {
-                        return res.Result;
-                    }
-                });
+			try {
+				return appender.GetPaged(pageIndex, pageSize);
+			} catch (Exception ex) {
+				_log.Warn(ex);
+				return new LogSearchResult(new LogWithId[0], 0);
+			}
         }
     }
 }

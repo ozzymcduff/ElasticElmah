@@ -5,16 +5,16 @@
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.box = "precise64"
+  config.vm.box = "ubuntu/trusty64"
 
-  config.vm.box_url = "http://files.vagrantup.com/precise64.box"
+  config.vm.box_url = "https://vagrantcloud.com/ubuntu/boxes/trusty64"
 config.vm.provider "virtualbox" do |v|
     v.customize ["modifyvm", :id, "--cpus", "2"]
     v.customize ["modifyvm", :id, "--memory", "1024"]
   end
   
   config.vm.provision :shell, :path => "vagrant/provisioning/install-rvm.sh",  :args => "stable"
-  config.vm.provision :shell, :path => "vagrant/provisioning/install-ruby.sh", :args => "2.1.0 puppet"
+  config.vm.provision :shell, :path => "vagrant/provisioning/install-ruby.sh", :args => "2.1.2 puppet"
   
   config.vm.provision :puppet, :module_path => "vagrant/modules" do |puppet|
     puppet.manifests_path = "vagrant/manifests"

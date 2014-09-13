@@ -13,14 +13,14 @@ namespace ElasticElmahMVC.Controllers
         public ActionResult Index()
         {
             var errorlog = Helper.GetDefault(HttpContext);
-            var errors = errorlog.GetErrorsAsync(0, ErrorDigestRssHandler.pageSize).Result;
+            var errors = errorlog.GetErrors(0, ErrorDigestRssHandler.pageSize);
             return new ErrorRssHandler(new Environment(HttpContext), errors.Hits.ToArray());
         }
 
         public ActionResult Digest()
         {
             var errorlog = Helper.GetDefault(HttpContext);
-            var errors = errorlog.GetErrorsAsync(0, ErrorDigestRssHandler.pageSize).Result;
+            var errors = errorlog.GetErrors(0, ErrorDigestRssHandler.pageSize);
             return new ErrorDigestRssHandler(new Environment(HttpContext), errors.Hits.ToArray());
         }
     }
