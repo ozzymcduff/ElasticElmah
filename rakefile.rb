@@ -115,7 +115,11 @@ task :install_packages do
   windows = os == :windows
 
   FileList["src/**/packages.config"].each do |filepath|
-    nuget_exec("i #{filepath} -o ./src/packages -source http://www.nuget.org/api/v2/")
+    begin
+      nuget_exec("i #{filepath} -o ./src/packages -source http://www.nuget.org/api/v2/")
+    rescue
+      puts "Failed to install missing packages ..."      
+    end
   end
 end
 
