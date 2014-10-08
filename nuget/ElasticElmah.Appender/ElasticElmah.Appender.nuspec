@@ -3,13 +3,13 @@
   <metadata>
     <id>ElasticElmah.Appender</id>
     <title>ElasticElmah.Appender</title>
-    <version>1.15.4</version>
+    <version>2.0.0</version>
     <authors>Oskar Gewalli</authors>
     <owners>Oskar Gewalli</owners>
     <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
     <projectUrl>https://github.com/wallymathieu/ElasticElmah</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>ElasticElmah appender is a small library to serialize log4net data using elasticsearch as a store.</description>
+    <description>ElasticElmah appender is a small library to serialize log4net data using elasticsearch as a store. It is not supposed to depend on anything else than log4net in order to simplify for your project (you might use some other version of for instance Nest in another library).</description>
     <copyright>Copyright 2013</copyright>
     <references>
       <reference file="ElasticElmah.Appender.dll" />
@@ -17,6 +17,6 @@
     <dependencies>
       <dependency id="log4net" version="2.0.3" />
     </dependencies>
-    <releaseNotes>Mono fixes.</releaseNotes>
+    <releaseNotes>Renamed LogEvent to LoggingEvent in order to simplify usage of that class with Nest.</releaseNotes>
   </metadata>
 </package>
