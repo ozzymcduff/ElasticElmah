@@ -3,6 +3,7 @@ using ElasticElmah.Appender.Storage;
 using log4net.Core;
 using NUnit.Framework;
 using System;
+using LoggingEvent = log4net.Core.LoggingEvent;
 
 namespace ElasticElmah.Appender.Tests
 {

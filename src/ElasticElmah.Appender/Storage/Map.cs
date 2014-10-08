@@ -9,7 +9,7 @@ namespace ElasticElmah.Appender.Storage
 {
     public class Map
     {
-        public static LoggingEventData To(LogEvent l)
+        public static LoggingEventData To(LoggingEvent l)
         {
             var d = new LoggingEventData
                         {
@@ -40,9 +40,9 @@ namespace ElasticElmah.Appender.Storage
             return datetime.ToString("yyyy-MM-ddTHH:mm:ss.fffffffzzz");
         }
 
-        public static LogEvent To(LoggingEvent l)
+        public static LoggingEvent To(log4net.Core.LoggingEvent l)
         {
-            var d = new LogEvent
+            var d = new LoggingEvent
                         {
                             loggerName = l.LoggerName,
                             level = l.Level!=null ? l.Level.Name : string.Empty,

@@ -72,11 +72,11 @@
     <Compile Include="..\ElasticElmah.Appender\Search\LogWithId.cs">
       <Link>Search\LogWithId.cs</Link>
     </Compile>
-    <Compile Include="..\ElasticElmah.Appender\Storage\LogEvent.cs">
-      <Link>Storage\LogEvent.cs</Link>
-    </Compile>
     <Compile Include="..\ElasticElmah.Appender\Storage\LogEventLocation.cs">
       <Link>Storage\LogEventLocation.cs</Link>
+    </Compile>
+    <Compile Include="..\ElasticElmah.Appender\Storage\LoggingEvent.cs">
+      <Link>Storage\LoggingEvent.cs</Link>
     </Compile>
     <Compile Include="..\ElasticElmah.Appender\Storage\Map.cs">
       <Link>Storage\Map.cs</Link>

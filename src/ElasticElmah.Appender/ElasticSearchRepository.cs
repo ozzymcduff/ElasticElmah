@@ -8,6 +8,7 @@ using System.Net;
 using ElasticElmah.Appender.Web;
 using ElasticElmah.Appender.Search;
 using System.Threading.Tasks;
+using LoggingEvent = ElasticElmah.Appender.Storage.LoggingEvent;
 
 namespace ElasticElmah.Appender
 {
@@ -329,7 +330,7 @@ namespace ElasticElmah.Appender
             public string _id { get; set; }
             public string _type { get; set; }
             public string _index { get; set; }
-            public LogEvent _source { get; set; }
+            public LoggingEvent _source { get; set; }
         }
 
         private RequestInfo GetRequest(string id)
@@ -375,7 +376,7 @@ namespace ElasticElmah.Appender
         /// </summary>
         /// <param name="loggingEvent"></param>
         /// <returns>the id of the logging event</returns>
-        public string Add(LoggingEvent loggingEvent)
+        public string Add(log4net.Core.LoggingEvent loggingEvent)
         {
             var resp = _request.Sync(AddRequest(loggingEvent));
             return _serializer.Deserialize<AddResponse>(resp.Item2)._id;
@@ -389,7 +390,7 @@ namespace ElasticElmah.Appender
             public int _version { get; set; }
         }
 
-        private RequestInfo AddRequest(LoggingEvent loggingEvent)
+        private RequestInfo AddRequest(log4net.Core.LoggingEvent loggingEvent)
         {
             return new RequestInfo(UrlToIndex(_settings, "LoggingEvent/"), "POST",
                 _serializer.Serialize(Map.To(loggingEvent)));
@@ -404,7 +405,7 @@ namespace ElasticElmah.Appender
             public string _index { get; set; }
             public string _type { get; set; }
         }
-        private RequestInfo AddBulkRequest(IEnumerable<LoggingEvent> loggingEvents, bool refresh = false)
+        private RequestInfo AddBulkRequest(IEnumerable<log4net.Core.LoggingEvent> loggingEvents, bool refresh = false)
         {
             string operation = _serializer.Serialize(new Index { index = new IndexOp() { _index = _index, _type = "LoggingEvent" } });
             return new RequestInfo(UrlToIndex(_settings, "LoggingEvent/_bulk" + (refresh ? "?refresh=true" : "")), "POST",
@@ -414,7 +415,7 @@ namespace ElasticElmah.Appender
                         + Environment.NewLine
                         );
         }
-        public HttpStatusCode AddBulk(IEnumerable<LoggingEvent> loggingEvents, bool refresh = false)
+        public HttpStatusCode AddBulk(IEnumerable<log4net.Core.LoggingEvent> loggingEvents, bool refresh = false)
         {
             return _request.Sync(AddBulkRequest(loggingEvents, refresh)).Item1;
         }

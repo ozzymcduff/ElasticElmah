@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2010
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElasticElmah.Appender", "ElasticElmah.Appender\ElasticElmah.Appender.csproj", "{C9EA9975-0609-4330-A69F-B8C608A46E28}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElasticElmah.Appender.Tests", "ElasticElmah.Appender.Tests\ElasticElmah.Appender.Tests.csproj", "{4F8C1DA9-B511-44E8-AAB8-47218A7ADFEB}"
