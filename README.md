@@ -1,10 +1,13 @@
 ElasticElmah [![Build Status](https://travis-ci.org/wallymathieu/ElasticElmah.png?branch=master)](https://travis-ci.org/wallymathieu/ElasticElmah) 
 ============
 
-Fork of ELMAH
--------------
+Originally a fork of ELMAH
+--------------------------
 https://code.google.com/p/elmah/
 
+Log4net elasticsearch appender
+------------------------------
+Now it's a log4net appender to elastic that knows knows how to log web context and can format some stack traces.
 
 Usage
 -----
