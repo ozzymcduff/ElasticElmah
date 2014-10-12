@@ -21,7 +21,7 @@ connectionstring: Right now a connection string looking like a database connecti
     </appender>
 
 In order to read logs, you can use the class ElasticSearchRepository. There is a test site based on Elmah (ElasticElmahMVC).
-The reason for an asp.net MVC site is that this is easier to read.
+The reason for an asp.net MVC site is that it enables you to integrate logging information with your admin site
 
 License
 -------
