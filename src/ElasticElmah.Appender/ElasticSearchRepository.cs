@@ -7,7 +7,6 @@ using log4net.Core;
 using System.Net;
 using ElasticElmah.Appender.Web;
 using ElasticElmah.Appender.Search;
-using System.Threading.Tasks;
 using LoggingEvent = ElasticElmah.Appender.Storage.LoggingEvent;
 
 namespace ElasticElmah.Appender
@@ -45,7 +44,7 @@ namespace ElasticElmah.Appender
         {
             try
             {
-                return _request.Sync(IndexExistsRequest()).Item1 == HttpStatusCode.OK;
+				return _request.Sync(IndexExistsRequest()).StatusCode == HttpStatusCode.OK;
             }
             catch (RequestException reqException)
             {
@@ -201,12 +200,12 @@ namespace ElasticElmah.Appender
         public LogSearchResult GetTimestampRange(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
         {
             var res = _request.Sync(GetTimestampRangeRequest(query, @from, @to, pageIndex, pageSize));
-            return GetPagedResult(res.Item2);
+			return GetPagedResult(res.ResponseText);
         }
 
         private RequestInfo GetTimestampRangeRequest(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
         {
-            if (string.IsNullOrWhiteSpace(query))
+            if (string.IsNullOrEmpty(query))
                 query = "*";
             return new RequestInfo(UrlToIndex(_settings, "LoggingEvent/_search"), "POST",
                   @"{
@@ -251,7 +250,7 @@ namespace ElasticElmah.Appender
             try
             {
                 var res = _request.Sync(GetPagedRequest(pageIndex, pageSize));
-                return GetPagedResult(res.Item2);
+				return GetPagedResult(res.ResponseText);
             }
             catch (RequestException ex)
             {
@@ -291,7 +290,7 @@ namespace ElasticElmah.Appender
         public LogSearchResult GetPaged(SearchTerm search, int pageIndex, int pageSize)
         {
             var res = _request.Sync(GetPagedRequest(search, pageIndex, pageSize));
-            return GetPagedResult(res.Item2);
+			return GetPagedResult(res.ResponseText);
         }
 
         public class SearchTerm
@@ -346,7 +345,7 @@ namespace ElasticElmah.Appender
 
         public LogWithId Get(string id)
         {
-            return GetGetResponse(_request.Sync(GetRequest(id)).Item2);
+			return GetGetResponse(_request.Sync(GetRequest(id)).ResponseText);
         }
 
         private static IDictionary<string, string> BuildElsticSearchConnection(string connectionString)
@@ -379,7 +378,7 @@ namespace ElasticElmah.Appender
         public string Add(log4net.Core.LoggingEvent loggingEvent)
         {
             var resp = _request.Sync(AddRequest(loggingEvent));
-            return _serializer.Deserialize<AddResponse>(resp.Item2)._id;
+			return _serializer.Deserialize<AddResponse>(resp.ResponseText)._id;
         }
         private class AddResponse
         {
@@ -411,13 +410,13 @@ namespace ElasticElmah.Appender
             return new RequestInfo(UrlToIndex(_settings, "LoggingEvent/_bulk" + (refresh ? "?refresh=true" : "")), "POST",
                 string.Join(Environment.NewLine, loggingEvents
                     .Select(l => operation + Environment.NewLine
-                        + _serializer.Serialize(Map.To(l))))
+						+ _serializer.Serialize(Map.To(l))).ToArray())
                         + Environment.NewLine
                         );
         }
         public HttpStatusCode AddBulk(IEnumerable<log4net.Core.LoggingEvent> loggingEvents, bool refresh = false)
         {
-            return _request.Sync(AddBulkRequest(loggingEvents, refresh)).Item1;
+			return _request.Sync(AddBulkRequest(loggingEvents, refresh)).StatusCode;
         }
 
         public void Refresh()
@@ -438,16 +437,6 @@ namespace ElasticElmah.Appender
             if (that != null)
                 tapaction(that);
             return that;
-        }
-        public static void PropagateExceptions(this Task task)
-        {
-            if (task == null)
-                throw new ArgumentNullException("task");
-            if (!task.IsCompleted)
-                throw new InvalidOperationException("The task has not completed yet.");
-
-            if (task.IsFaulted)
-                task.Wait();
         }
     }
 

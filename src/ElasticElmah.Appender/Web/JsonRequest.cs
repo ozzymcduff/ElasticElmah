@@ -7,7 +7,7 @@ namespace ElasticElmah.Appender.Web
 {
     public class JsonRequest : IJSonRequest
     {
-        public Tuple<HttpStatusCode, string> Sync(Uri uri, string method, string data)
+		public JsonResponse Sync(Uri uri, string method, string data)
         {
             try
             {
@@ -31,7 +31,7 @@ namespace ElasticElmah.Appender.Web
                 using (var reader = new StreamReader(rstream, Encoding.UTF8))
                 {
                     var c = reader.ReadToEnd();
-                    return new Tuple<HttpStatusCode, string>(response.StatusCode, c);
+					return new JsonResponse(response.StatusCode, c);
                 }
             }
             catch (WebException ex)

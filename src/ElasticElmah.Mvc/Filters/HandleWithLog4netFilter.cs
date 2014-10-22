@@ -18,7 +18,7 @@ namespace ElasticElmahMVC.Filters
             {
                 var loggingevent = new LoggingEvent(typeof(Logger),
                     log.Repository, log.Name, Level.Error, "Unhandled exception", filterContext.Exception);
-                ElasticSearchWebAppender.AddHttpContextProperties(loggingevent, filterContext.HttpContext);
+            //    ElasticSearchWebAppender.AddHttpContextProperties(loggingevent, filterContext.HttpContext);
                 log.Log(loggingevent);
                 filterContext.ExceptionHandled = true;
                 filterContext.Result = new HttpStatusCodeResult(500);

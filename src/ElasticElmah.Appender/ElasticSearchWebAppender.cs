@@ -17,7 +17,7 @@ namespace ElasticElmah.Appender
         {
             if (HttpContext.Current != null)
             {
-                AddHttpContextProperties(loggingEvent, new HttpContextWrapper(HttpContext.Current));
+                AddHttpContextProperties(loggingEvent, HttpContext.Current);
             }
             base.Append(loggingEvent);
         }
@@ -36,7 +36,7 @@ namespace ElasticElmah.Appender
             }
         }
 
-        public static void AddHttpContextProperties(LoggingEvent loggingEvent, HttpContextBase context)
+        public static void AddHttpContextProperties(LoggingEvent loggingEvent, HttpContext context)
         {
             var errors = new List<ErrorCodeAndHtmlMessage>();
             if (context != null && context.AllErrors != null)

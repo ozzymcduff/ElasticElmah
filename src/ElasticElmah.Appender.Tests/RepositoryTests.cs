@@ -95,14 +95,14 @@ namespace ElasticElmah.Appender.Tests
         ]
         public virtual void Can_log_web_properties()
         {
-            string id;
+            string id=null;
             using (var simulator = new HttpSimulator())
             {
                 var form = new WebHeaderCollection();
                 form.Add("variable1", "keyvalue1");
 
                 simulator.SimulateRequest(new Uri("http://localhost/path/to/something/filename.aspx?query=somevalue"),form);
-                
+				#if HTTPSIMULATOR
                 id = _appender.Add(new LoggingEvent(GetType(), _log.Logger.Repository,
                                                     new LoggingEventData
                                                         {
@@ -111,8 +111,9 @@ namespace ElasticElmah.Appender.Tests
                                                             TimeStamp = now,
                                                         }).Tap(evt => ElasticSearchWebAppender.AddHttpContextProperties(evt,
                                                                                                    new HttpContextWrapper
-                                                                                                       (HttpContext.Current))));
-            }
+				                                                                      (HttpContext.Current))));
+				#endif
+				}
             _appender.Refresh();
 
             var err = _appender.Get(id);
