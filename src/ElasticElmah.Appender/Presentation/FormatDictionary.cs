@@ -27,7 +27,7 @@ namespace ElasticElmah.Appender.Presentation
                 </tr>",
                       (i % 2 == 0 ? "large-even-row" : "large-odd-row"),
                       kv.Key,
-                      kv.Value))));
+					  kv.Value)).ToArray()));
         }
 
         private static Dictionary<string, string> Map(PropertiesDictionary propertiesDictionary)
@@ -76,7 +76,7 @@ namespace ElasticElmah.Appender.Presentation
                         string.Format(@"<tr class=""{0}"">
                     <td class=""key-col"">{1}</td>
                     <td class=""value-col"">{2}</td>
-                </tr>", (i % 2 == 0 ? "even-row" : "odd-row"), Encode(k), MapToString(d[k])))));
+                </tr>", (i % 2 == 0 ? "even-row" : "odd-row"), Encode(k), MapToString(d[k]))).ToArray()));
                 }
                 else 
                 {
