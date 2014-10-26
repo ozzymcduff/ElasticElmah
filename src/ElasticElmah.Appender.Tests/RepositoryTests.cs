@@ -180,15 +180,6 @@ namespace ElasticElmah.Appender.Tests
 			ExpectOrderedResultSync(now);
 		}
 
-		protected static void ExpectedFacetResult(LogSearchFacetResult result) 
-        {
-            Assert.AreEqual(5, result.Count);
-            //Assert.That(result.Hits.Select(l => l.Data.TimeStamp).ToArray(),
-            //    Is.EquivalentTo(new[]{ 
-            //        now.AddDays(4), now.AddDays(3)
-            //    }));
-        }
-
         protected static DateTime AtTwelve(DateTime t) 
         {
             return new DateTime(t.Year, t.Month, t.Day, 12, 0, 0, 0);

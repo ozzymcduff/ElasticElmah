@@ -60,12 +60,6 @@
     <Compile Include="..\ElasticElmah.Appender\IJsonSerializer.cs">
       <Link>IJsonSerializer.cs</Link>
     </Compile>
-    <Compile Include="..\ElasticElmah.Appender\Search\LogSearchFacetResult.cs">
-      <Link>Search\LogSearchFacetResult.cs</Link>
-    </Compile>
-    <Compile Include="..\ElasticElmah.Appender\Search\LogSearchHistogramResult.cs">
-      <Link>Search\LogSearchHistogramResult.cs</Link>
-    </Compile>
     <Compile Include="..\ElasticElmah.Appender\Search\LogSearchResult.cs">
       <Link>Search\LogSearchResult.cs</Link>
     </Compile>

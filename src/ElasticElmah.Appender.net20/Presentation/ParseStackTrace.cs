@@ -1,0 +1,162 @@
+﻿using System;
+
+namespace ElasticElmah.Appender.Presentation
+{
+	public delegate void Action();
+	public delegate void Action<in T>(
+		T obj
+	);
+	public delegate T Func<T>();
+    public class ParseStackTrace
+    {
+        private readonly Token[] _tokens;
+
+        public ParseStackTrace(string stacktrace)
+        {
+			var lex = new LexStackTrace (stacktrace);
+			lex.TokenizeLines ();
+            _tokens = lex.GetTokens();
+        }
+        public event Action<Token> OnAccept;
+        public event Action OnEnterLine;
+        public event Action OnExitLine;
+        public event Action OnEnterStackFrame;
+        public event Action OnExitStackFrame;
+        public event Action<string> OnWhiteSpace;
+        private void whilemax(Func<bool> action, int max)
+        {
+            int count = 0;
+            while (action() && count<max)
+            {
+                count++;
+            }
+            if (count >= max)
+                throw new Exception();
+        }
+        public void Parse()
+        {
+            whilemax(() =>
+            {
+                whilemax(() => Accept(Symbols.Unrecognized), 1000);
+                if (Accept(Symbols.None))
+                {
+                    return false;
+                }
+				if (OnEnterLine!=null)OnEnterLine();
+                if (Accept(Symbols.At))
+                {
+					if (OnEnterStackFrame!=null)OnEnterStackFrame();
+                    if (Accept(Symbols.Type))
+                    {
+                        Accept(Symbols.TypeMethodDelim);
+                        Expect(Symbols.Method);
+                    }
+                    else
+                    {
+                        Expect(Symbols.Method);
+                    }
+                    Expect(Symbols.LeftParanthesis);
+                    whilemax(() =>
+                    {
+                        if (Accept(Symbols.File))
+                        {
+                            Expect(Symbols.Colon);
+                            Expect(Symbols.LineNumber);
+                            Expect(Symbols.Colon);
+                            Accept(Symbols.Column);
+                            return true;
+                        }
+                        if (Accept(Symbols.Type))
+                        {
+                            if (Accept(Symbols.Var))
+                            {
+                            }
+                        }
+                        if (Accept(Symbols.Comma))
+                        {
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                        return true;
+                    }, 1000);
+                    Expect(Symbols.RightParanthesis);
+                    if (Accept(Symbols.In))
+                    {
+                        Expect(Symbols.File);
+                        Expect(Symbols.Colon);
+                        Expect(Symbols.Line);
+                        Expect(Symbols.LineNumber);
+                    }
+					if (OnExitStackFrame!=null)OnExitStackFrame();
+                }
+				if (OnExitLine!=null)OnExitLine();
+                return true;
+            }, 2000);
+        }
+
+        private int _current;
+        public Token? CurrentToken
+        {
+            get
+            {
+                if (_tokens.Length > _current)
+                    return _tokens[_current];
+                return null;
+            }
+        }
+        public Token? PreviousToken
+        {
+            get 
+            {
+                if (_current - 1 >= 0) 
+                {
+                    return _tokens[_current - 1];
+                }
+                return null;
+            }
+        }
+        private Symbols Sym
+        {
+            get
+            {
+                if (_tokens.Length > _current)
+                    return _tokens[_current].Type;
+                return Symbols.None;
+            }
+        }
+        private void GetSym()
+        {
+            _current++;
+        }
+
+        bool Accept(Symbols s)
+        {
+            while (Sym==Symbols.Whitespace)
+            {
+				if (OnWhiteSpace!=null)OnWhiteSpace(CurrentToken.Value.Value);
+                GetSym();
+            }
+
+            if (Sym == s)
+            {
+				if (CurrentToken.HasValue&& OnAccept!=null)
+                {
+                    OnAccept(CurrentToken.Value); 
+                }
+                GetSym();
+                return true;
+            }
+            return false;
+        }
+
+        void Expect(Symbols s)
+        {
+            if (Accept(s))
+                return;
+            throw new Exception("expect: unexpected symbol");
+        }
+    }
+}
+

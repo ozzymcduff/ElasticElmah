@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{974D56B0-ED86-4D80-80B1-401BD77C9FD6}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>ElasticSearch.Appender</RootNamespace>
+    <AssemblyName>ElasticSearch.Appender</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions, Version=1.0.61025.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
+    <Reference Include="log4net">
+      <HintPath>..\packages\log4net.2.0.3\lib\net20-full\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="DefaultJsonSerializer.cs" />
+    <Compile Include="ElasticSearchAppender.cs" />
+    <Compile Include="ElasticSearchRepository.cs" />
+    <Compile Include="ElasticSearchWebAppender.cs" />
+    <Compile Include="IJsonSerializer.cs" />
+    <Compile Include="Storage\LogEventLocation.cs" />
+    <Compile Include="Storage\LoggingEvent.cs" />
+    <Compile Include="Storage\Map.cs" />
+    <Compile Include="Web\IJSonRequest.cs" />
+    <Compile Include="Web\JsonRequest.cs" />
+    <Compile Include="Web\RequestException.cs" />
+    <Compile Include="Web\RequestInfo.cs" />
+    <Compile Include="Search\LogSearchResult.cs" />
+    <Compile Include="Search\LogWithId.cs" />
+    <Compile Include="Web\JsonResponse.cs" />
+    <Compile Include="Presentation\ColorizeStackTrace.cs" />
+    <Compile Include="Presentation\FormatDictionary.cs" />
+    <Compile Include="Presentation\LexStackTrace.cs" />
+    <Compile Include="Presentation\ParseStackTrace.cs" />
+    <Compile Include="Presentation\Symbols.cs" />
+    <Compile Include="Presentation\Token.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+</Project>

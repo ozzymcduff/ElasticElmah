@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
 using ElasticElmah.Appender.Storage;
 using log4net.Core;
@@ -8,6 +7,7 @@ using System.Net;
 using ElasticElmah.Appender.Web;
 using ElasticElmah.Appender.Search;
 using LoggingEvent = ElasticElmah.Appender.Storage.LoggingEvent;
+using System.Text;
 
 namespace ElasticElmah.Appender
 {
@@ -44,7 +44,7 @@ namespace ElasticElmah.Appender
         {
             try
             {
-				return _request.Sync(IndexExistsRequest()).StatusCode == HttpStatusCode.OK;
+				return _request.Request(IndexExistsRequest()).StatusCode == HttpStatusCode.OK;
             }
             catch (RequestException reqException)
             {
@@ -58,12 +58,12 @@ namespace ElasticElmah.Appender
         private readonly IDictionary<string, string> _settings;
         public void PutMapping()
         {
-            _request.Sync(PutMappingRequestInfo());
+            _request.Request(PutMappingRequestInfo());
         }
 
         public void CreateIndex()
         {
-            _request.Sync(CreateIndexRequest());
+            _request.Request(CreateIndexRequest());
         }
         private RequestInfo CreateIndexRequest()
         {
@@ -133,7 +133,7 @@ namespace ElasticElmah.Appender
         {
             try
             {
-                _request.Sync(UrlToIndex(_settings, ""), "DELETE", null);
+                _request.Request(UrlToIndex(_settings, ""), "DELETE", null);
             }
             catch (IndexMissingException) { }
         }
@@ -199,7 +199,7 @@ namespace ElasticElmah.Appender
 
         public LogSearchResult GetTimestampRange(string query, DateTime @from, DateTime @to, int pageIndex, int pageSize)
         {
-            var res = _request.Sync(GetTimestampRangeRequest(query, @from, @to, pageIndex, pageSize));
+            var res = _request.Request(GetTimestampRangeRequest(query, @from, @to, pageIndex, pageSize));
 			return GetPagedResult(res.ResponseText);
         }
 
@@ -249,7 +249,7 @@ namespace ElasticElmah.Appender
         {
             try
             {
-                var res = _request.Sync(GetPagedRequest(pageIndex, pageSize));
+                var res = _request.Request(GetPagedRequest(pageIndex, pageSize));
 				return GetPagedResult(res.ResponseText);
             }
             catch (RequestException ex)
@@ -265,13 +265,16 @@ namespace ElasticElmah.Appender
         private LogSearchResult GetPagedResult(string s)
         {
             var res = _serializer.Deserialize<SearchResponse>(s);
-            var parsed = new LogSearchResult(res.hits.hits.Select(h => new LogWithId(h._id, Map.To(h._source))), res.hits.total);
+			var list = new List<LogWithId> ();
+			foreach (var hit in res.hits.hits) {
+				list.Add(new LogWithId(hit._id, Map.To(hit._source)));
+			}
+            var parsed = new LogSearchResult(list, res.hits.total);
             return parsed;
         }
-
         public LogSearchResult GetPaged(SearchTerm search, int pageIndex, int pageSize)
         {
-            var res = _request.Sync(GetPagedRequest(search, pageIndex, pageSize));
+            var res = _request.Request(GetPagedRequest(search, pageIndex, pageSize));
 			return GetPagedResult(res.ResponseText);
         }
 
@@ -327,15 +330,18 @@ namespace ElasticElmah.Appender
 
         public LogWithId Get(string id)
         {
-			return GetGetResponse(_request.Sync(GetRequest(id)).ResponseText);
+			return GetGetResponse(_request.Request(GetRequest(id)).ResponseText);
         }
 
         private static IDictionary<string, string> BuildElsticSearchConnection(string connectionString)
         {
-            var lookup = connectionString
-                .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(s => s.Split(new[] { '=' }))
-                .ToDictionary(v => v[0], v => v[1], StringComparer.InvariantCultureIgnoreCase);
+			var builder = new System.Data.Common.DbConnectionStringBuilder();
+			builder.ConnectionString = connectionString.Replace("{", "\"").Replace("}", "\"");
+			var lookup = new Dictionary<string,string>(StringComparer.InvariantCultureIgnoreCase);
+			foreach (string key in builder.Keys)
+			{
+				lookup[key] = Convert.ToString(builder[key]);
+			}
             return lookup;
         }
 
@@ -359,7 +365,7 @@ namespace ElasticElmah.Appender
         /// <returns>the id of the logging event</returns>
         public string Add(log4net.Core.LoggingEvent loggingEvent)
         {
-            var resp = _request.Sync(AddRequest(loggingEvent));
+            var resp = _request.Request(AddRequest(loggingEvent));
 			return _serializer.Deserialize<AddResponse>(resp.ResponseText)._id;
         }
         private class AddResponse
@@ -390,35 +396,27 @@ namespace ElasticElmah.Appender
         {
             string operation = _serializer.Serialize(new Index { index = new IndexOp() { _index = _index, _type = "LoggingEvent" } });
             return new RequestInfo(UrlToIndex(_settings, "LoggingEvent/_bulk" + (refresh ? "?refresh=true" : "")), "POST",
-                string.Join(Environment.NewLine, loggingEvents
-                    .Select(l => operation + Environment.NewLine
-						+ _serializer.Serialize(Map.To(l))).ToArray())
+				string.Join(Environment.NewLine, SerializeForBulk(operation,loggingEvents))
                         + Environment.NewLine
                         );
         }
+		private string[] SerializeForBulk(string operation, IEnumerable<log4net.Core.LoggingEvent> loggingEvents){
+			var sb = new List<string> ();
+			foreach (var l in loggingEvents) {
+				sb.Add (operation);
+
+				sb.Add(_serializer.Serialize(Map.To(l)));
+			}
+			return sb.ToArray ();
+		}
         public HttpStatusCode AddBulk(IEnumerable<log4net.Core.LoggingEvent> loggingEvents, bool refresh = false)
         {
-			return _request.Sync(AddBulkRequest(loggingEvents, refresh)).StatusCode;
+			return _request.Request(AddBulkRequest(loggingEvents, refresh)).StatusCode;
         }
 
         public void Refresh()
         {
-            _request.Sync(UrlToIndex(_settings, "_refresh"), "POST", null);
-        }
-    }
-
-    internal static class Extensions
-    {
-        public static T Tap<T>(this T that, Action<T> tapaction)
-        {
-            tapaction(that);
-            return that;
-        }
-        public static T TapNotNull<T>(this T that, Action<T> tapaction) where T : class
-        {
-            if (that != null)
-                tapaction(that);
-            return that;
+            _request.Request(UrlToIndex(_settings, "_refresh"), "POST", null);
         }
     }
 

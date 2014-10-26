@@ -40,19 +40,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DefaultJsonSerializer.cs" />
-    <Compile Include="ElasticSearchAppender.cs" />
-    <Compile Include="ElasticSearchRepository.cs" />
-    <Compile Include="ElasticSearchWebAppender.cs" />
-    <Compile Include="IJsonSerializer.cs" />
     <Compile Include="Presentation\ColorizeStackTrace.cs" />
     <Compile Include="Presentation\FormatDictionary.cs" />
     <Compile Include="Presentation\ParseStackTrace.cs" />
     <Compile Include="Presentation\Symbols.cs" />
     <Compile Include="Presentation\Token.cs" />
     <Compile Include="Presentation\LexStackTrace.cs" />
-    <Compile Include="Search\LogSearchFacetResult.cs" />
-    <Compile Include="Search\LogSearchHistogramResult.cs" />
     <Compile Include="Search\LogSearchResult.cs" />
     <Compile Include="Search\LogWithId.cs" />
     <Compile Include="Storage\LogEventLocation.cs" />
@@ -64,6 +57,11 @@
     <Compile Include="Web\JsonRequestExtensions.cs" />
     <Compile Include="Web\RequestException.cs" />
     <Compile Include="Web\RequestInfo.cs" />
+    <Compile Include="DefaultJsonSerializer.cs" />
+    <Compile Include="ElasticSearchAppender.cs" />
+    <Compile Include="ElasticSearchRepository.cs" />
+    <Compile Include="ElasticSearchWebAppender.cs" />
+    <Compile Include="IJsonSerializer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">
