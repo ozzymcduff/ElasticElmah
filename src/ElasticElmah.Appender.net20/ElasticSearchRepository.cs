@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using ElasticElmah.Appender.Storage;
-using log4net.Core;
 using System.Net;
 using ElasticElmah.Appender.Web;
 using ElasticElmah.Appender.Search;
 using LoggingEvent = ElasticElmah.Appender.Storage.LoggingEvent;
-using System.Text;
 
 namespace ElasticElmah.Appender
 {
@@ -21,7 +19,9 @@ namespace ElasticElmah.Appender
             _settings = BuildElsticSearchConnection(connectionString);
             _index = _settings["Index"];
             _request = request ?? new JsonRequest();
-            _serializer = serializer ?? new DefaultJsonSerializer();
+            _serializer = serializer;
+            if (serializer==null)
+                throw new Exception("Missing serializer");
         }
         public void CreateIndexOrRefreshMappings()
         {
