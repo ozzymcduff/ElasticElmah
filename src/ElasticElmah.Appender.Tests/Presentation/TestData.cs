@@ -1,4 +1,8 @@
-﻿namespace ElasticElmah.Appender.Tests.Presentation
+﻿#if NET20
+namespace ElasticElmah.Appender.net20.Tests.Presentation
+#else
+namespace ElasticElmah.Appender.Tests.Presentation
+#endif
 {
     public class TestData
     {

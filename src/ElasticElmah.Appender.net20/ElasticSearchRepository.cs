@@ -19,9 +19,7 @@ namespace ElasticElmah.Appender
             _settings = BuildElsticSearchConnection(connectionString);
             _index = _settings["Index"];
             _request = request ?? new JsonRequest();
-            _serializer = serializer;
-            if (serializer==null)
-                throw new Exception("Missing serializer");
+            _serializer = serializer?? new DefaultJsonSerializer();
         }
         public void CreateIndexOrRefreshMappings()
         {

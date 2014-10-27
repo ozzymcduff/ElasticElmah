@@ -5,7 +5,11 @@ using log4net.Core;
 using log4net;
 using System.Reflection;
 using System.Threading.Tasks;
+#if NET20
+namespace ElasticElmah.Appender.net20.Tests
+#else
 namespace ElasticElmah.Appender.Tests
+#endif
 {
     [TestFixture]
     public class AppenderOnWrongHostTests
@@ -19,7 +23,7 @@ namespace ElasticElmah.Appender.Tests
             var _index = Guid.NewGuid();
             var conn = "Server=" + Guid.NewGuid() + ";Index=" + _index + ";Port=9200";
             _appender = new ElasticSearchAppender { ConnectionString = conn };
-        }
+         }
 
         [TearDown]
         public virtual void Cleanup()

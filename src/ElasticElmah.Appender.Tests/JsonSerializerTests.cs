@@ -5,7 +5,11 @@ using NUnit.Framework;
 using System;
 using LoggingEvent = log4net.Core.LoggingEvent;
 
+#if NET20
+namespace ElasticElmah.Appender.net20.Tests
+#else
 namespace ElasticElmah.Appender.Tests
+#endif
 {
     [TestFixture]
     public class JsonSerializerTests

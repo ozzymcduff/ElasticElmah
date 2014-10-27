@@ -1,7 +1,11 @@
 ﻿using System;
 using NUnit.Framework;
 
+#if NET20
+namespace ElasticElmah.Appender.net20.Tests
+#else
 namespace ElasticElmah.Appender.Tests
+#endif
 {
     [TestFixture]
     public class MissingIndexTests:Assertions

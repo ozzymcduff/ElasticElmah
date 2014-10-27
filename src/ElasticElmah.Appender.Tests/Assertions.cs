@@ -3,7 +3,11 @@ using NUnit.Framework;
 using System.Linq;
 using ElasticElmah.Appender.Search;
 
+#if NET20
+namespace ElasticElmah.Appender.net20.Tests
+#else
 namespace ElasticElmah.Appender.Tests
+#endif
 {
     public class Assertions
     {

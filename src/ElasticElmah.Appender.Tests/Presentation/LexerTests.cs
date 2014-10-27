@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using ElasticElmah.Appender.Presentation;
-using ElasticElmah.Appender.Tests.Presentation;
-namespace ElasticElmah.Appender.Tests
+#if NET20
+namespace ElasticElmah.Appender.net20.Tests.Presentation
+#else
+namespace ElasticElmah.Appender.Tests.Presentation
+#endif
 {
     [TestFixture]
     public class LexerTests

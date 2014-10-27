@@ -1,8 +1,11 @@
 ﻿using Makrill;
 using Newtonsoft.Json;
 using JsonConvert = Newtonsoft.Json.JsonConvert;
-
+#if NET20
+namespace ElasticElmah.Appender.net20.Tests
+#else
 namespace ElasticElmah.Appender.Tests
+#endif
 {
     public class WrappedNewtonsoft : IJsonSerializer
     {

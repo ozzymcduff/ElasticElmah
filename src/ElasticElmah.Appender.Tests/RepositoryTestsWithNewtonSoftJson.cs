@@ -1,7 +1,10 @@
 ﻿using NUnit.Framework;
 using System;
-
+#if NET20
+namespace ElasticElmah.Appender.net20.Tests
+#else
 namespace ElasticElmah.Appender.Tests
+#endif
 {
     [TestFixture]
     public class RepositoryTestsWithNewtonSoftJson : RepositoryTests

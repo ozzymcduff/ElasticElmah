@@ -1,17 +1,17 @@
 ﻿using System;
-using System.Net;
 using System.Reflection;
-using System.Web;
 using ElasticElmah.Appender.Presentation;
 using NUnit.Framework;
-using Subtext.TestLibrary;
 using log4net;
 using System.Linq;
 using log4net.Core;
 using System.Collections.Generic;
-using ElasticElmah.Appender.Search;
 
+#if NET20
+namespace ElasticElmah.Appender.net20.Tests
+#else
 namespace ElasticElmah.Appender.Tests
+#endif
 {
     public abstract class RepositoryTests:Assertions
     {
@@ -87,12 +87,8 @@ namespace ElasticElmah.Appender.Tests
             ExpectedPagingResult(_appender.GetPaged(0, 10));
         }
 
-
-        [Test
-#if !HTTPSIMULATOR
-        ,Ignore("HttpSimulator does not work everywhere")
-#endif
-        ]
+#if HTTPSIMULATOR
+        [Test]
         public virtual void Can_log_web_properties()
         {
             string id;
@@ -126,6 +122,7 @@ namespace ElasticElmah.Appender.Tests
             Assert.That(str, Is.StringContaining("keyvalue1"));
             Assert.That(err.Data.Message, Is.EqualTo("Message"));
         }
+#endif
 
         [Test]
         public virtual void Should_get_latest_bulk()

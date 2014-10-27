@@ -1,7 +1,10 @@
 ﻿using ElasticElmah.Appender.Presentation;
 using NUnit.Framework;
-
+#if NET20
+namespace ElasticElmah.Appender.net20.Tests.Presentation
+#else
 namespace ElasticElmah.Appender.Tests.Presentation
+#endif
 {
     [TestFixture]
     public class ColorizationJsTests

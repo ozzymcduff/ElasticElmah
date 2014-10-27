@@ -6,7 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+#if NET20
+namespace ElasticElmah.Appender.net20.Tests.Presentation
+#else
 namespace ElasticElmah.Appender.Tests.Presentation
+#endif
 {
     [TestFixture]
     public class ColorizationTests

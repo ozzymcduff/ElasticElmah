@@ -4,7 +4,11 @@ using log4net.Core;
 using log4net;
 using System.Reflection;
 
+#if NET20
+namespace ElasticElmah.Appender.net20.Tests
+#else
 namespace ElasticElmah.Appender.Tests
+#endif
 {
     [TestFixture]
     public class AppenderTests
@@ -19,8 +23,8 @@ namespace ElasticElmah.Appender.Tests
             var fiddler = Global.UseFiddler;
             var index = Guid.NewGuid();
             var conn = "Server=" + (fiddler ? Environment.MachineName : "localhost") + ";Index=" + index + ";Port=" + Global.Port;
-            _appender = new ElasticSearchAppender() { ConnectionString = conn };
-            _repo = new ElasticSearchRepository(conn);
+            _repo = new ElasticSearchRepository(conn, serializer: new DefaultJsonSerializer());
+            _appender = new ElasticSearchAppender() { ConnectionString = conn};
         }
 
         [TearDown]
