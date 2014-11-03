@@ -1,2 +1,5 @@
 install:
   - choco install elastic
+build:
+  project: .\src\ElasticElmah.Core.sln
+
