@@ -1,4 +1,4 @@
-ElasticElmah [![Build Status](https://travis-ci.org/wallymathieu/ElasticElmah.png?branch=master)](https://travis-ci.org/wallymathieu/ElasticElmah) 
+ElasticElmah [![Build Status](https://travis-ci.org/wallymathieu/ElasticElmah.png?branch=master)](https://travis-ci.org/wallymathieu/ElasticElmah) [![Build status](https://ci.appveyor.com/api/projects/status/v7fcwree00bpgrt8?svg=true)](https://ci.appveyor.com/project/wallymathieu/elasticelmah)
 ============
 
 Originally a fork of ELMAH
