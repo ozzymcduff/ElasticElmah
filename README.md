@@ -23,6 +23,17 @@ connectionstring: Right now a connection string looking like a database connecti
 In order to read logs, you can use the class ElasticSearchRepository. There is a test site based on Elmah (ElasticElmahMVC).
 The reason for an asp.net MVC site is that it enables you to integrate logging information with your admin site
 
+What to copy from this lib?
+---------------------------
+
+Elmah has a dump of the web context. Implemented against log4net here [./src/ElasticElmah.Appender/ElasticSearchWebAppender.cs](./src/ElasticElmah.Appender/ElasticSearchWebAppender.cs)
+
+Alternatives
+------------
+- [serilog](https://github.com/serilog/serilog)
+- [log4net.ElasticSearch](https://github.com/jptoto/log4net.ElasticSearch)
+- [Nest to output to kibana format](https://github.com/elasticsearch/elasticsearch-net)
+
 License
 -------
 Same as ELMAH
